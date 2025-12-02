@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useFlowStore } from '@/store/flowStore';
 import { Button, ServiceIcon } from '@/components/ui';
+import { Confetti } from '@/components/ui/Confetti';
 import { OrderDetailsModal } from './OrderDetailsModal';
 import { generateOrderPdf } from '@/lib/generatePdf';
 import {
@@ -56,6 +57,7 @@ function Step5Review() {
   if (orderConfirmation) {
     return (
       <>
+        <Confetti />
         <div className="space-y-8 text-center">
           {/* Success icon */}
           <div className="flex justify-center">
