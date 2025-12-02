@@ -87,8 +87,15 @@ function Step4Verify() {
         </p>
       </div>
 
-      {/* Navigation buttons - primary left per Practical UI */}
-      <div className="pt-4 flex flex-col sm:flex-row gap-3">
+      {/* Navigation buttons - Back always left */}
+      <div className="pt-4 flex flex-col-reverse sm:flex-row gap-3">
+        <Button
+          variant="secondary"
+          onClick={prevStep}
+          leftIcon={<ChevronLeft className="w-5 h-5" />}
+        >
+          Back
+        </Button>
         <Button
           onClick={handleSubmit}
           fullWidth
@@ -96,13 +103,6 @@ function Step4Verify() {
           className="sm:flex-1"
         >
           Review and submit
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={prevStep}
-          leftIcon={<ChevronLeft className="w-5 h-5" />}
-        >
-          Back
         </Button>
       </div>
     </div>

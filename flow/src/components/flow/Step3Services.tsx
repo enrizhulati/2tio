@@ -294,9 +294,16 @@ function Step3Services() {
         />
       </div>
 
-      {/* Navigation buttons - primary left per Practical UI */}
+      {/* Navigation buttons - Back always left */}
       <div className="pt-4 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col-reverse sm:flex-row gap-3">
+          <Button
+            variant="secondary"
+            onClick={prevStep}
+            leftIcon={<ChevronLeft className="w-5 h-5" />}
+          >
+            Back
+          </Button>
           <Button
             onClick={nextStep}
             fullWidth
@@ -304,13 +311,6 @@ function Step3Services() {
             className="sm:flex-1"
           >
             {getButtonText()}
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={prevStep}
-            leftIcon={<ChevronLeft className="w-5 h-5" />}
-          >
-            Back
           </Button>
         </div>
 

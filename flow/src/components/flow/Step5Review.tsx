@@ -334,8 +334,16 @@ function Step5Review() {
         and authorize us to set up utilities on your behalf.
       </p>
 
-      {/* Navigation buttons - primary left per Practical UI */}
-      <div className="pt-4 flex flex-col sm:flex-row gap-3">
+      {/* Navigation buttons - Back always left */}
+      <div className="pt-4 flex flex-col-reverse sm:flex-row gap-3">
+        <Button
+          variant="secondary"
+          onClick={prevStep}
+          leftIcon={<ChevronLeft className="w-5 h-5" />}
+          disabled={isSubmitting}
+        >
+          Back
+        </Button>
         <Button
           onClick={submitOrder}
           fullWidth
@@ -344,14 +352,6 @@ function Step5Review() {
           className="sm:flex-1"
         >
           Place order
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={prevStep}
-          leftIcon={<ChevronLeft className="w-5 h-5" />}
-          disabled={isSubmitting}
-        >
-          Back
         </Button>
       </div>
     </div>
