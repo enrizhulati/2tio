@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
+import { Loader2, X } from 'lucide-react';
 
 export interface AddressResult {
   street: string;
@@ -28,27 +29,21 @@ interface AddressAutocompleteProps {
   disabled?: boolean;
 }
 
-declare global {
-  interface Window {
-    Radar?: {
-      initialize: (key: string) => void;
-      ui: {
-        autocomplete: (options: {
-          container: string;
-          showMarkers?: boolean;
-          markerColor?: string;
-          responsive?: boolean;
-          width?: string;
-          maxHeight?: string;
-          placeholder?: string;
-          limit?: number;
-          minCharacters?: number;
-          near?: string | null;
-          onSelection?: (address: RadarAddress) => void;
-        }) => void;
-      };
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
     };
-  }
+  }, [value, delay]);
+
+  return debouncedValue;
 }
 
 export function AddressAutocomplete({
@@ -56,93 +51,223 @@ export function AddressAutocomplete({
   error,
   disabled,
 }: AddressAutocompleteProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const initializedRef = useRef(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [value, setValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<RadarAddress[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [hasSelected, setHasSelected] = useState(false);
 
-  // Load Radar SDK
+  const debouncedValue = useDebounce(value, 300);
+
+  // Fetch suggestions from Radar
   useEffect(() => {
-    // Check if already loaded
-    if (window.Radar) {
-      setIsLoaded(true);
-      return;
-    }
+    const fetchSuggestions = async () => {
+      // Skip fetching if user just selected an address
+      if (hasSelected) {
+        return;
+      }
 
-    // Load CSS
-    const link = document.createElement('link');
-    link.href = 'https://js.radar.com/v4.5.3/radar.css';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
+      if (!debouncedValue || debouncedValue.length < 3) {
+        setSuggestions([]);
+        setShowDropdown(false);
+        return;
+      }
 
-    // Load JS
-    const script = document.createElement('script');
-    script.src = 'https://js.radar.com/v4.5.3/radar.min.js';
-    script.async = true;
-    script.onload = () => setIsLoaded(true);
-    document.head.appendChild(script);
+      const apiKey = process.env.NEXT_PUBLIC_RADAR_API_KEY;
+      if (!apiKey) {
+        console.warn('Radar API key not configured');
+        return;
+      }
 
-    return () => {
-      // Cleanup if needed
+      setIsLoading(true);
+      try {
+        const response = await fetch(
+          `https://api.radar.io/v1/search/autocomplete?query=${encodeURIComponent(
+            debouncedValue
+          )}&country=US&layers=address`,
+          {
+            headers: {
+              Authorization: apiKey,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setSuggestions(data.addresses || []);
+          setShowDropdown(true);
+          setHighlightedIndex(-1);
+        }
+      } catch (err) {
+        console.error('Error fetching address suggestions:', err);
+      } finally {
+        setIsLoading(false);
+      }
     };
+
+    fetchSuggestions();
+  }, [debouncedValue, hasSelected]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Initialize autocomplete when SDK is loaded
-  useEffect(() => {
-    if (!isLoaded || !window.Radar || initializedRef.current) return;
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
+    setHasSelected(false);
+    setShowDropdown(true);
+  }, []);
 
-    const apiKey = process.env.NEXT_PUBLIC_RADAR_API_KEY;
-    if (!apiKey) {
-      console.warn('Radar API key not configured');
-      return;
+  const handleSelect = useCallback(
+    (address: RadarAddress) => {
+      const street = address.number && address.street
+        ? `${address.number} ${address.street}`
+        : address.street || address.addressLabel || '';
+
+      const result: AddressResult = {
+        street,
+        city: address.city || '',
+        state: address.stateCode || address.state || '',
+        zip: address.postalCode || '',
+        formatted: address.formattedAddress,
+      };
+
+      onSelect(result);
+      setValue(address.formattedAddress);
+      setHasSelected(true);
+      setSuggestions([]);
+      setShowDropdown(false);
+    },
+    [onSelect]
+  );
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showDropdown || suggestions.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIndex((prev) =>
+          prev < suggestions.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
+          handleSelect(suggestions[highlightedIndex]);
+        }
+        break;
+      case 'Escape':
+        setShowDropdown(false);
+        break;
     }
+  };
 
-    window.Radar.initialize(apiKey);
-
-    window.Radar.ui.autocomplete({
-      container: 'radar-autocomplete',
-      showMarkers: true,
-      markerColor: '#20C997', // teal color
-      responsive: true,
-      width: '100%',
-      maxHeight: '400px',
-      placeholder: 'Start typing your address...',
-      limit: 6,
-      minCharacters: 3,
-      near: null,
-      onSelection: (address: RadarAddress) => {
-        const street = address.number && address.street
-          ? `${address.number} ${address.street}`
-          : address.street || address.addressLabel || '';
-
-        const result: AddressResult = {
-          street,
-          city: address.city || '',
-          state: address.stateCode || address.state || '',
-          zip: address.postalCode || '',
-          formatted: address.formattedAddress,
-        };
-
-        onSelect(result);
-      },
-    });
-
-    initializedRef.current = true;
-  }, [isLoaded, onSelect]);
+  const handleClear = () => {
+    setValue('');
+    setHasSelected(false);
+    setSuggestions([]);
+    setShowDropdown(false);
+    inputRef.current?.focus();
+  };
 
   return (
     <div className="space-y-2">
       <label className="block text-[14px] font-semibold text-[var(--color-darkest)] tracking-wide">
         Street address
       </label>
-      <div
-        ref={containerRef}
-        id="radar-autocomplete"
-        className={`
-          radar-autocomplete-wrapper
-          ${disabled ? 'opacity-50 pointer-events-none' : ''}
-          ${error ? 'radar-error' : ''}
-        `}
-      />
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
+          disabled={disabled}
+          placeholder="Start typing your address..."
+          className={`w-full h-14 px-4 text-[16px] text-[var(--color-darkest)] bg-white border-2 rounded-xl transition-colors duration-150 placeholder:text-[var(--color-medium)] focus:outline-none focus:border-[var(--color-teal)] ${error ? 'border-[var(--color-error)] focus:border-[var(--color-error)]' : 'border-[var(--color-light)] hover:border-[var(--color-medium)]'} ${disabled ? 'bg-[var(--color-lightest)] text-[var(--color-medium)] cursor-not-allowed' : ''}`}
+          autoComplete="off"
+          role="combobox"
+          aria-expanded={showDropdown}
+          aria-haspopup="listbox"
+          aria-autocomplete="list"
+        />
+
+        {/* Loading or clear button */}
+        {(isLoading || value) && !disabled && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2">
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 text-[var(--color-medium)] animate-spin" />
+            ) : value ? (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="text-[var(--color-medium)] hover:text-[var(--color-dark)] transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            ) : null}
+          </div>
+        )}
+
+        {/* Dropdown */}
+        {showDropdown && suggestions.length > 0 && (
+          <div
+            ref={dropdownRef}
+            className="absolute z-50 w-full mt-2 bg-white border-2 border-[var(--color-light)] rounded-xl shadow-lg overflow-hidden"
+            role="listbox"
+          >
+            {suggestions.map((address, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => handleSelect(address)}
+                onMouseEnter={() => setHighlightedIndex(index)}
+                className={`
+                  w-full px-4 py-3 text-left
+                  transition-colors duration-100
+                  ${
+                    index === highlightedIndex
+                      ? 'bg-[var(--color-teal-light)]'
+                      : 'hover:bg-[var(--color-lightest)]'
+                  }
+                  ${index !== suggestions.length - 1 ? 'border-b border-[var(--color-light)]' : ''}
+                `}
+                role="option"
+                aria-selected={index === highlightedIndex}
+              >
+                <p className="text-[15px] text-[var(--color-darkest)] font-medium">
+                  {address.addressLabel || address.street}
+                </p>
+                <p className="text-[13px] text-[var(--color-dark)]">
+                  {address.city}, {address.stateCode} {address.postalCode}
+                </p>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       {error && (
         <p className="text-[14px] text-[var(--color-error)]">{error}</p>
       )}

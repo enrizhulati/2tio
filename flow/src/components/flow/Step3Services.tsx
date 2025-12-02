@@ -15,6 +15,7 @@ import {
   Leaf,
 } from 'lucide-react';
 import { SERVICE_INFO, type ServiceType, type ServicePlan } from '@/types/flow';
+import { ServiceIcon } from '@/components/ui';
 
 function ServiceCard({
   type,
@@ -89,7 +90,7 @@ function ServiceCard({
             {/* Service info */}
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-[24px]">{SERVICE_INFO[type].icon}</span>
+                <ServiceIcon type={type} size="xl" />
                 <h3 className="text-[20px] font-semibold text-[var(--color-darkest)]">
                   {SERVICE_INFO[type].label}
                 </h3>

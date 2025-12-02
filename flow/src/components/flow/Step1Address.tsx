@@ -2,9 +2,9 @@
 
 import { useState, useCallback } from 'react';
 import { useFlowStore } from '@/store/flowStore';
-import { Button, Input } from '@/components/ui';
+import { Button, Input, ServiceIcon } from '@/components/ui';
 import { AddressAutocomplete, type AddressResult } from '@/components/ui/AddressAutocomplete';
-import { MapPin, ChevronRight, Edit2, Navigation, Calendar } from 'lucide-react';
+import { MapPin, ChevronRight, Edit2, Navigation } from 'lucide-react';
 import { SERVICE_INFO } from '@/types/flow';
 
 // Map preview component
@@ -218,7 +218,7 @@ function Step1Address() {
           <div className="space-y-3">
             {availableServices.water.available && (
               <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-white flex items-center gap-4">
-                <span className="text-[28px]">{SERVICE_INFO.water.icon}</span>
+                <ServiceIcon type="water" size="xl" />
                 <div className="flex-1">
                   <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
                     {SERVICE_INFO.water.label}
@@ -235,7 +235,7 @@ function Step1Address() {
 
             {availableServices.electricity.available && (
               <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-white flex items-center gap-4">
-                <span className="text-[28px]">{SERVICE_INFO.electricity.icon}</span>
+                <ServiceIcon type="electricity" size="xl" />
                 <div className="flex-1">
                   <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
                     {SERVICE_INFO.electricity.label}
@@ -252,7 +252,7 @@ function Step1Address() {
 
             {availableServices.internet.available && (
               <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-white flex items-center gap-4">
-                <span className="text-[28px]">{SERVICE_INFO.internet.icon}</span>
+                <ServiceIcon type="internet" size="xl" />
                 <div className="flex-1">
                   <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
                     {SERVICE_INFO.internet.label}
@@ -335,7 +335,6 @@ function Step1Address() {
           disabled={isCheckingAvailability}
           min={new Date().toISOString().split('T')[0]}
           max={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-          rightIcon={<Calendar className="w-5 h-5" />}
         />
       </div>
 

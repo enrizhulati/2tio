@@ -1,7 +1,7 @@
 'use client';
 
 import { useFlowStore } from '@/store/flowStore';
-import { Button } from '@/components/ui';
+import { Button, ServiceIcon } from '@/components/ui';
 import {
   ChevronLeft,
   Edit2,
@@ -83,7 +83,7 @@ function Step5Review() {
             {orderConfirmation.services.map((service) => (
               <div key={service.type} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-[20px]">{SERVICE_INFO[service.type].icon}</span>
+                  <ServiceIcon type={service.type} size="md" />
                   <div>
                     <p className="text-[16px] font-medium text-[var(--color-darkest)]">
                       {SERVICE_INFO[service.type].label}
@@ -238,7 +238,7 @@ function Step5Review() {
             {selectedServices.water && selectedPlans.water && (
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[18px]">{SERVICE_INFO.water.icon}</span>
+                  <ServiceIcon type="water" size="md" />
                   <span className="text-[16px] font-medium text-[var(--color-darkest)]">
                     {SERVICE_INFO.water.label}
                   </span>
@@ -255,7 +255,7 @@ function Step5Review() {
             {selectedServices.electricity && selectedPlans.electricity && (
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[18px]">{SERVICE_INFO.electricity.icon}</span>
+                  <ServiceIcon type="electricity" size="md" />
                   <span className="text-[16px] font-medium text-[var(--color-darkest)]">
                     {SERVICE_INFO.electricity.label}
                   </span>
@@ -272,7 +272,7 @@ function Step5Review() {
             {selectedServices.internet && selectedPlans.internet && (
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[18px]">{SERVICE_INFO.internet.icon}</span>
+                  <ServiceIcon type="internet" size="md" />
                   <span className="text-[16px] font-medium text-[var(--color-darkest)]">
                     {SERVICE_INFO.internet.label}
                   </span>

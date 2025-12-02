@@ -141,7 +141,7 @@ export const STEP_INFO = {
 } as const;
 
 export const SERVICE_INFO = {
-  water: { icon: '💧', label: 'Water' },
-  electricity: { icon: '⚡', label: 'Electricity' },
-  internet: { icon: '📡', label: 'Internet' },
+  water: { label: 'Water' },
+  electricity: { label: 'Electricity' },
+  internet: { label: 'Internet' },
 } as const;

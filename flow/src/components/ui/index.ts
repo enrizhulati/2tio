@@ -18,3 +18,5 @@ export type { FileUploadProps } from './FileUpload';
 
 export { AddressAutocomplete } from './AddressAutocomplete';
 export type { AddressResult } from './AddressAutocomplete';
+
+export { ServiceIcon } from './ServiceIcon';
