@@ -22,7 +22,8 @@ test.describe('Core Functionality', () => {
   });
 
   test('primary CTA button exists', async ({ page }) => {
-    const button = page.locator('button:has-text("Choose my services")');
+    // Initial state shows "Check availability" button
+    const button = page.locator('button:has-text("Check availability")');
     await expect(button).toBeVisible();
   });
 
@@ -204,7 +205,8 @@ test.describe('Progress Indicator', () => {
   });
 
   test('progress bar visible', async ({ page }) => {
-    const progressBar = page.locator('[class*="h-1"]').first();
+    // The progress bar container has h-1.5 class with rounded-full
+    const progressBar = page.locator('.h-1\\.5.rounded-full');
     await expect(progressBar).toBeVisible();
   });
 });
