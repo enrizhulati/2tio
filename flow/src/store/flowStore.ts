@@ -11,7 +11,23 @@ import type {
   SelectedPlans,
   Documents,
   OrderConfirmation,
+  ESIID,
+  UsageProfile,
+  HomeDetails,
+  TwotionCart,
+  TwotionCheckoutStep,
 } from '@/types/flow';
+import {
+  getUserId,
+  setUserId,
+  generateUserId,
+  getPlans,
+  enrichPlansWithCosts,
+  addPlanToCart as apiAddToCart,
+  removePlanFromCart as apiRemoveFromCart,
+  getCheckoutSteps,
+  type TwotionPlan,
+} from '@/lib/api/twotion';
 
 // Mock data for available services (simulating API response)
 const mockAvailableServices: AvailableServices = {
@@ -124,12 +140,23 @@ const mockAvailableServices: AvailableServices = {
 const initialState = {
   currentStep: 1 as FlowStep,
 
+  // 2TIO User Session
+  twotionUserId: null as string | null,
+  isInitializingUser: false,
+
   // Step 1
   address: null,
   moveInDate: null,
   availableServices: null,
   isCheckingAvailability: false,
   availabilityChecked: false,
+
+  // Electricity ESIID (fetched from ERCOT when address is entered)
+  esiidMatches: [] as ESIID[],
+  selectedEsiid: null as ESIID | null,
+  usageProfile: null as UsageProfile | null,
+  homeDetails: null as HomeDetails | null,
+  isLoadingElectricity: false,
 
   // Step 2
   profile: null,
@@ -143,8 +170,14 @@ const initialState = {
   selectedPlans: {},
   expandedService: 'water' as ServiceType | null, // Auto-expand water since it's pre-selected
 
+  // 2TIO Cart
+  cart: null as TwotionCart | null,
+  isUpdatingCart: false,
+
   // Step 4
   documents: {},
+  checkoutSteps: null as TwotionCheckoutStep[] | null,
+  checkoutAnswers: {} as Record<string, string>,
 
   // Step 5
   isSubmitting: false,
@@ -180,12 +213,17 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   setProfile: (profile: UserProfile) => set({ profile }),
 
   toggleService: (service: ServiceType) => {
-    const { selectedServices, selectedPlans, availableServices } = get();
+    const { selectedServices, selectedPlans, availableServices, address } = get();
 
     // Can't toggle water off (it's required since they came for water)
     if (service === 'water') return;
 
     const isNowSelected = !selectedServices[service];
+
+    // If selecting electricity, fetch real plans from 2TIO
+    if (service === 'electricity' && isNowSelected && address?.zip) {
+      get().fetchElectricityPlans(address.zip);
+    }
 
     // If selecting, auto-select the recommended plan
     let newSelectedPlans = { ...selectedPlans };
@@ -343,4 +381,250 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   },
 
   reset: () => set(initialState),
+
+  // Electricity actions (ERCOT for Zillow data, will proxy through twotion route)
+  fetchESIIDs: async (address: string, zip: string) => {
+    set({ isLoadingElectricity: true });
+
+    try {
+      const params = new URLSearchParams({ action: 'search-esiids', address });
+      if (zip) params.append('zip_code', zip);
+
+      const response = await fetch(`/api/twotion?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch ESIIDs');
+
+      const esiids: ESIID[] = await response.json();
+
+      set({
+        esiidMatches: esiids,
+        isLoadingElectricity: false,
+        // Auto-select if only one match
+        selectedEsiid: esiids.length === 1 ? esiids[0] : null,
+      });
+
+      // If auto-selected, fetch usage profile
+      if (esiids.length === 1) {
+        await get().fetchUsageProfile();
+      }
+    } catch (error) {
+      console.error('Error fetching ESIIDs:', error);
+      set({ esiidMatches: [], isLoadingElectricity: false });
+    }
+  },
+
+  selectESIID: (esiid: ESIID) => {
+    set({ selectedEsiid: esiid });
+    // Fetch usage profile for the selected ESIID
+    get().fetchUsageProfile();
+  },
+
+  fetchUsageProfile: async () => {
+    const { selectedEsiid } = get();
+    if (!selectedEsiid) return;
+
+    set({ isLoadingElectricity: true });
+
+    // Helper to calculate annual kWh from monthly usage array
+    const calculateAnnualKwh = (usage: number[]): number =>
+      usage.reduce((sum, kWh) => sum + kWh, 0);
+
+    try {
+      // Will be updated to use 2TIO proxy route
+      const params = new URLSearchParams({
+        action: 'usage-profile',
+        esiid: selectedEsiid.esiid,
+      });
+
+      const response = await fetch(`/api/twotion?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch usage profile');
+
+      const profile: UsageProfile = await response.json();
+
+      // Calculate home details from profile
+      const annualKwh = calculateAnnualKwh(profile.usage);
+      const currentYear = new Date().getFullYear();
+      const homeDetails: HomeDetails = {
+        squareFootage: profile.square_footage,
+        homeAge: profile.home_age,
+        yearBuilt: profile.home_age > 0 ? currentYear - profile.home_age : 0,
+        annualKwh,
+        foundDetails: profile.found_home_details,
+      };
+
+      set({
+        usageProfile: profile,
+        homeDetails,
+        isLoadingElectricity: false,
+      });
+    } catch (error) {
+      console.error('Error fetching usage profile:', error);
+      // Set default profile on error
+      const defaultUsage = [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900];
+      set({
+        usageProfile: {
+          usage: defaultUsage,
+          home_age: 0,
+          square_footage: 0,
+          found_home_details: false,
+        },
+        homeDetails: {
+          squareFootage: 0,
+          homeAge: 0,
+          yearBuilt: 0,
+          annualKwh: calculateAnnualKwh(defaultUsage),
+          foundDetails: false,
+        },
+        isLoadingElectricity: false,
+      });
+    }
+  },
+
+  fetchElectricityPlans: async (zipCode: string) => {
+    const { usageProfile, availableServices } = get();
+
+    set({ isLoadingElectricity: true });
+
+    try {
+      // Fetch plans from 2TIO
+      const rawPlans: TwotionPlan[] = await getPlans('electricity', zipCode);
+
+      // Use usage profile or default usage for cost calculations
+      const usage = usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900];
+
+      // Enrich plans with annual cost calculations
+      const enrichedPlans = enrichPlansWithCosts(rawPlans, usage);
+
+      // Convert to ServicePlan format for the store
+      const servicePlans: ServicePlan[] = enrichedPlans.map((plan, index) => ({
+        id: plan.id,
+        provider: plan.vendorName,
+        name: plan.name,
+        rate: `$${plan.uPrice.toFixed(3)}/kWh`,
+        rateType: 'flat' as const,
+        contractMonths: plan.term,
+        contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
+        setupFee: 0,
+        monthlyEstimate: plan.monthlyEstimate ? `$${Math.round(plan.monthlyEstimate)}` : undefined,
+        features: [
+          plan.bulletPoint1,
+          plan.bulletPoint2,
+          plan.bulletPoint3,
+        ].filter(Boolean) as string[],
+        badge: plan.renewable ? 'GREEN' : index === 0 ? 'RECOMMENDED' : undefined,
+        badgeReason: plan.renewable
+          ? '100% renewable energy from Texas wind and solar'
+          : index === 0
+          ? 'Best value based on your home\'s usage profile'
+          : undefined,
+      }));
+
+      // Update available services with real electricity plans
+      const updatedServices: AvailableServices = {
+        ...availableServices!,
+        electricity: {
+          available: true,
+          providerCount: new Set(servicePlans.map(p => p.provider)).size,
+          startingRate: servicePlans.length > 0 ? servicePlans[0].rate : undefined,
+          plans: servicePlans,
+        },
+      };
+
+      set({
+        availableServices: updatedServices,
+        isLoadingElectricity: false,
+      });
+    } catch (error) {
+      console.error('Error fetching electricity plans:', error);
+      set({ isLoadingElectricity: false });
+    }
+  },
+
+  // 2TIO User actions
+  initializeUser: async () => {
+    // Check if we already have a user ID
+    const existingId = getUserId();
+    if (existingId) {
+      set({ twotionUserId: existingId, isInitializingUser: false });
+      return;
+    }
+
+    set({ isInitializingUser: true });
+
+    try {
+      const newUserId = await generateUserId();
+      setUserId(newUserId);
+      set({ twotionUserId: newUserId, isInitializingUser: false });
+    } catch (error) {
+      console.error('Error initializing user:', error);
+      set({ isInitializingUser: false });
+    }
+  },
+
+  // 2TIO Cart actions
+  addToCart: async (planId: string, plan: ServicePlan, serviceType: ServiceType) => {
+    set({ isUpdatingCart: true });
+
+    try {
+      await apiAddToCart(planId);
+
+      // Update local cart state
+      const { cart } = get();
+      const newItem = {
+        planId,
+        planName: plan.name,
+        vendorName: plan.provider,
+        serviceType,
+        monthlyEstimate: plan.monthlyEstimate ? parseFloat(plan.monthlyEstimate.replace('$', '')) : undefined,
+      };
+
+      set({
+        cart: {
+          items: [...(cart?.items || []), newItem],
+        },
+        isUpdatingCart: false,
+      });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      set({ isUpdatingCart: false });
+    }
+  },
+
+  removeFromCart: async (planId: string) => {
+    set({ isUpdatingCart: true });
+
+    try {
+      await apiRemoveFromCart(planId);
+
+      // Update local cart state
+      const { cart } = get();
+      set({
+        cart: {
+          items: (cart?.items || []).filter(item => item.planId !== planId),
+        },
+        isUpdatingCart: false,
+      });
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      set({ isUpdatingCart: false });
+    }
+  },
+
+  fetchCheckoutSteps: async () => {
+    try {
+      const steps = await getCheckoutSteps();
+      set({ checkoutSteps: steps as TwotionCheckoutStep[] });
+    } catch (error) {
+      console.error('Error fetching checkout steps:', error);
+    }
+  },
+
+  setCheckoutAnswer: (questionId: string, answer: string) => {
+    const { checkoutAnswers } = get();
+    set({
+      checkoutAnswers: {
+        ...checkoutAnswers,
+        [questionId]: answer,
+      },
+    });
+  },
 }));

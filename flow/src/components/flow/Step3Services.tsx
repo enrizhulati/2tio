@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect } from 'react';
 import { useFlowStore } from '@/store/flowStore';
 import { Button } from '@/components/ui';
 import { RadioGroup, RadioOption } from '@/components/ui/RadioGroup';
@@ -12,6 +13,8 @@ import {
   Plus,
   X,
   Star,
+  Home,
+  Loader2,
 } from 'lucide-react';
 import { SERVICE_INFO, type ServiceType, type ServicePlan } from '@/types/flow';
 import { ServiceIcon } from '@/components/ui';
@@ -22,14 +25,16 @@ function ServiceCard({
   isExpanded,
   onToggle,
   onExpand,
+  isLoading,
 }: {
   type: ServiceType;
   isSelected: boolean;
   isExpanded: boolean;
   onToggle: () => void;
   onExpand: () => void;
+  isLoading?: boolean;
 }) {
-  const { availableServices, selectedPlans, selectPlan } = useFlowStore();
+  const { availableServices, selectedPlans, selectPlan, homeDetails } = useFlowStore();
   const service = availableServices?.[type];
   const selectedPlan = selectedPlans[type];
 
@@ -115,6 +120,12 @@ function ServiceCard({
                     <span className="text-[var(--color-teal)] font-medium">$0 setup fee</span>
                   </div>
                 </div>
+              ) : isLoading && type === 'electricity' ? (
+                // Loading state for electricity
+                <div className="mt-2 flex items-center gap-2 text-[var(--color-dark)]">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-[15px]">Loading personalized rates...</span>
+                </div>
               ) : (
                 // Other services show provider count
                 <div className="mt-1">
@@ -124,6 +135,12 @@ function ServiceCard({
                   <p className="text-[16px] text-[var(--color-dark)]">
                     Starting at {service.startingRate}
                   </p>
+                  {/* Show home-based estimate for electricity */}
+                  {type === 'electricity' && homeDetails?.foundDetails && plans.length > 0 && plans[0].monthlyEstimate && (
+                    <p className="text-[14px] text-[var(--color-teal)] font-medium mt-1">
+                      Est. {plans[0].monthlyEstimate}/mo based on your home
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -205,14 +222,22 @@ function ServiceCard({
                   <RadioOption
                     key={plan.id}
                     value={plan.id}
-                    badge={plan.badge === 'RECOMMENDED' ? 'RECOMMENDED' : plan.badge === 'GREEN' ? 'GREEN' : undefined}
+                    badge={plan.badge === 'RECOMMENDED' ? 'RECOMMENDED' : plan.badge === 'POPULAR' ? 'POPULAR' : plan.badge === 'GREEN' ? 'GREEN' : undefined}
                     badgeVariant={plan.badge === 'GREEN' ? 'success' : 'default'}
                     badgeReason={plan.badgeReason}
                   >
-                    <div>
-                      <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
-                        {plan.provider} - {plan.name}
-                      </p>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
+                          {plan.provider} - {plan.name}
+                        </p>
+                        {/* Show monthly estimate for electricity if available */}
+                        {type === 'electricity' && plan.monthlyEstimate && (
+                          <p className="text-[16px] font-bold text-[var(--color-teal)]">
+                            {plan.monthlyEstimate}/mo
+                          </p>
+                        )}
+                      </div>
                       <p className="text-[14px] text-[var(--color-dark)] mt-1">
                         {plan.rate} • {plan.contractLabel}
                       </p>

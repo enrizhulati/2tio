@@ -1,0 +1,345 @@
+// 2TIO API Client
+// Handles all communication with 2TIO Consumer API and ERCOT (for Zillow data)
+
+// Types for 2TIO API
+export interface GetStartedRequest {
+  address: string;
+  unit?: string;
+  city: string;
+  state: string;
+  zip: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  emailAddress: string;
+  rentOrOwn: 'Own' | 'Rent';
+  targetMoveInDate: string;
+  propertyType: 'Residential' | 'Commercial';
+  isBusiness: boolean;
+}
+
+export interface GetStartedResponse {
+  userId: string;
+  availableServices: TwotionService[];
+}
+
+export interface TwotionService {
+  id: string;
+  name: string;
+  icon?: string;
+  displayOrder: number;
+  electric?: boolean;
+}
+
+export interface TwotionPlan {
+  id: string;
+  name: string;
+  vendorId: string;
+  vendorName: string;
+  uPrice: number;      // Price per kWh
+  mPrice: number;      // Monthly base fee
+  kWh1000: number;     // Price at 1000 kWh (for comparison)
+  term: number;        // Contract length in months
+  cancellationFee: number;
+  renewable: boolean;
+  prepaid: boolean;
+  bulletPoint1?: string;
+  bulletPoint2?: string;
+  bulletPoint3?: string;
+  logo?: string;
+  // Calculated fields (added by client)
+  annualCost?: number;
+  monthlyEstimate?: number;
+}
+
+export interface PlanOption {
+  id: string;
+  type: 'single' | 'multi';
+  selectedInt?: number;
+  selectedValues?: string[];
+}
+
+export interface CartItem {
+  planId: string;
+  planOptions?: PlanOption[];
+}
+
+export interface Cart {
+  items: CartItem[];
+  total?: number;
+}
+
+export interface AppQuestion {
+  id: string;
+  question: string;
+  type: 'text' | 'select' | 'date' | 'ssn';
+  required: boolean;
+  options?: string[];
+}
+
+export interface CheckoutStep {
+  VendorId: string | null;
+  VendorName: string | null;
+  Logo: string | null;
+  AppQuestions: AppQuestion[];
+  DocumentList: { name: string; required: boolean }[];
+  IsStepOne: boolean;
+  LeadTime: number;
+  IsDLUpload: boolean;
+  IsLeaseUpload: boolean;
+  IsOwnUpload: boolean;
+}
+
+export interface CheckoutData {
+  serviceStartDateSelection: string;
+  appFields: Record<string, string>;
+}
+
+export interface CheckoutFiles {
+  dlFile?: File;
+  rentFile?: File;
+  ownFile?: File;
+}
+
+export interface OrderConfirmation {
+  confirmationId: string;
+  orderNumber: string;
+  status: string;
+  services: {
+    vendorName: string;
+    planName: string;
+    startDate: string;
+  }[];
+}
+
+export interface OrderStatus {
+  status: string;
+  services: {
+    vendorName: string;
+    planName: string;
+    status: string;
+  }[];
+}
+
+// User ID Management
+const USER_ID_KEY = 'twotion-user-id';
+
+export function getUserId(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(USER_ID_KEY);
+}
+
+export function setUserId(id: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(USER_ID_KEY, id);
+}
+
+export function clearUserId(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(USER_ID_KEY);
+}
+
+// API Functions
+
+export async function generateUserId(): Promise<string> {
+  const response = await fetch('/api/twotion?action=generate-user-id', {
+    method: 'POST',
+  });
+
+  if (!response.ok) throw new Error('Failed to generate user ID');
+  const data = await response.json();
+  setUserId(data.userId);
+  return data.userId;
+}
+
+export async function getStarted(data: GetStartedRequest): Promise<GetStartedResponse> {
+  const userId = getUserId();
+  if (!userId) throw new Error('User ID not found');
+
+  const response = await fetch('/api/twotion?action=get-started', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-user-id': userId,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) throw new Error('Failed to initialize user');
+  return response.json();
+}
+
+export async function getServices(zipCode: string): Promise<TwotionService[]> {
+  const response = await fetch(`/api/twotion?action=services&zipCode=${zipCode}`);
+  if (!response.ok) throw new Error('Failed to fetch services');
+  return response.json();
+}
+
+export async function getPlans(serviceName: string, zipCode: string): Promise<TwotionPlan[]> {
+  const response = await fetch(`/api/twotion?action=plans&service=${serviceName}&zipCode=${zipCode}`);
+  if (!response.ok) throw new Error('Failed to fetch plans');
+  return response.json();
+}
+
+export async function getCart(): Promise<Cart> {
+  const userId = getUserId();
+  if (!userId) throw new Error('User ID not found');
+
+  const response = await fetch('/api/twotion?action=cart', {
+    headers: { 'x-user-id': userId },
+  });
+
+  if (!response.ok) throw new Error('Failed to fetch cart');
+  return response.json();
+}
+
+export async function addPlanToCart(planId: string, options?: PlanOption[]): Promise<void> {
+  const userId = getUserId();
+  if (!userId) throw new Error('User ID not found');
+
+  const response = await fetch('/api/twotion?action=add-to-cart', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-user-id': userId,
+    },
+    body: JSON.stringify({ planId, planOptions: options }),
+  });
+
+  if (!response.ok) throw new Error('Failed to add to cart');
+}
+
+export async function removePlanFromCart(planId: string): Promise<void> {
+  const userId = getUserId();
+  if (!userId) throw new Error('User ID not found');
+
+  const response = await fetch(`/api/twotion?action=remove-from-cart&planId=${planId}`, {
+    method: 'DELETE',
+    headers: { 'x-user-id': userId },
+  });
+
+  if (!response.ok) throw new Error('Failed to remove from cart');
+}
+
+export async function getCheckoutSteps(): Promise<CheckoutStep[]> {
+  const userId = getUserId();
+  if (!userId) throw new Error('User ID not found');
+
+  const response = await fetch('/api/twotion?action=checkout-steps', {
+    headers: { 'x-user-id': userId },
+  });
+
+  if (!response.ok) throw new Error('Failed to fetch checkout steps');
+  return response.json();
+}
+
+export async function completeCheckout(
+  data: CheckoutData,
+  files: CheckoutFiles
+): Promise<OrderConfirmation> {
+  const userId = getUserId();
+  if (!userId) throw new Error('User ID not found');
+
+  const formData = new FormData();
+  formData.append('data', JSON.stringify(data));
+
+  if (files.dlFile) formData.append('dlFile', files.dlFile);
+  if (files.rentFile) formData.append('rentFile', files.rentFile);
+  if (files.ownFile) formData.append('ownFile', files.ownFile);
+
+  const response = await fetch('/api/twotion?action=checkout', {
+    method: 'POST',
+    headers: { 'x-user-id': userId },
+    body: formData,
+  });
+
+  if (!response.ok) throw new Error('Failed to complete checkout');
+  return response.json();
+}
+
+export async function getOrderStatus(
+  confirmationId: string,
+  lastName: string,
+  zip: string
+): Promise<OrderStatus> {
+  const params = new URLSearchParams({
+    action: 'order-status',
+    confirmationId,
+    lastName,
+    zip,
+  });
+
+  const response = await fetch(`/api/twotion?${params}`);
+  if (!response.ok) throw new Error('Failed to fetch order status');
+  return response.json();
+}
+
+// ESIID lookup via 2TIO
+export async function getEsiid(address: {
+  streetNumber: string;
+  streetName: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}): Promise<{ ESIID: string }[]> {
+  const userId = getUserId();
+  if (!userId) throw new Error('User ID not found');
+
+  const params = new URLSearchParams({
+    action: 'get-esiid',
+    ...address,
+  });
+
+  const response = await fetch(`/api/twotion?${params}`, {
+    headers: { 'x-user-id': userId },
+  });
+
+  if (!response.ok) throw new Error('Failed to get ESIID');
+  const data = await response.json();
+  return data.results || [];
+}
+
+// Cost Calculation Utilities
+
+export function calculateAnnualCost(
+  usage: number[],
+  uPrice: number,
+  mPrice: number
+): number {
+  const energyCost = usage.reduce((total, monthKwh) => total + (monthKwh * uPrice), 0);
+  const baseFees = mPrice * 12;
+  return energyCost + baseFees;
+}
+
+export function calculateMonthlyEstimate(
+  usage: number[],
+  uPrice: number,
+  mPrice: number
+): number {
+  return calculateAnnualCost(usage, uPrice, mPrice) / 12;
+}
+
+export function enrichPlansWithCosts(
+  plans: TwotionPlan[],
+  usage: number[]
+): TwotionPlan[] {
+  return plans.map((plan) => ({
+    ...plan,
+    annualCost: calculateAnnualCost(usage, plan.uPrice, plan.mPrice),
+    monthlyEstimate: calculateMonthlyEstimate(usage, plan.uPrice, plan.mPrice),
+  }));
+}
+
+// Format helpers
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+export function formatNumber(num: number): string {
+  return num.toLocaleString();
+}

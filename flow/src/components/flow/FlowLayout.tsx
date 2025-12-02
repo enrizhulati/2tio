@@ -116,6 +116,12 @@ function FlowLayout({ children }: FlowLayoutProps) {
   const currentStep = useFlowStore((state) => state.currentStep);
   const orderConfirmation = useFlowStore((state) => state.orderConfirmation);
   const availabilityChecked = useFlowStore((state) => state.availabilityChecked);
+  const initializeUser = useFlowStore((state) => state.initializeUser);
+
+  // Initialize 2TIO user session on mount
+  useEffect(() => {
+    initializeUser();
+  }, [initializeUser]);
 
   // Scroll to top when step changes or availability is checked
   useEffect(() => {

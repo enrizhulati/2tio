@@ -9,6 +9,41 @@ export interface Address {
   formatted: string;
 }
 
+// ESIID (Electric Service Identifier ID) from ERCOT
+export interface ESIID {
+  _id: string;
+  esiid: string;
+  address: string;
+  address_overflow: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  zip_code_4?: string;
+  county?: string;
+  premise_type: string;
+  status: string;
+  power_region: string;
+  station_name: string;
+  duns: string;
+}
+
+// Usage profile from ERCOT (includes Zillow home data)
+export interface UsageProfile {
+  usage: number[];  // 12-month kWh array (Jan-Dec)
+  home_age: number;
+  square_footage: number;
+  found_home_details: boolean;
+}
+
+// Home details for display
+export interface HomeDetails {
+  squareFootage: number;
+  homeAge: number;
+  yearBuilt: number;
+  annualKwh: number;
+  foundDetails: boolean;
+}
+
 export interface UserProfile {
   firstName: string;
   lastName: string;
@@ -89,8 +124,47 @@ export interface OrderConfirmation {
 
 export type FlowStep = 1 | 2 | 3 | 4 | 5;
 
+// 2TIO Cart types
+export interface TwotionCartItem {
+  planId: string;
+  planName: string;
+  vendorName: string;
+  serviceType: ServiceType;
+  monthlyEstimate?: number;
+}
+
+export interface TwotionCart {
+  items: TwotionCartItem[];
+}
+
+// 2TIO Checkout types
+export interface TwotionCheckoutQuestion {
+  id: string;
+  question: string;
+  type: 'text' | 'select' | 'date' | 'ssn';
+  required: boolean;
+  options?: string[];
+}
+
+export interface TwotionCheckoutStep {
+  VendorId: string | null;
+  VendorName: string | null;
+  Logo: string | null;
+  AppQuestions: TwotionCheckoutQuestion[];
+  DocumentList: { name: string; required: boolean }[];
+  IsStepOne: boolean;
+  LeadTime: number;
+  IsDLUpload: boolean;
+  IsLeaseUpload: boolean;
+  IsOwnUpload: boolean;
+}
+
 export interface FlowState {
   currentStep: FlowStep;
+
+  // 2TIO User Session
+  twotionUserId: string | null;
+  isInitializingUser: boolean;
 
   // Step 1: Address
   address: Address | null;
@@ -98,6 +172,13 @@ export interface FlowState {
   availableServices: AvailableServices | null;
   isCheckingAvailability: boolean;
   availabilityChecked: boolean;
+
+  // Electricity ESIID (fetched from ERCOT when address is entered)
+  esiidMatches: ESIID[];
+  selectedEsiid: ESIID | null;
+  usageProfile: UsageProfile | null;
+  homeDetails: HomeDetails | null;
+  isLoadingElectricity: boolean;
 
   // Step 2: Profile
   profile: UserProfile | null;
@@ -107,8 +188,14 @@ export interface FlowState {
   selectedPlans: SelectedPlans;
   expandedService: ServiceType | null;
 
-  // Step 4: Documents
+  // 2TIO Cart
+  cart: TwotionCart | null;
+  isUpdatingCart: boolean;
+
+  // Step 4: Documents / Checkout
   documents: Documents;
+  checkoutSteps: TwotionCheckoutStep[] | null;
+  checkoutAnswers: Record<string, string>;
 
   // Step 5: Confirmation
   isSubmitting: boolean;
@@ -129,6 +216,21 @@ export interface FlowState {
   prevStep: () => void;
   goToStep: (step: FlowStep) => void;
   reset: () => void;
+
+  // 2TIO User actions
+  initializeUser: () => Promise<void>;
+
+  // Electricity actions (ERCOT for Zillow data)
+  fetchESIIDs: (address: string, zip: string) => Promise<void>;
+  selectESIID: (esiid: ESIID) => void;
+  fetchUsageProfile: () => Promise<void>;
+  fetchElectricityPlans: (zipCode: string) => Promise<void>;
+
+  // 2TIO Cart actions
+  addToCart: (planId: string, plan: ServicePlan, serviceType: ServiceType) => Promise<void>;
+  removeFromCart: (planId: string) => Promise<void>;
+  fetchCheckoutSteps: () => Promise<void>;
+  setCheckoutAnswer: (questionId: string, answer: string) => void;
 }
 
 // Step metadata
