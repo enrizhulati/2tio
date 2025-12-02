@@ -48,7 +48,6 @@ const mockAvailableServices: AvailableServices = {
         contractLabel: '12 month contract',
         setupFee: 0,
         features: ['Free electricity 9pm-6am', 'No deposit with autopay'],
-        badgeReason: 'Best for night owls',
       },
       {
         id: 'reliant-prepaid',
@@ -61,7 +60,7 @@ const mockAvailableServices: AvailableServices = {
         setupFee: 0,
         features: ['Pay as you go', 'No credit check', 'Real-time usage tracking'],
         badge: 'RECOMMENDED',
-        badgeReason: 'Most flexible option',
+        badgeReason: 'No contract required, lowest rate per kWh, and no credit check needed. Perfect for new movers who want flexibility.',
       },
       {
         id: 'green-mountain-renewable',
@@ -74,7 +73,7 @@ const mockAvailableServices: AvailableServices = {
         setupFee: 0,
         features: ['100% wind power', 'Carbon neutral'],
         badge: 'GREEN',
-        badgeReason: '100% renewable energy',
+        badgeReason: 'Powered by 100% Texas wind energy. Supports local renewable infrastructure and reduces your carbon footprint.',
       },
     ],
   },
@@ -93,7 +92,6 @@ const mockAvailableServices: AvailableServices = {
         contractLabel: '12 month price lock',
         setupFee: 0,
         features: ['Symmetrical upload/download', 'No data caps'],
-        badgeReason: 'Best for streaming and remote work',
       },
       {
         id: 'spectrum-500',
@@ -106,7 +104,7 @@ const mockAvailableServices: AvailableServices = {
         setupFee: 0,
         features: ['Free modem', 'No data caps', 'Free installation this month'],
         badge: 'RECOMMENDED',
-        badgeReason: 'Best value, no contract',
+        badgeReason: 'Fastest speeds at the lowest price with no contract. Free modem and installation included this month.',
       },
       {
         id: 'frontier-gig',
@@ -118,7 +116,6 @@ const mockAvailableServices: AvailableServices = {
         contractLabel: '2 year price lock',
         setupFee: 0,
         features: ['Fastest option available', 'Free eero mesh WiFi'],
-        badgeReason: 'Fastest option available',
       },
     ],
   },

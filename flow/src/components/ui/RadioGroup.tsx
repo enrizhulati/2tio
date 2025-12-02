@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
+import { Info } from 'lucide-react';
 
 interface RadioGroupContextValue {
   name: string;
@@ -46,6 +47,7 @@ interface RadioOptionProps {
   children: ReactNode;
   badge?: string;
   badgeVariant?: 'default' | 'success';
+  badgeReason?: string;
   className?: string;
 }
 
@@ -54,9 +56,11 @@ function RadioOption({
   children,
   badge,
   badgeVariant = 'default',
+  badgeReason,
   className = '',
 }: RadioOptionProps) {
   const context = useContext(RadioGroupContext);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   if (!context) {
     throw new Error('RadioOption must be used within a RadioGroup');
@@ -116,18 +120,36 @@ function RadioOption({
         {/* Content */}
         <div className="flex-1 min-w-0">{children}</div>
 
-        {/* Badge */}
+        {/* Badge with tooltip */}
         {badge && (
-          <span
-            className={`
-              flex-shrink-0 px-2 py-1
-              text-[12px] font-bold uppercase tracking-wide
-              rounded
-              ${badgeStyles[badgeVariant]}
-            `}
-          >
-            {badge}
-          </span>
+          <div className="relative flex-shrink-0">
+            <div
+              className={`
+                flex items-center gap-1 px-2 py-1
+                text-[12px] font-bold uppercase tracking-wide
+                rounded cursor-help
+                ${badgeStyles[badgeVariant]}
+              `}
+              onMouseEnter={() => badgeReason && setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (badgeReason) setShowTooltip(!showTooltip);
+              }}
+            >
+              {badge}
+              {badgeReason && <Info className="w-3 h-3" />}
+            </div>
+
+            {/* Tooltip */}
+            {showTooltip && badgeReason && (
+              <div className="absolute right-0 top-full mt-2 z-50 w-64 p-3 bg-[var(--color-darkest)] text-white text-[13px] font-normal normal-case tracking-normal rounded-lg shadow-lg">
+                <div className="absolute -top-1.5 right-4 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
+                <p className="relative z-10">{badgeReason}</p>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </label>

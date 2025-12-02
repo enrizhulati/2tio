@@ -148,11 +148,17 @@ function Step5Review() {
 
         {/* Actions */}
         <div className="space-y-3">
-          <Button fullWidth>View order details</Button>
-          <button className="w-full flex items-center justify-center gap-2 text-[var(--color-teal)] text-[16px] font-medium hover:underline">
+          <Button fullWidth disabled>View order details</Button>
+          <button
+            disabled
+            className="w-full flex items-center justify-center gap-2 text-[var(--color-medium)] text-[16px] font-medium cursor-not-allowed"
+          >
             <Download className="w-4 h-4" />
             Download confirmation (PDF)
           </button>
+          <p className="text-[14px] text-[var(--color-dark)] text-center">
+            Order details and PDF download coming soon
+          </p>
         </div>
       </div>
     );
@@ -176,7 +182,7 @@ function Step5Review() {
         {/* Address section */}
         <div className="border-b border-[var(--color-light)] pb-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-[18px] font-semibold text-[var(--color-darkest)]">
+            <h3 className="text-[22px] font-semibold text-[var(--color-darkest)]">
               Service address
             </h3>
             <button
@@ -202,7 +208,7 @@ function Step5Review() {
         {/* Profile section */}
         <div className="border-b border-[var(--color-light)] pb-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-[18px] font-semibold text-[var(--color-darkest)]">
+            <h3 className="text-[22px] font-semibold text-[var(--color-darkest)]">
               Your information
             </h3>
             <button
@@ -223,7 +229,7 @@ function Step5Review() {
         {/* Services section */}
         <div className="border-b border-[var(--color-light)] pb-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-[18px] font-semibold text-[var(--color-darkest)]">
+            <h3 className="text-[22px] font-semibold text-[var(--color-darkest)]">
               Services
             </h3>
             <button
@@ -291,7 +297,7 @@ function Step5Review() {
         {/* Documents section */}
         <div className="border-b border-[var(--color-light)] pb-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-[18px] font-semibold text-[var(--color-darkest)]">
+            <h3 className="text-[22px] font-semibold text-[var(--color-darkest)]">
               Documents
             </h3>
             <button

@@ -50,7 +50,7 @@ function MapPreview({ address }: { address: string }) {
       <div className="absolute bottom-3 left-3 right-3">
         <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm flex items-center gap-2">
           <Navigation className="w-4 h-4 text-[var(--color-coral)]" />
-          <span className="text-[13px] text-[var(--color-darkest)] truncate">
+          <span className="text-[14px] text-[var(--color-darkest)] truncate">
             {address}
           </span>
         </div>
@@ -227,7 +227,7 @@ function Step1Address() {
                     {availableServices.water.provider}
                   </p>
                 </div>
-                <span className="text-[13px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
+                <span className="text-[14px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
                   Available
                 </span>
               </div>
@@ -244,7 +244,7 @@ function Step1Address() {
                     {availableServices.electricity.providerCount} providers
                   </p>
                 </div>
-                <span className="text-[13px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
+                <span className="text-[14px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
                   Available
                 </span>
               </div>
@@ -261,7 +261,7 @@ function Step1Address() {
                     {availableServices.internet.providerCount} providers
                   </p>
                 </div>
-                <span className="text-[13px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
+                <span className="text-[14px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
                   Available
                 </span>
               </div>

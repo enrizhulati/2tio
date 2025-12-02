@@ -83,7 +83,7 @@ function SidebarNav() {
             {/* Label */}
             <span
               className={`
-                text-[15px] font-medium
+                text-[16px] font-medium
                 ${isActive ? 'text-[var(--color-coral)]' : 'text-[var(--color-dark)]'}
               `}
             >
@@ -128,7 +128,7 @@ function FlowLayout({ children }: FlowLayoutProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-6 text-[13px] text-[var(--color-dark)]">
+        <div className="p-6 text-[14px] text-[var(--color-dark)]">
           <div className="flex items-center gap-1 mb-2">
             <svg className="w-4 h-4 text-[var(--color-teal)]" fill="currentColor" viewBox="0 0 20 20">
               <path

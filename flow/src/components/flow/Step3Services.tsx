@@ -12,7 +12,6 @@ import {
   Plus,
   X,
   Star,
-  Leaf,
 } from 'lucide-react';
 import { SERVICE_INFO, type ServiceType, type ServicePlan } from '@/types/flow';
 import { ServiceIcon } from '@/components/ui';
@@ -91,7 +90,7 @@ function ServiceCard({
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <ServiceIcon type={type} size="xl" />
-                <h3 className="text-[20px] font-semibold text-[var(--color-darkest)]">
+                <h3 className="text-[22px] font-semibold text-[var(--color-darkest)]">
                   {SERVICE_INFO[type].label}
                 </h3>
               </div>
@@ -208,6 +207,7 @@ function ServiceCard({
                     value={plan.id}
                     badge={plan.badge === 'RECOMMENDED' ? 'RECOMMENDED' : plan.badge === 'GREEN' ? 'GREEN' : undefined}
                     badgeVariant={plan.badge === 'GREEN' ? 'success' : 'default'}
+                    badgeReason={plan.badgeReason}
                   >
                     <div>
                       <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
@@ -216,16 +216,6 @@ function ServiceCard({
                       <p className="text-[14px] text-[var(--color-dark)] mt-1">
                         {plan.rate} • {plan.contractLabel}
                       </p>
-                      {plan.badgeReason && (
-                        <div className="flex items-center gap-1 mt-1 text-[14px] text-[var(--color-dark)]">
-                          {plan.badge === 'GREEN' ? (
-                            <Leaf className="w-3 h-3" />
-                          ) : (
-                            <Star className="w-3 h-3" />
-                          )}
-                          <span>{plan.badgeReason}</span>
-                        </div>
-                      )}
                     </div>
                   </RadioOption>
                 ))}
