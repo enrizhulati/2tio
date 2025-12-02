@@ -395,15 +395,32 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
       const esiids: ESIID[] = await response.json();
 
+      // Extract unit from search address if present (e.g., "3031 Oliver St APT 1214" -> "1214")
+      const unitMatch = address.match(/APT\s+(\w+)/i);
+      const searchedUnit = unitMatch ? unitMatch[1].toUpperCase() : null;
+
+      // Auto-select if:
+      // 1. Only one match, OR
+      // 2. User searched with a unit and the first result contains that unit
+      let autoSelected: ESIID | null = null;
+      if (esiids.length === 1) {
+        autoSelected = esiids[0];
+      } else if (searchedUnit && esiids.length > 0) {
+        // Check if first result matches the searched unit
+        const firstAddress = esiids[0].address.toUpperCase();
+        if (firstAddress.includes(`APT ${searchedUnit}`) || firstAddress.includes(`#${searchedUnit}`)) {
+          autoSelected = esiids[0];
+        }
+      }
+
       set({
         esiidMatches: esiids,
         isLoadingElectricity: false,
-        // Auto-select if only one match
-        selectedEsiid: esiids.length === 1 ? esiids[0] : null,
+        selectedEsiid: autoSelected,
       });
 
       // If auto-selected, fetch usage profile
-      if (esiids.length === 1) {
+      if (autoSelected) {
         await get().fetchUsageProfile();
       }
     } catch (error) {

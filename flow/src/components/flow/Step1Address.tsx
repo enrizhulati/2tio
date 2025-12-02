@@ -145,9 +145,13 @@ function Step1Address() {
       setMoveInDate(date);
 
       // Fetch ESIIDs in parallel with availability check
+      // Include unit number in search to prioritize the user's specific apartment
+      const searchAddress = unit
+        ? `${selectedAddress.street} APT ${unit}`
+        : selectedAddress.street;
       await Promise.all([
         checkAvailability(),
-        fetchESIIDs(selectedAddress.street, selectedAddress.zip),
+        fetchESIIDs(searchAddress, selectedAddress.zip),
       ]);
     }
   }, [selectedAddress, unit, date, setAddress, setMoveInDate, checkAvailability, fetchESIIDs]);
