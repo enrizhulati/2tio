@@ -230,8 +230,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
   setProfile: (profile: UserProfile) => set({ profile }),
 
-  toggleService: (service: ServiceType) => {
-    const { selectedServices, selectedPlans, availableServices, address } = get();
+  toggleService: async (service: ServiceType) => {
+    const { selectedServices, selectedPlans, availableServices, address, cart } = get();
 
     // Can't toggle water off (it's required since they came for water)
     if (service === 'water') return;
@@ -243,13 +243,42 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       get().fetchElectricityPlans(address.zip);
     }
 
-    // If selecting, auto-select the recommended plan
+    // If selecting, auto-select the recommended plan and add to cart
     let newSelectedPlans = { ...selectedPlans };
     if (isNowSelected && availableServices) {
       const plans = availableServices[service].plans;
       const recommendedPlan = plans.find((p) => p.badge === 'RECOMMENDED') || plans[0];
       newSelectedPlans[service] = recommendedPlan;
+
+      // Add to 2TIO cart for electricity
+      if (service === 'electricity' && recommendedPlan) {
+        try {
+          await apiAddToCart(recommendedPlan.id);
+          const newItems = [...(cart?.items || [])];
+          newItems.push({
+            planId: recommendedPlan.id,
+            planName: recommendedPlan.name,
+            vendorName: recommendedPlan.provider,
+            serviceType: service,
+            monthlyEstimate: recommendedPlan.monthlyEstimate ? parseFloat(recommendedPlan.monthlyEstimate.replace('$', '')) : undefined,
+          });
+          set({ cart: { items: newItems } });
+        } catch (error) {
+          console.error('Error adding to cart:', error);
+        }
+      }
     } else if (!isNowSelected) {
+      // Remove from cart when deselecting
+      const previousPlan = selectedPlans[service];
+      if (service === 'electricity' && previousPlan) {
+        try {
+          await apiRemoveFromCart(previousPlan.id);
+          const newItems = (cart?.items || []).filter(item => item.planId !== previousPlan.id);
+          set({ cart: { items: newItems } });
+        } catch (error) {
+          console.error('Error removing from cart:', error);
+        }
+      }
       delete newSelectedPlans[service];
     }
 
@@ -263,13 +292,48 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     });
   },
 
-  selectPlan: (service: ServiceType, plan: ServicePlan) => {
+  selectPlan: async (service: ServiceType, plan: ServicePlan) => {
+    const { selectedPlans, cart } = get();
+    const previousPlan = selectedPlans[service];
+
+    // Update local state immediately for responsive UI
     set({
       selectedPlans: {
-        ...get().selectedPlans,
+        ...selectedPlans,
         [service]: plan,
       },
     });
+
+    // For electricity, sync with 2TIO cart
+    if (service === 'electricity') {
+      try {
+        // Remove previous plan from cart if exists
+        if (previousPlan && previousPlan.id !== plan.id) {
+          const previousCartItem = cart?.items.find(item => item.planId === previousPlan.id);
+          if (previousCartItem) {
+            await apiRemoveFromCart(previousPlan.id);
+          }
+        }
+
+        // Add new plan to cart
+        await apiAddToCart(plan.id);
+
+        // Update cart state
+        const newItems = (cart?.items || []).filter(item => item.planId !== previousPlan?.id);
+        newItems.push({
+          planId: plan.id,
+          planName: plan.name,
+          vendorName: plan.provider,
+          serviceType: service,
+          monthlyEstimate: plan.monthlyEstimate ? parseFloat(plan.monthlyEstimate.replace('$', '')) : undefined,
+        });
+
+        set({ cart: { items: newItems } });
+      } catch (error) {
+        console.error('Error syncing cart:', error);
+        // Cart sync failed, but local selection still works
+      }
+    }
   },
 
   setExpandedService: (service: ServiceType | null) => {

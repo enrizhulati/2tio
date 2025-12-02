@@ -206,8 +206,8 @@ export interface FlowState {
   setMoveInDate: (date: string) => void;
   checkAvailability: () => Promise<void>;
   setProfile: (profile: UserProfile) => void;
-  toggleService: (service: ServiceType) => void;
-  selectPlan: (service: ServiceType, plan: ServicePlan) => void;
+  toggleService: (service: ServiceType) => Promise<void>;
+  selectPlan: (service: ServiceType, plan: ServicePlan) => Promise<void>;
   setExpandedService: (service: ServiceType | null) => void;
   uploadDocument: (type: 'id' | 'proofOfResidence', file: File) => Promise<void>;
   removeDocument: (type: 'id' | 'proofOfResidence') => void;
