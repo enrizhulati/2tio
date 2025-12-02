@@ -29,112 +29,70 @@ import {
   type TwotionPlan,
 } from '@/lib/api/twotion';
 
-// Mock data for available services (simulating API response)
-const mockAvailableServices: AvailableServices = {
-  water: {
-    available: true,
-    provider: 'City of Dallas Water Utilities',
-    plans: [
-      {
-        id: 'dallas-water-standard',
-        provider: 'City of Dallas Water Utilities',
-        name: 'Standard Residential',
-        rate: 'Tiered usage rates',
-        rateType: 'tiered',
-        contractMonths: 0,
-        contractLabel: 'No contract',
-        setupFee: 0,
-        monthlyEstimate: '$45-65',
-        features: ['24/7 emergency service', 'Online account management'],
-      },
-    ],
-  },
-  electricity: {
-    available: true,
-    providerCount: 12,
-    startingRate: '$0.08/kWh',
-    plans: [
-      {
-        id: 'txu-free-nights',
-        provider: 'TXU Energy',
-        name: 'Free Nights',
-        rate: '$0.12/kWh days',
-        rateType: 'variable',
-        contractMonths: 12,
-        contractLabel: '12 month contract',
-        setupFee: 0,
-        features: ['Free electricity 9pm-6am', 'No deposit with autopay'],
-      },
-      {
-        id: 'reliant-prepaid',
-        provider: 'Reliant',
-        name: 'Simply Prepaid',
-        rate: '$0.10/kWh',
-        rateType: 'flat',
-        contractMonths: 0,
-        contractLabel: 'No contract',
-        setupFee: 0,
-        features: ['Pay as you go', 'No credit check', 'Real-time usage tracking'],
-        badge: 'RECOMMENDED',
-        badgeReason: 'No contract required, lowest rate per kWh, and no credit check needed. Perfect for new movers who want flexibility.',
-      },
-      {
-        id: 'green-mountain-renewable',
-        provider: 'Green Mountain',
-        name: '100% Renewable',
-        rate: '$0.11/kWh',
-        rateType: 'flat',
-        contractMonths: 24,
-        contractLabel: '24 month contract',
-        setupFee: 0,
-        features: ['100% wind power', 'Carbon neutral'],
-        badge: 'GREEN',
-        badgeReason: 'Powered by 100% Texas wind energy. Supports local renewable infrastructure and reduces your carbon footprint.',
-      },
-    ],
-  },
-  internet: {
-    available: true,
-    providerCount: 5,
-    startingRate: '$39.99/mo',
-    plans: [
-      {
-        id: 'att-fiber-300',
-        provider: 'AT&T Fiber',
-        name: '300 Mbps',
-        rate: '$55/mo',
-        rateType: 'flat',
-        contractMonths: 12,
-        contractLabel: '12 month price lock',
-        setupFee: 0,
-        features: ['Symmetrical upload/download', 'No data caps'],
-      },
-      {
-        id: 'spectrum-500',
-        provider: 'Spectrum',
-        name: '500 Mbps',
-        rate: '$49.99/mo',
-        rateType: 'flat',
-        contractMonths: 0,
-        contractLabel: 'No contract',
-        setupFee: 0,
-        features: ['Free modem', 'No data caps', 'Free installation this month'],
-        badge: 'RECOMMENDED',
-        badgeReason: 'Fastest speeds at the lowest price with no contract. Free modem and installation included this month.',
-      },
-      {
-        id: 'frontier-gig',
-        provider: 'Frontier',
-        name: '1 Gbps',
-        rate: '$79.99/mo',
-        rateType: 'flat',
-        contractMonths: 24,
-        contractLabel: '2 year price lock',
-        setupFee: 0,
-        features: ['Fastest option available', 'Free eero mesh WiFi'],
-      },
-    ],
-  },
+// Default usage profile for cost estimates (when Zillow data unavailable)
+const DEFAULT_USAGE = [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900];
+
+// Mock data for water/internet (not yet from 2TIO API)
+const mockWaterService = {
+  available: true,
+  provider: 'City of Dallas Water Utilities',
+  plans: [
+    {
+      id: 'dallas-water-standard',
+      provider: 'City of Dallas Water Utilities',
+      name: 'Standard Residential',
+      rate: 'Tiered usage rates',
+      rateType: 'tiered' as const,
+      contractMonths: 0,
+      contractLabel: 'No contract',
+      setupFee: 0,
+      monthlyEstimate: '$45-65',
+      features: ['24/7 emergency service', 'Online account management'],
+    },
+  ],
+};
+
+const mockInternetService = {
+  available: true,
+  providerCount: 5,
+  startingRate: '$39.99/mo',
+  plans: [
+    {
+      id: 'att-fiber-300',
+      provider: 'AT&T Fiber',
+      name: '300 Mbps',
+      rate: '$55/mo',
+      rateType: 'flat' as const,
+      contractMonths: 12,
+      contractLabel: '12 month price lock',
+      setupFee: 0,
+      features: ['Symmetrical upload/download', 'No data caps'],
+    },
+    {
+      id: 'spectrum-500',
+      provider: 'Spectrum',
+      name: '500 Mbps',
+      rate: '$49.99/mo',
+      rateType: 'flat' as const,
+      contractMonths: 0,
+      contractLabel: 'No contract',
+      setupFee: 0,
+      features: ['Free modem', 'No data caps', 'Free installation this month'],
+      badge: 'RECOMMENDED' as const,
+      badgeReason: 'Fastest speeds at the lowest price with no contract. Free modem and installation included this month.',
+    },
+    {
+      id: 'frontier-gig',
+      provider: 'Frontier',
+      name: '1 Gbps',
+      rate: '$79.99/mo',
+      rateType: 'flat' as const,
+      contractMonths: 24,
+      contractLabel: '2 year price lock',
+      setupFee: 0,
+      features: ['Fastest option available', 'Free eero mesh WiFi'],
+    },
+  ],
 };
 
 const initialState = {
@@ -192,22 +150,82 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   setMoveInDate: (date: string) => set({ moveInDate: date }),
 
   checkAvailability: async () => {
+    const { address } = get();
     set({ isCheckingAvailability: true });
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Fetch real electricity plans from 2TIO
+      const zipCode = address?.zip || '75205';
+      const rawPlans: TwotionPlan[] = await getPlans('electricity', zipCode);
 
-    // Set water plan as default selected
-    const waterPlan = mockAvailableServices.water.plans[0];
+      // Enrich plans with default usage cost estimates
+      const enrichedPlans = enrichPlansWithCosts(rawPlans, DEFAULT_USAGE);
 
-    set({
-      availableServices: mockAvailableServices,
-      isCheckingAvailability: false,
-      availabilityChecked: true,
-      selectedPlans: {
-        water: waterPlan,
-      },
-    });
+      // Convert to ServicePlan format
+      const electricityPlans: ServicePlan[] = enrichedPlans.map((plan, index) => ({
+        id: plan.id,
+        provider: plan.vendorName,
+        name: plan.name,
+        rate: `$${plan.uPrice.toFixed(3)}/kWh`,
+        rateType: 'flat' as const,
+        contractMonths: plan.term,
+        contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
+        setupFee: 0,
+        monthlyEstimate: plan.monthlyEstimate ? `$${Math.round(plan.monthlyEstimate)}` : undefined,
+        features: [
+          plan.bulletPoint1,
+          plan.bulletPoint2,
+          plan.bulletPoint3,
+        ].filter(Boolean) as string[],
+        badge: plan.renewable ? 'GREEN' as const : index === 0 ? 'RECOMMENDED' as const : undefined,
+        badgeReason: plan.renewable
+          ? '100% renewable energy from Texas wind and solar'
+          : index === 0
+          ? 'Best value based on estimated usage'
+          : undefined,
+      }));
+
+      // Build available services with real electricity data
+      const availableServices: AvailableServices = {
+        water: mockWaterService,
+        electricity: {
+          available: true,
+          providerCount: new Set(electricityPlans.map(p => p.provider)).size,
+          startingRate: electricityPlans.length > 0 ? electricityPlans[0].rate : undefined,
+          plans: electricityPlans,
+        },
+        internet: mockInternetService,
+      };
+
+      set({
+        availableServices,
+        isCheckingAvailability: false,
+        availabilityChecked: true,
+        selectedPlans: {
+          water: mockWaterService.plans[0],
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching electricity plans:', error);
+      // Still show availability but with empty electricity plans
+      // The UI should show an error message
+      set({
+        availableServices: {
+          water: mockWaterService,
+          electricity: {
+            available: false, // Mark as unavailable if API fails
+            providerCount: 0,
+            plans: [],
+          },
+          internet: mockInternetService,
+        },
+        isCheckingAvailability: false,
+        availabilityChecked: true,
+        selectedPlans: {
+          water: mockWaterService.plans[0],
+        },
+      });
+    }
   },
 
   setProfile: (profile: UserProfile) => set({ profile }),

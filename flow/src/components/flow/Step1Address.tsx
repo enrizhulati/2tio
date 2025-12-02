@@ -4,8 +4,8 @@ import { useState, useCallback } from 'react';
 import { useFlowStore } from '@/store/flowStore';
 import { Button, Input, ServiceIcon } from '@/components/ui';
 import { AddressAutocomplete, type AddressResult } from '@/components/ui/AddressAutocomplete';
-import { MapPin, ChevronRight, Edit2, Navigation, Home, Zap, Loader2 } from 'lucide-react';
-import { SERVICE_INFO, type ESIID } from '@/types/flow';
+import { MapPin, ChevronRight, Edit2, Navigation, Home } from 'lucide-react';
+import { SERVICE_INFO } from '@/types/flow';
 
 // Format number with commas (e.g., 1234 -> "1,234")
 const formatNumber = (num: number): string => num.toLocaleString();
@@ -69,15 +69,11 @@ function Step1Address() {
     availableServices,
     isCheckingAvailability,
     availabilityChecked,
-    esiidMatches,
-    selectedEsiid,
     homeDetails,
-    isLoadingElectricity,
     setAddress,
     setMoveInDate,
     checkAvailability,
     fetchESIIDs,
-    selectESIID,
     nextStep,
   } = useFlowStore();
 
@@ -188,63 +184,20 @@ function Step1Address() {
 
   // Show availability results
   if (availabilityChecked && availableServices && address) {
-    // Check if we need to show ESIID picker (multiple matches, none selected yet)
-    const showEsiidPicker = esiidMatches.length > 1 && !selectedEsiid;
-
     return (
       <div className="space-y-8">
         {/* Success heading */}
         <div className="text-center">
           <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
-            {showEsiidPicker ? 'Confirm your address' : 'Great news!'}
+            Great news!
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
-            {showEsiidPicker
-              ? 'We found multiple addresses. Please select yours.'
-              : 'We can set up utilities for your new home.'}
+            We can set up utilities for your new home.
           </p>
         </div>
 
-        {/* ESIID Address Picker - show when multiple matches */}
-        {showEsiidPicker && (
-          <div className="p-5 rounded-xl border-2 border-[var(--color-coral)] bg-white">
-            <div className="flex items-center gap-2 mb-4">
-              <Zap className="w-5 h-5 text-[var(--color-coral)]" />
-              <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
-                Select your exact address
-              </span>
-            </div>
-            <div className="space-y-2">
-              {esiidMatches.map((esiid) => (
-                <button
-                  key={esiid._id}
-                  onClick={() => selectESIID(esiid)}
-                  className="w-full p-4 rounded-lg border-2 border-[var(--color-light)] hover:border-[var(--color-teal)] transition-colors text-left"
-                >
-                  <p className="text-[15px] font-medium text-[var(--color-darkest)]">
-                    {esiid.address}
-                  </p>
-                  <p className="text-[14px] text-[var(--color-dark)]">
-                    {esiid.city}, {esiid.state} {esiid.zip_code}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Loading state while fetching home details */}
-        {isLoadingElectricity && (
-          <div className="p-5 rounded-xl border-2 border-[var(--color-light)] bg-[var(--color-lightest)] flex items-center justify-center gap-3">
-            <Loader2 className="w-5 h-5 text-[var(--color-teal)] animate-spin" />
-            <span className="text-[15px] text-[var(--color-dark)]">
-              Looking up your home details...
-            </span>
-          </div>
-        )}
-
-        {/* Home details banner - show if Zillow data was found */}
-        {homeDetails?.foundDetails && !showEsiidPicker && !isLoadingElectricity && (
+        {/* Home details banner - show if Zillow data was found (optional enhancement) */}
+        {homeDetails?.foundDetails && (
           <div className="p-5 rounded-xl bg-[var(--color-teal-light)] border-2 border-[var(--color-teal)]">
             <div className="flex items-center gap-2 mb-3">
               <Home className="w-5 h-5 text-[var(--color-teal)]" />
@@ -261,10 +214,8 @@ function Step1Address() {
           </div>
         )}
 
-        {/* Map preview - only show after ESIID selection is done */}
-        {!showEsiidPicker && (
-          <MapPreview address={address.formatted || `${address.street}, ${address.city}, ${address.state}`} />
-        )}
+        {/* Map preview */}
+        <MapPreview address={address.formatted || `${address.street}, ${address.city}, ${address.state}`} />
 
         {/* Address card */}
         <div className="p-5 rounded-xl border-2 border-[var(--color-light)] bg-white">
@@ -354,19 +305,16 @@ function Step1Address() {
           </div>
         </div>
 
-        {/* Continue button - clear what happens next */}
-        {!showEsiidPicker && (
-          <Button
-            onClick={nextStep}
-            fullWidth
-            size="large"
-            colorScheme="coral"
-            rightIcon={<ChevronRight className="w-5 h-5" />}
-            disabled={isLoadingElectricity}
-          >
-            Choose my services
-          </Button>
-        )}
+        {/* Continue button */}
+        <Button
+          onClick={nextStep}
+          fullWidth
+          size="large"
+          colorScheme="coral"
+          rightIcon={<ChevronRight className="w-5 h-5" />}
+        >
+          Choose my services
+        </Button>
       </div>
     );
   }
