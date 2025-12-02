@@ -13,14 +13,15 @@ import {
 export default function Home() {
   const currentStep = useFlowStore((state) => state.currentStep);
 
+  // Flow order: Address → Services → Profile → Verify → Review
   const renderStep = () => {
     switch (currentStep) {
       case 1:
         return <Step1Address />;
       case 2:
-        return <Step2Profile />;
+        return <Step3Services />; // Services now step 2
       case 3:
-        return <Step3Services />;
+        return <Step2Profile />; // Profile now step 3
       case 4:
         return <Step4Verify />;
       case 5:

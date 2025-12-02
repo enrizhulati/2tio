@@ -1,13 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { useFlowStore } from '@/store/flowStore';
 import { Button, ServiceIcon } from '@/components/ui';
+import { OrderDetailsModal } from './OrderDetailsModal';
+import { generateOrderPdf } from '@/lib/generatePdf';
 import {
   ChevronLeft,
   Edit2,
   Check,
   Download,
-  Loader2,
   CheckCircle,
   Clock,
 } from 'lucide-react';
@@ -28,6 +30,8 @@ function Step5Review() {
     goToStep,
   } = useFlowStore();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString('en-US', {
@@ -38,129 +42,151 @@ function Step5Review() {
     });
   };
 
+  const handleDownloadPdf = () => {
+    if (orderConfirmation && profile) {
+      generateOrderPdf({
+        orderConfirmation,
+        profile,
+        selectedPlans,
+      });
+    }
+  };
+
   // Show confirmation page after order is placed
   if (orderConfirmation) {
     return (
-      <div className="space-y-8 text-center">
-        {/* Success icon */}
-        <div className="flex justify-center">
-          <div className="w-20 h-20 rounded-full bg-[var(--color-success-light)] flex items-center justify-center">
-            <CheckCircle className="w-10 h-10 text-[var(--color-success)]" />
+      <>
+        <div className="space-y-8 text-center">
+          {/* Success icon */}
+          <div className="flex justify-center">
+            <div className="w-20 h-20 rounded-full bg-[var(--color-success-light)] flex items-center justify-center">
+              <CheckCircle className="w-10 h-10 text-[var(--color-success)]" />
+            </div>
           </div>
-        </div>
 
-        {/* Heading */}
-        <div>
-          <h1 className="text-[44px] font-bold text-[var(--color-darkest)] mb-3">
-            You're all set!
-          </h1>
-          <p className="text-[18px] text-[var(--color-dark)]">
-            We're setting up your utilities now.
-          </p>
-        </div>
+          {/* Heading */}
+          <div>
+            <h1 className="text-[44px] font-bold text-[var(--color-darkest)] mb-3">
+              You're all set!
+            </h1>
+            <p className="text-[18px] text-[var(--color-dark)]">
+              We're setting up your utilities now.
+            </p>
+          </div>
 
-        {/* Order card */}
-        <div className="p-6 rounded-xl border-2 border-[var(--color-light)] bg-white text-left">
-          <p className="text-[14px] text-[var(--color-dark)] mb-2">
-            Order #{orderConfirmation.orderId}
-          </p>
-          <p className="text-[18px] font-semibold text-[var(--color-darkest)]">
-            {orderConfirmation.address.street}
-            {orderConfirmation.address.unit && `, ${orderConfirmation.address.unit}`}
-          </p>
-          <p className="text-[16px] text-[var(--color-dark)]">
-            {orderConfirmation.address.city}, {orderConfirmation.address.state}{' '}
-            {orderConfirmation.address.zip}
-          </p>
-          <p className="text-[16px] text-[var(--color-dark)] mt-2">
-            Services starting {formatDate(orderConfirmation.moveInDate)}
-          </p>
+          {/* Order card */}
+          <div className="p-6 rounded-xl border-2 border-[var(--color-light)] bg-white text-left">
+            <p className="text-[14px] text-[var(--color-dark)] mb-2">
+              Order #{orderConfirmation.orderId}
+            </p>
+            <p className="text-[18px] font-semibold text-[var(--color-darkest)]">
+              {orderConfirmation.address.street}
+              {orderConfirmation.address.unit && `, ${orderConfirmation.address.unit}`}
+            </p>
+            <p className="text-[16px] text-[var(--color-dark)]">
+              {orderConfirmation.address.city}, {orderConfirmation.address.state}{' '}
+              {orderConfirmation.address.zip}
+            </p>
+            <p className="text-[16px] text-[var(--color-dark)] mt-2">
+              Services starting {formatDate(orderConfirmation.moveInDate)}
+            </p>
 
-          <div className="border-t border-[var(--color-light)] my-4" />
+            <div className="border-t border-[var(--color-light)] my-4" />
 
-          {/* Services status */}
-          <div className="space-y-3">
-            {orderConfirmation.services.map((service) => (
-              <div key={service.type} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <ServiceIcon type={service.type} size="md" />
-                  <div>
-                    <p className="text-[16px] font-medium text-[var(--color-darkest)]">
-                      {SERVICE_INFO[service.type].label}
-                    </p>
-                    <p className="text-[14px] text-[var(--color-dark)]">
-                      {service.provider}
-                    </p>
+            {/* Services status */}
+            <div className="space-y-3">
+              {orderConfirmation.services.map((service) => (
+                <div key={service.type} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <ServiceIcon type={service.type} size="md" />
+                    <div>
+                      <p className="text-[16px] font-medium text-[var(--color-darkest)]">
+                        {SERVICE_INFO[service.type].label}
+                      </p>
+                      <p className="text-[14px] text-[var(--color-dark)]">
+                        {service.provider}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-[14px] text-[var(--color-warning)]">
+                    <Clock className="w-4 h-4" />
+                    <span>Setting up...</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 text-[14px] text-[var(--color-warning)]">
-                  <Clock className="w-4 h-4" />
-                  <span>Setting up...</span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          {/* What happens next */}
+          <div className="text-left">
+            <h2 className="text-[22px] font-semibold text-[var(--color-darkest)] mb-4">
+              What happens next
+            </h2>
+            <ol className="space-y-3">
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-teal-light)] text-[var(--color-teal)] text-[14px] font-medium flex items-center justify-center">
+                  1
+                </span>
+                <span className="text-[16px] text-[var(--color-dark)]">
+                  We submit your information to each provider
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-teal-light)] text-[var(--color-teal)] text-[14px] font-medium flex items-center justify-center">
+                  2
+                </span>
+                <span className="text-[16px] text-[var(--color-dark)]">
+                  You'll receive confirmation emails within 24 hours
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-teal-light)] text-[var(--color-teal)] text-[14px] font-medium flex items-center justify-center">
+                  3
+                </span>
+                <span className="text-[16px] text-[var(--color-dark)]">
+                  Utilities will be active on your move-in date
+                </span>
+              </li>
+            </ol>
+          </div>
+
+          {/* Support */}
+          <p className="text-[14px] text-[var(--color-dark)]">
+            Questions? Contact{' '}
+            <a
+              href="mailto:support@2tion.com"
+              className="text-[var(--color-teal)] hover:underline"
+            >
+              support@2tion.com
+            </a>
+          </p>
+
+          {/* Actions */}
+          <div className="space-y-3">
+            <Button fullWidth onClick={() => setIsModalOpen(true)}>
+              View order details
+            </Button>
+            <button
+              onClick={handleDownloadPdf}
+              className="w-full flex items-center justify-center gap-2 text-[var(--color-teal)] text-[16px] font-medium hover:underline"
+            >
+              <Download className="w-4 h-4" />
+              Download confirmation (PDF)
+            </button>
           </div>
         </div>
 
-        {/* What happens next */}
-        <div className="text-left">
-          <h2 className="text-[22px] font-semibold text-[var(--color-darkest)] mb-4">
-            What happens next
-          </h2>
-          <ol className="space-y-3">
-            <li className="flex items-start gap-3">
-              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-teal-light)] text-[var(--color-teal)] text-[14px] font-medium flex items-center justify-center">
-                1
-              </span>
-              <span className="text-[16px] text-[var(--color-dark)]">
-                We submit your information to each provider
-              </span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-teal-light)] text-[var(--color-teal)] text-[14px] font-medium flex items-center justify-center">
-                2
-              </span>
-              <span className="text-[16px] text-[var(--color-dark)]">
-                You'll receive confirmation emails within 24 hours
-              </span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-teal-light)] text-[var(--color-teal)] text-[14px] font-medium flex items-center justify-center">
-                3
-              </span>
-              <span className="text-[16px] text-[var(--color-dark)]">
-                Utilities will be active on your move-in date
-              </span>
-            </li>
-          </ol>
-        </div>
-
-        {/* Support */}
-        <p className="text-[14px] text-[var(--color-dark)]">
-          Questions? Contact{' '}
-          <a
-            href="mailto:support@2tion.com"
-            className="text-[var(--color-teal)] hover:underline"
-          >
-            support@2tion.com
-          </a>
-        </p>
-
-        {/* Actions */}
-        <div className="space-y-3">
-          <Button fullWidth disabled>View order details</Button>
-          <button
-            disabled
-            className="w-full flex items-center justify-center gap-2 text-[var(--color-medium)] text-[16px] font-medium cursor-not-allowed"
-          >
-            <Download className="w-4 h-4" />
-            Download confirmation (PDF)
-          </button>
-          <p className="text-[14px] text-[var(--color-dark)] text-center">
-            Order details and PDF download coming soon
-          </p>
-        </div>
-      </div>
+        {/* Order Details Modal */}
+        {profile && (
+          <OrderDetailsModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            orderConfirmation={orderConfirmation}
+            profile={profile}
+            selectedPlans={selectedPlans}
+          />
+        )}
+      </>
     );
   }
 
@@ -205,14 +231,14 @@ function Step5Review() {
           </p>
         </div>
 
-        {/* Profile section */}
+        {/* Profile section - step 3 in new order */}
         <div className="border-b border-[var(--color-light)] pb-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-[22px] font-semibold text-[var(--color-darkest)]">
               Your information
             </h3>
             <button
-              onClick={() => goToStep(2)}
+              onClick={() => goToStep(3)}
               className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium hover:underline"
             >
               <Edit2 className="w-3 h-3" />
@@ -233,7 +259,7 @@ function Step5Review() {
               Services
             </h3>
             <button
-              onClick={() => goToStep(3)}
+              onClick={() => goToStep(2)}
               className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium hover:underline"
             >
               <Edit2 className="w-3 h-3" />

@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import { useFlowStore } from '@/store/flowStore';
 import { Home, MapPin, User, Zap, Settings, CheckCircle } from 'lucide-react';
 
@@ -41,10 +41,12 @@ function Logo() {
 }
 
 // Step configuration - user-centered microcopy
+// Order: Address → Services → Your details → Verify → Confirm
+// (Services before Profile so "Choose my services" CTA is fulfilled immediately)
 const STEPS = [
   { step: 1, label: 'Your address', icon: MapPin },
-  { step: 2, label: 'About you', icon: User },
-  { step: 3, label: 'Services', icon: Zap },
+  { step: 2, label: 'Services', icon: Zap },
+  { step: 3, label: 'Your details', icon: User },
   { step: 4, label: 'Verify', icon: Settings },
   { step: 5, label: 'Confirm', icon: CheckCircle },
 ];
@@ -111,7 +113,14 @@ function ProgressBar() {
 }
 
 function FlowLayout({ children }: FlowLayoutProps) {
+  const currentStep = useFlowStore((state) => state.currentStep);
   const orderConfirmation = useFlowStore((state) => state.orderConfirmation);
+  const availabilityChecked = useFlowStore((state) => state.availabilityChecked);
+
+  // Scroll to top when step changes or availability is checked
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [currentStep, availabilityChecked, orderConfirmation]);
 
   return (
     <div className="min-h-screen flex">
