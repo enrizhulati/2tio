@@ -294,24 +294,23 @@ function Step3Services() {
         />
       </div>
 
-      {/* Navigation buttons */}
+      {/* Navigation buttons - primary left per Practical UI */}
       <div className="pt-4 space-y-4">
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            variant="secondary"
-            onClick={prevStep}
-            leftIcon={<ChevronLeft className="w-5 h-5" />}
-            className="sm:order-1"
-          >
-            Back
-          </Button>
           <Button
             onClick={nextStep}
             fullWidth
             rightIcon={<ChevronRight className="w-5 h-5" />}
-            className="sm:order-2 sm:flex-1"
+            className="sm:flex-1"
           >
             {getButtonText()}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={prevStep}
+            leftIcon={<ChevronLeft className="w-5 h-5" />}
+          >
+            Back
           </Button>
         </div>
 

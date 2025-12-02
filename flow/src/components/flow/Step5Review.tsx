@@ -334,25 +334,24 @@ function Step5Review() {
         and authorize us to set up utilities on your behalf.
       </p>
 
-      {/* Navigation buttons */}
+      {/* Navigation buttons - primary left per Practical UI */}
       <div className="pt-4 flex flex-col sm:flex-row gap-3">
-        <Button
-          variant="secondary"
-          onClick={prevStep}
-          leftIcon={<ChevronLeft className="w-5 h-5" />}
-          className="sm:order-1"
-          disabled={isSubmitting}
-        >
-          Back
-        </Button>
         <Button
           onClick={submitOrder}
           fullWidth
           isLoading={isSubmitting}
           loadingText="Placing order..."
-          className="sm:order-2 sm:flex-1"
+          className="sm:flex-1"
         >
           Place order
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={prevStep}
+          leftIcon={<ChevronLeft className="w-5 h-5" />}
+          disabled={isSubmitting}
+        >
+          Back
         </Button>
       </div>
     </div>
