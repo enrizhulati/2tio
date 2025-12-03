@@ -100,9 +100,9 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
       </div>
 
       {/* Chart - use 99% width to fix Recharts ResponsiveContainer bug */}
-      <div className="h-[120px] w-full min-w-0 overflow-hidden">
-        <ResponsiveContainer width="99%" height="100%">
-          <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 0 }}>
+      <div className="h-[120px] w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
             <XAxis
               dataKey="month"
               axisLine={false}
