@@ -293,6 +293,32 @@ function Step5Review() {
             </div>
           )}
 
+          {/* CP Checkout Link - for completing electric enrollment */}
+          {orderConfirmation.checkoutUrl && (
+            <div className="p-5 rounded-xl bg-[var(--color-teal-light)] border-2 border-[var(--color-teal)]">
+              <div className="flex items-start gap-3">
+                <ServiceIcon type="electricity" size="md" />
+                <div className="flex-1">
+                  <p className="text-[18px] font-semibold text-[var(--color-darkest)]">
+                    Complete your electricity enrollment
+                  </p>
+                  <p className="text-[16px] text-[var(--color-dark)] mt-1">
+                    Click below to finalize your electricity service with your selected provider.
+                  </p>
+                  <a
+                    href={orderConfirmation.checkoutUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-3 px-5 py-3 bg-[var(--color-teal)] text-white text-[16px] font-semibold rounded-lg hover:bg-[var(--color-teal-dark)] transition-colors"
+                  >
+                    Complete enrollment
+                    <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* What happens next - Practical UI: Use proper numbered list semantics */}
           <div className="text-left">
             <h2 className="text-[22px] font-semibold text-[var(--color-darkest)] mb-4">
