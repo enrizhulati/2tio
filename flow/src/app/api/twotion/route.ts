@@ -2,12 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // 2TIO Consumer API
 const TWOTION_API = 'https://cp-2tio-consumer-api-node-dev-633383779286.us-central1.run.app/api/v1';
+const TWOTION_API_KEY = process.env.TWOTION_API_KEY || '';
+
 // ERCOT API (for Zillow usage data only)
 const ERCOT_API = 'https://ercot.api.comparepower.com';
 
 // Helper to get user ID from request headers or cookies
 function getUserId(request: NextRequest): string | null {
   return request.headers.get('x-user-id') || request.cookies.get('twotion-user-id')?.value || null;
+}
+
+// Helper to get 2TIO headers
+function getTwotionHeaders(userId?: string | null): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (TWOTION_API_KEY) {
+    headers['x-api-key'] = TWOTION_API_KEY;
+  }
+  if (userId) {
+    headers['x-user-id'] = userId;
+  }
+  return headers;
 }
 
 export async function GET(request: NextRequest) {
@@ -69,7 +83,7 @@ export async function GET(request: NextRequest) {
       if (zipCode) params.append('zipCode', zipCode);
 
       const response = await fetch(`${TWOTION_API}/users/get-esiid?${params}`, {
-        headers: { 'x-user-id': userId },
+        headers: getTwotionHeaders(userId),
       });
 
       if (!response.ok) throw new Error('Failed to get ESIID');
@@ -83,7 +97,9 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Zip code required' }, { status: 400 });
       }
 
-      const response = await fetch(`${TWOTION_API}/services?zipCode=${zipCode}`);
+      const response = await fetch(`${TWOTION_API}/services?zipCode=${zipCode}`, {
+        headers: getTwotionHeaders(),
+      });
       if (!response.ok) throw new Error('Failed to fetch services');
 
       const data = await response.json();
@@ -98,8 +114,16 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Zip code required' }, { status: 400 });
       }
 
-      const response = await fetch(`${TWOTION_API}/services/${serviceName}/plans?zipCode=${zipCode}`);
-      if (!response.ok) throw new Error('Failed to fetch plans');
+      const url = `${TWOTION_API}/services/${serviceName}/plans?zipCode=${zipCode}`;
+      const headers = getTwotionHeaders();
+
+      const response = await fetch(url, { headers });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Plans API error:', response.status, errorText);
+        throw new Error(`Failed to fetch plans: ${response.status}`);
+      }
 
       const data = await response.json();
       return NextResponse.json(data);
@@ -112,7 +136,7 @@ export async function GET(request: NextRequest) {
       }
 
       const response = await fetch(`${TWOTION_API}/cart`, {
-        headers: { 'x-user-id': userId },
+        headers: getTwotionHeaders(userId),
       });
 
       if (!response.ok) throw new Error('Failed to fetch cart');
@@ -127,7 +151,7 @@ export async function GET(request: NextRequest) {
       }
 
       const response = await fetch(`${TWOTION_API}/checkout/steps`, {
-        headers: { 'x-user-id': userId },
+        headers: getTwotionHeaders(userId),
       });
 
       if (!response.ok) throw new Error('Failed to fetch checkout steps');
@@ -172,6 +196,7 @@ export async function POST(request: NextRequest) {
     if (action === 'generate-user-id') {
       const response = await fetch(`${TWOTION_API}/users/generate-id`, {
         method: 'POST',
+        headers: getTwotionHeaders(),
       });
 
       if (!response.ok) throw new Error('Failed to generate user ID');
@@ -200,8 +225,8 @@ export async function POST(request: NextRequest) {
       const response = await fetch(`${TWOTION_API}/users/get-started`, {
         method: 'POST',
         headers: {
+          ...getTwotionHeaders(userId),
           'Content-Type': 'application/json',
-          'x-user-id': userId!,
         },
         body: JSON.stringify(body),
       });
@@ -215,8 +240,8 @@ export async function POST(request: NextRequest) {
       const response = await fetch(`${TWOTION_API}/cart/plans`, {
         method: 'POST',
         headers: {
+          ...getTwotionHeaders(userId),
           'Content-Type': 'application/json',
-          'x-user-id': userId!,
         },
         body: JSON.stringify(body),
       });
@@ -232,7 +257,7 @@ export async function POST(request: NextRequest) {
 
       const response = await fetch(`${TWOTION_API}/checkout/complete`, {
         method: 'POST',
-        headers: { 'x-user-id': userId! },
+        headers: getTwotionHeaders(userId),
         body: formData,
       });
 
@@ -269,7 +294,7 @@ export async function DELETE(request: NextRequest) {
 
       const response = await fetch(`${TWOTION_API}/cart/plans/${planId}`, {
         method: 'DELETE',
-        headers: { 'x-user-id': userId },
+        headers: getTwotionHeaders(userId),
       });
 
       if (!response.ok) throw new Error('Failed to remove from cart');

@@ -300,23 +300,26 @@ export async function getEsiid(address: {
 }
 
 // Cost Calculation Utilities
+// Note: API returns kWh1000 in cents (e.g., 9 = 9¢/kWh), uPrice is often 0
 
 export function calculateAnnualCost(
   usage: number[],
-  uPrice: number,
+  kWh1000: number,
   mPrice: number
 ): number {
-  const energyCost = usage.reduce((total, monthKwh) => total + (monthKwh * uPrice), 0);
+  // Convert kWh1000 from cents to dollars (divide by 100)
+  const ratePerKwh = kWh1000 / 100;
+  const energyCost = usage.reduce((total, monthKwh) => total + (monthKwh * ratePerKwh), 0);
   const baseFees = mPrice * 12;
   return energyCost + baseFees;
 }
 
 export function calculateMonthlyEstimate(
   usage: number[],
-  uPrice: number,
+  kWh1000: number,
   mPrice: number
 ): number {
-  return calculateAnnualCost(usage, uPrice, mPrice) / 12;
+  return calculateAnnualCost(usage, kWh1000, mPrice) / 12;
 }
 
 export function enrichPlansWithCosts(
@@ -325,8 +328,8 @@ export function enrichPlansWithCosts(
 ): TwotionPlan[] {
   return plans.map((plan) => ({
     ...plan,
-    annualCost: calculateAnnualCost(usage, plan.uPrice, plan.mPrice),
-    monthlyEstimate: calculateMonthlyEstimate(usage, plan.uPrice, plan.mPrice),
+    annualCost: calculateAnnualCost(usage, plan.kWh1000, plan.mPrice),
+    monthlyEstimate: calculateMonthlyEstimate(usage, plan.kWh1000, plan.mPrice),
   }));
 }
 

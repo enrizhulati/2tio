@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useFlowStore } from '@/store/flowStore';
-import { Button } from '@/components/ui';
+import { Button, UsageChart } from '@/components/ui';
 import { RadioGroup, RadioOption } from '@/components/ui/RadioGroup';
 import {
   ChevronLeft,
@@ -15,9 +15,100 @@ import {
   Star,
   Home,
   Loader2,
+  ShoppingCart,
 } from 'lucide-react';
 import { SERVICE_INFO, type ServiceType, type ServicePlan } from '@/types/flow';
 import { ServiceIcon } from '@/components/ui';
+
+// Cart summary component
+function CartSummary() {
+  const { selectedServices, selectedPlans, cart } = useFlowStore();
+
+  // Calculate total monthly estimate
+  const getMonthlyTotal = () => {
+    let total = 0;
+
+    // Water estimate
+    if (selectedServices.water) {
+      total += 55; // Midpoint of $45-65 estimate
+    }
+
+    // Electricity from cart or selected plan
+    if (selectedServices.electricity && selectedPlans.electricity) {
+      const estimate = selectedPlans.electricity.monthlyEstimate;
+      if (estimate) {
+        total += parseFloat(estimate.replace('$', ''));
+      }
+    }
+
+    // Internet
+    if (selectedServices.internet && selectedPlans.internet) {
+      const rate = selectedPlans.internet.rate;
+      if (rate) {
+        const match = rate.match(/\$?([\d.]+)/);
+        if (match) total += parseFloat(match[1]);
+      }
+    }
+
+    return total;
+  };
+
+  const selectedCount = Object.values(selectedServices).filter(Boolean).length;
+  const monthlyTotal = getMonthlyTotal();
+
+  if (selectedCount === 0) return null;
+
+  return (
+    <div className="p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)]">
+      <div className="flex items-center gap-2 mb-3">
+        <ShoppingCart className="w-4 h-4 text-[var(--color-teal)]" />
+        <span className="text-[14px] font-semibold text-[var(--color-darkest)]">
+          Your services
+        </span>
+      </div>
+
+      <div className="space-y-2">
+        {selectedServices.water && selectedPlans.water && (
+          <div className="flex justify-between text-[14px]">
+            <span className="text-[var(--color-dark)]">Water</span>
+            <span className="text-[var(--color-darkest)]">~$55/mo</span>
+          </div>
+        )}
+
+        {selectedServices.electricity && selectedPlans.electricity && (
+          <div className="flex justify-between text-[14px]">
+            <span className="text-[var(--color-dark)]">
+              {selectedPlans.electricity.provider}
+            </span>
+            <span className="text-[var(--color-darkest)]">
+              {selectedPlans.electricity.monthlyEstimate || selectedPlans.electricity.rate}/mo
+            </span>
+          </div>
+        )}
+
+        {selectedServices.internet && selectedPlans.internet && (
+          <div className="flex justify-between text-[14px]">
+            <span className="text-[var(--color-dark)]">
+              {selectedPlans.internet.provider}
+            </span>
+            <span className="text-[var(--color-darkest)]">
+              {selectedPlans.internet.rate}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-3 pt-3 border-t border-[var(--color-light)] flex justify-between">
+        <span className="text-[14px] font-medium text-[var(--color-darkest)]">
+          Est. monthly total
+        </span>
+        <span className="text-[16px] font-bold text-[var(--color-teal)]">
+          ~${Math.round(monthlyTotal)}/mo
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function ServiceCard({
   type,
@@ -34,7 +125,8 @@ function ServiceCard({
   onExpand: () => void;
   isLoading?: boolean;
 }) {
-  const { availableServices, selectedPlans, selectPlan, homeDetails } = useFlowStore();
+  const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile } = useFlowStore();
+  const [showAllPlans, setShowAllPlans] = useState(false);
   const service = availableServices?.[type];
   const selectedPlan = selectedPlans[type];
 
@@ -42,6 +134,15 @@ function ServiceCard({
 
   const isWater = type === 'water';
   const plans = service.plans;
+
+  // Sort plans by annualCost (cheapest first) for electricity
+  const sortedPlans = useMemo(() => {
+    if (type !== 'electricity') return plans;
+    return [...plans].sort((a, b) => (a.annualCost || Infinity) - (b.annualCost || Infinity));
+  }, [plans, type]);
+
+  // Top 3 plans for initial display
+  const displayedPlans = showAllPlans ? sortedPlans : sortedPlans.slice(0, 3);
 
   // Upsell messages
   const upsellMessages = {
@@ -63,11 +164,17 @@ function ServiceCard({
             {/* Checkbox/indicator */}
             <div className="mt-1">
               {isWater ? (
-                // Water is always selected - show checkmark
-                <div className="w-6 h-6 rounded bg-[var(--color-teal)] flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
+                // Water is always selected - show locked checkmark with tooltip
+                <div className="relative group">
+                  <div className="w-6 h-6 rounded bg-[var(--color-teal)] flex items-center justify-center cursor-help">
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  {/* Tooltip */}
+                  <div className="absolute left-8 top-0 hidden group-hover:block z-10 w-48 p-2 bg-[var(--color-darkest)] text-white text-[14px] rounded-lg shadow-lg">
+                    Water service is required by your city when you move to a new address
+                  </div>
                 </div>
               ) : (
                 // Toggle for other services
@@ -98,6 +205,11 @@ function ServiceCard({
                 <h3 className="text-[22px] font-semibold text-[var(--color-darkest)]">
                   {SERVICE_INFO[type].label}
                 </h3>
+                {isWater && (
+                  <span className="text-[12px] font-medium text-[var(--color-dark)] bg-[var(--color-lightest)] px-2 py-0.5 rounded">
+                    Required
+                  </span>
+                )}
               </div>
 
               {isWater && service.provider ? (
@@ -209,46 +321,115 @@ function ServiceCard({
 
           {isExpanded && (
             <div className="px-4 pb-4 animate-slide-up">
+              {/* Usage Chart for electricity - show with real or default usage */}
+              {type === 'electricity' && sortedPlans.length > 0 && sortedPlans[0].annualCost && (
+                <UsageChart
+                  usage={usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900]}
+                  homeDetails={homeDetails?.foundDetails ? {
+                    squareFootage: homeDetails.squareFootage || 0,
+                    yearBuilt: homeDetails.yearBuilt || 0,
+                    annualKwh: (usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900]).reduce((sum, val) => sum + val, 0),
+                  } : undefined}
+                  className="mb-4"
+                />
+              )}
+
+              {/* Section header for electricity */}
+              {type === 'electricity' && sortedPlans.length > 0 && sortedPlans[0].annualCost && (
+                <p className="text-[14px] font-semibold text-[var(--color-darkest)] mb-3">
+                  Best plans for your home
+                </p>
+              )}
+
               <RadioGroup
                 name={`${type}-plan`}
                 value={selectedPlan?.id || ''}
                 onChange={(planId) => {
-                  const plan = plans.find((p) => p.id === planId);
+                  const plan = sortedPlans.find((p) => p.id === planId);
                   if (plan) selectPlan(type, plan);
                 }}
                 label="Choose your plan"
               >
-                {plans.map((plan) => (
-                  <RadioOption
-                    key={plan.id}
-                    value={plan.id}
-                    badge={plan.badge === 'RECOMMENDED' ? 'RECOMMENDED' : plan.badge === 'POPULAR' ? 'POPULAR' : plan.badge === 'GREEN' ? 'GREEN' : undefined}
-                    badgeVariant={plan.badge === 'GREEN' ? 'success' : 'default'}
-                    badgeReason={plan.badgeReason}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
-                          {plan.provider} - {plan.name}
+                {displayedPlans.map((plan, index) => {
+                  // For electricity: first plan is cheapest, show GREEN badge if renewable
+                  const isElectricity = type === 'electricity';
+                  const isCheapest = isElectricity && index === 0;
+                  const isGreen = plan.renewable || plan.badge === 'GREEN';
+
+                  let badge: 'CHEAPEST' | 'GREEN' | 'RECOMMENDED' | 'POPULAR' | undefined;
+                  let badgeVariant: 'default' | 'success' | 'cheapest' = 'default';
+                  let badgeReason: string | undefined;
+
+                  if (isCheapest) {
+                    badge = 'CHEAPEST';
+                    badgeVariant = 'cheapest';
+                    // Calculate savings vs next cheapest
+                    if (sortedPlans.length > 1 && sortedPlans[0].annualCost && sortedPlans[1].annualCost) {
+                      const savings = Math.round(sortedPlans[1].annualCost - sortedPlans[0].annualCost);
+                      if (savings > 0) {
+                        badgeReason = `Saves $${savings}/year vs next cheapest`;
+                      }
+                    }
+                  } else if (isGreen) {
+                    badge = 'GREEN';
+                    badgeVariant = 'success';
+                    badgeReason = '100% renewable energy';
+                  } else if (plan.badge === 'POPULAR') {
+                    badge = 'POPULAR';
+                  }
+
+                  return (
+                    <RadioOption
+                      key={plan.id}
+                      value={plan.id}
+                      badge={badge}
+                      badgeVariant={badgeVariant}
+                      badgeReason={badgeReason}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
+                            {plan.provider} - {plan.name}
+                          </p>
+                          {/* Show monthly estimate for electricity if available */}
+                          {isElectricity && plan.monthlyEstimate && (
+                            <p className="text-[16px] font-bold text-[var(--color-teal)]">
+                              {plan.monthlyEstimate}/mo
+                            </p>
+                          )}
+                        </div>
+                        <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                          {plan.rate} • {plan.contractLabel}
                         </p>
-                        {/* Show monthly estimate for electricity if available */}
-                        {type === 'electricity' && plan.monthlyEstimate && (
-                          <p className="text-[16px] font-bold text-[var(--color-teal)]">
-                            {plan.monthlyEstimate}/mo
+                        {/* Show WHY this is the cheapest plan - inline text */}
+                        {isCheapest && badgeReason && (
+                          <p className="text-[14px] text-[var(--color-teal)] font-medium mt-1">
+                            {badgeReason}
                           </p>
                         )}
                       </div>
-                      <p className="text-[14px] text-[var(--color-dark)] mt-1">
-                        {plan.rate} • {plan.contractLabel}
-                      </p>
-                    </div>
-                  </RadioOption>
-                ))}
+                    </RadioOption>
+                  );
+                })}
               </RadioGroup>
 
-              <button className="text-[var(--color-teal)] text-[14px] font-medium mt-3 hover:underline">
-                View all {plans.length} plans →
-              </button>
+              {/* View all plans button */}
+              {!showAllPlans && sortedPlans.length > 3 && (
+                <button
+                  onClick={() => setShowAllPlans(true)}
+                  className="text-[var(--color-teal)] text-[14px] font-medium mt-3 underline"
+                >
+                  View all {sortedPlans.length} plans →
+                </button>
+              )}
+              {showAllPlans && sortedPlans.length > 3 && (
+                <button
+                  onClick={() => setShowAllPlans(false)}
+                  className="text-[var(--color-dark)] text-[14px] font-medium mt-3 underline"
+                >
+                  Show fewer plans
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -319,6 +500,9 @@ function Step3Services() {
         />
       </div>
 
+      {/* Cart summary */}
+      <CartSummary />
+
       {/* Navigation buttons - Back always left */}
       <div className="pt-4 space-y-4">
         <div className="flex flex-col-reverse sm:flex-row gap-3">
@@ -343,7 +527,7 @@ function Step3Services() {
         {selectedCount < 3 && (
           <button
             onClick={handleAddAll}
-            className="w-full text-center text-[var(--color-teal)] text-[16px] font-medium hover:underline"
+            className="w-full text-center text-[var(--color-teal)] text-[16px] font-medium underline"
           >
             or Set up all three services
           </button>

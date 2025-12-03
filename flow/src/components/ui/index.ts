@@ -20,3 +20,6 @@ export { AddressAutocomplete } from './AddressAutocomplete';
 export type { AddressResult } from './AddressAutocomplete';
 
 export { ServiceIcon } from './ServiceIcon';
+
+export { UsageChart } from './UsageChart';
+export type { UsageChartProps } from './UsageChart';

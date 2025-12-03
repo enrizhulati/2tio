@@ -131,7 +131,7 @@ function FlowLayout({ children }: FlowLayoutProps) {
   return (
     <div className="min-h-screen flex">
       {/* Left Sidebar */}
-      <aside className="hidden lg:flex flex-col w-72 bg-[#F8F6F4] border-r border-[var(--color-light)]">
+      <aside className="hidden lg:flex flex-col w-72 bg-[var(--color-sidebar-bg)] border-r border-[var(--color-light)]">
         {/* Logo */}
         <div className="p-6 pb-8">
           <Logo />
@@ -155,13 +155,13 @@ function FlowLayout({ children }: FlowLayoutProps) {
             <span>256-bit encryption</span>
           </div>
           <div className="flex gap-3">
-            <a href="#" className="hover:text-[var(--color-teal)] transition-colors">
+            <a href="#" className="underline text-[var(--color-dark)] hover:text-[var(--color-teal)] transition-colors">
               Help
             </a>
-            <a href="#" className="hover:text-[var(--color-teal)] transition-colors">
+            <a href="#" className="underline text-[var(--color-dark)] hover:text-[var(--color-teal)] transition-colors">
               Privacy
             </a>
-            <a href="#" className="hover:text-[var(--color-teal)] transition-colors">
+            <a href="#" className="underline text-[var(--color-dark)] hover:text-[var(--color-teal)] transition-colors">
               Terms
             </a>
           </div>

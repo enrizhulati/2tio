@@ -112,6 +112,8 @@ const initialState = {
   // Electricity ESIID (fetched from ERCOT when address is entered)
   esiidMatches: [] as ESIID[],
   selectedEsiid: null as ESIID | null,
+  esiidSearchComplete: false, // True when ESIID search is done (show selection UI)
+  esiidConfirmed: false, // True after user confirms their address/ESIID
   usageProfile: null as UsageProfile | null,
   homeDetails: null as HomeDetails | null,
   isLoadingElectricity: false,
@@ -162,11 +164,12 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       const enrichedPlans = enrichPlansWithCosts(rawPlans, DEFAULT_USAGE);
 
       // Convert to ServicePlan format
+      // Note: API returns kWh1000 in cents (e.g., 9 = 9¢/kWh), uPrice is often 0
       const electricityPlans: ServicePlan[] = enrichedPlans.map((plan, index) => ({
         id: plan.id,
         provider: plan.vendorName,
         name: plan.name,
-        rate: `$${plan.uPrice.toFixed(3)}/kWh`,
+        rate: `$${(plan.kWh1000 / 100).toFixed(3)}/kWh`,
         rateType: 'flat' as const,
         contractMonths: plan.term,
         contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
@@ -465,7 +468,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   reset: () => set(initialState),
 
   // Electricity actions (ERCOT for Zillow data, will proxy through twotion route)
-  fetchESIIDs: async (address: string, zip: string) => {
+  // userUnit is passed explicitly to avoid race condition with state updates
+  fetchESIIDs: async (address: string, zip: string, userUnit?: string) => {
     set({ isLoadingElectricity: true });
 
     try {
@@ -477,21 +481,30 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
       const esiids: ESIID[] = await response.json();
 
-      // Extract unit from search address if present (e.g., "3031 Oliver St APT 1214" -> "1214")
-      const unitMatch = address.match(/APT\s+(\w+)/i);
-      const searchedUnit = unitMatch ? unitMatch[1].toUpperCase() : null;
+      // Extract digits only from userUnit (e.g., "1214" from "Apt 1214")
+      const normalizedUnit = userUnit?.replace(/\D/g, '') || null;
 
-      // Auto-select if:
-      // 1. Only one match, OR
-      // 2. User searched with a unit and the first result contains that unit
+      // Auto-select logic:
+      // 1. Only one match -> auto-select and confirm
+      // 2. Multiple matches + user specified unit -> find matching address_overflow
       let autoSelected: ESIID | null = null;
+      let shouldAutoConfirm = false;
+
       if (esiids.length === 1) {
         autoSelected = esiids[0];
-      } else if (searchedUnit && esiids.length > 0) {
-        // Check if first result matches the searched unit
-        const firstAddress = esiids[0].address.toUpperCase();
-        if (firstAddress.includes(`APT ${searchedUnit}`) || firstAddress.includes(`#${searchedUnit}`)) {
-          autoSelected = esiids[0];
+        shouldAutoConfirm = true;
+      } else if (normalizedUnit && esiids.length > 1) {
+        // Match user's unit against address field (e.g., "3031 OLIVER ST APT 1214")
+        // ERCOT stores apartment in address field, not address_overflow
+        autoSelected = esiids.find((e: ESIID) => {
+          // Extract apartment number from address (e.g., "APT 1214" -> "1214")
+          const aptMatch = e.address?.match(/APT\s*(\d+)/i);
+          const addressUnit = aptMatch ? aptMatch[1] : null;
+          return addressUnit === normalizedUnit;
+        }) || null;
+
+        if (autoSelected) {
+          shouldAutoConfirm = true;
         }
       }
 
@@ -499,22 +512,44 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         esiidMatches: esiids,
         isLoadingElectricity: false,
         selectedEsiid: autoSelected,
+        esiidSearchComplete: true,
+        esiidConfirmed: shouldAutoConfirm,
       });
 
-      // If auto-selected, fetch usage profile
-      if (autoSelected) {
-        await get().fetchUsageProfile();
+      // Auto-fetch usage profile if auto-confirmed
+      if (shouldAutoConfirm && autoSelected) {
+        get().fetchUsageProfile();
       }
     } catch (error) {
       console.error('Error fetching ESIIDs:', error);
-      set({ esiidMatches: [], isLoadingElectricity: false });
+      set({
+        esiidMatches: [],
+        isLoadingElectricity: false,
+        esiidSearchComplete: true,
+        esiidConfirmed: false,
+      });
     }
   },
 
   selectESIID: (esiid: ESIID) => {
     set({ selectedEsiid: esiid });
-    // Fetch usage profile for the selected ESIID
-    get().fetchUsageProfile();
+    // Don't auto-fetch usage profile - wait for confirmation
+  },
+
+  // User confirms their ESIID/address selection
+  confirmEsiid: async () => {
+    const { selectedEsiid, checkAvailability, fetchUsageProfile } = get();
+    if (!selectedEsiid) return;
+
+    set({ esiidConfirmed: true, isLoadingElectricity: true });
+
+    // Fetch usage profile and check availability in parallel
+    await Promise.all([
+      fetchUsageProfile(),
+      checkAvailability(),
+    ]);
+
+    set({ isLoadingElectricity: false });
   },
 
   fetchUsageProfile: async () => {
@@ -594,11 +629,12 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       const enrichedPlans = enrichPlansWithCosts(rawPlans, usage);
 
       // Convert to ServicePlan format for the store
+      // Note: API returns kWh1000 in cents (e.g., 9 = 9¢/kWh), uPrice is often 0
       const servicePlans: ServicePlan[] = enrichedPlans.map((plan, index) => ({
         id: plan.id,
         provider: plan.vendorName,
         name: plan.name,
-        rate: `$${plan.uPrice.toFixed(3)}/kWh`,
+        rate: `$${(plan.kWh1000 / 100).toFixed(3)}/kWh`,
         rateType: 'flat' as const,
         contractMonths: plan.term,
         contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
@@ -615,6 +651,9 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           : index === 0
           ? 'Best value based on your home\'s usage profile'
           : undefined,
+        // Enriched fields from usage calculation
+        annualCost: plan.annualCost,
+        renewable: plan.renewable,
       }));
 
       // Update available services with real electricity plans

@@ -17,9 +17,9 @@ const sizeMap = {
 };
 
 const colorMap = {
-  water: 'text-blue-500',
-  electricity: 'text-amber-500',
-  internet: 'text-violet-500',
+  water: 'text-[var(--color-water)]',
+  electricity: 'text-[var(--color-electricity)]',
+  internet: 'text-[var(--color-internet)]',
 };
 
 const iconMap = {

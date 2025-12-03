@@ -30,6 +30,14 @@
   --color-warning: #E67700;
   --color-warning-light: #FFF8E6;
 
+  /* Service Colors */
+  --color-water: #3B82F6;
+  --color-electricity: #F59E0B;
+  --color-internet: #8B5CF6;
+
+  /* Layout */
+  --color-sidebar-bg: #F8F6F4;
+
   /* Spacing (8pt base) */
   --space-xs: 8px;
   --space-s: 16px;
@@ -115,6 +123,7 @@ h3, .h3 {
   font-weight: 700;
   line-height: var(--line-height-heading);
   color: var(--color-darkest);
+  letter-spacing: -0.01em;
 }
 
 h4, .h4 {

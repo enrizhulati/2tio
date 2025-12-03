@@ -46,6 +46,23 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+// Extract apartment/unit from formatted address string
+// Handles: "Apt 123", "Unit 4B", "#5", "Suite 100", "Ste 200"
+function extractApartment(formattedAddress: string): { cleanAddress: string; unit?: string } {
+  // Pattern to match apartment indicators followed by unit number
+  // Must appear after street address (look for it after a comma or space)
+  const aptPattern = /,?\s*(apt\.?|apartment|unit|suite|ste\.?|#)\s*([a-z0-9-]+)/i;
+
+  const match = formattedAddress.match(aptPattern);
+  if (match) {
+    const unit = match[2];
+    const cleanAddress = formattedAddress.replace(match[0], '').trim();
+    return { cleanAddress, unit };
+  }
+
+  return { cleanAddress: formattedAddress };
+}
+
 export function AddressAutocomplete({
   onSelect,
   error,
@@ -136,12 +153,16 @@ export function AddressAutocomplete({
 
   const handleSelect = useCallback(
     (address: RadarAddress) => {
+      // Extract apartment/unit from the formatted address (e.g., "Apt 1214")
+      const { unit: detectedUnit } = extractApartment(address.formattedAddress);
+
       const street = address.number && address.street
         ? `${address.number} ${address.street}`
         : address.street || address.addressLabel || '';
 
       const result: AddressResult = {
         street,
+        unit: detectedUnit, // Now captures apartment from formatted address!
         city: address.city || '',
         state: address.stateCode || address.state || '',
         zip: address.postalCode || '',
@@ -260,7 +281,7 @@ export function AddressAutocomplete({
                 <p className="text-[15px] text-[var(--color-darkest)] font-medium">
                   {address.addressLabel || address.street}
                 </p>
-                <p className="text-[13px] text-[var(--color-dark)]">
+                <p className="text-[14px] text-[var(--color-dark)]">
                   {address.city}, {address.stateCode} {address.postalCode}
                 </p>
               </button>

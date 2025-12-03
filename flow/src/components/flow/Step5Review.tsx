@@ -157,7 +157,7 @@ function Step5Review() {
             Questions? Contact{' '}
             <a
               href="mailto:support@2tion.com"
-              className="text-[var(--color-teal)] hover:underline"
+              className="text-[var(--color-teal)] underline"
             >
               support@2tion.com
             </a>
@@ -170,7 +170,7 @@ function Step5Review() {
             </Button>
             <button
               onClick={handleDownloadPdf}
-              className="w-full flex items-center justify-center gap-2 text-[var(--color-teal)] text-[16px] font-medium hover:underline"
+              className="w-full flex items-center justify-center gap-2 text-[var(--color-teal)] text-[16px] font-medium underline"
             >
               <Download className="w-4 h-4" />
               Download confirmation (PDF)
@@ -215,7 +215,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(1)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium hover:underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
             >
               <Edit2 className="w-3 h-3" />
               Edit
@@ -241,7 +241,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(3)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium hover:underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
             >
               <Edit2 className="w-3 h-3" />
               Edit
@@ -262,7 +262,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(2)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium hover:underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
             >
               <Edit2 className="w-3 h-3" />
               Edit
@@ -330,7 +330,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(4)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium hover:underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
             >
               <Edit2 className="w-3 h-3" />
               Edit
@@ -356,10 +356,14 @@ function Step5Review() {
       {/* Legal */}
       <p className="text-[14px] text-[var(--color-dark)]">
         By placing this order, you agree to the{' '}
-        <a href="#" className="text-[var(--color-teal)] underline">
+        <a href="/terms" target="_blank" className="text-[var(--color-teal)] underline">
           Terms of Service
         </a>{' '}
-        and authorize us to set up utilities on your behalf.
+        and{' '}
+        <a href="/privacy" target="_blank" className="text-[var(--color-teal)] underline">
+          Privacy Policy
+        </a>
+        , and authorize us to set up utilities on your behalf.
       </p>
 
       {/* Navigation buttons - Back always left */}

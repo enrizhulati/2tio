@@ -46,7 +46,7 @@ interface RadioOptionProps {
   value: string;
   children: ReactNode;
   badge?: string;
-  badgeVariant?: 'default' | 'success';
+  badgeVariant?: 'default' | 'success' | 'cheapest';
   badgeReason?: string;
   className?: string;
 }
@@ -72,6 +72,7 @@ function RadioOption({
   const badgeStyles = {
     default: 'bg-[var(--color-teal-light)] text-[var(--color-teal)]',
     success: 'bg-[var(--color-success-light)] text-[var(--color-success)]',
+    cheapest: 'bg-[var(--color-teal)] text-white',
   };
 
   return (
@@ -144,7 +145,7 @@ function RadioOption({
 
             {/* Tooltip */}
             {showTooltip && badgeReason && (
-              <div className="absolute right-0 top-full mt-2 z-50 w-64 p-3 bg-[var(--color-darkest)] text-white text-[13px] font-normal normal-case tracking-normal rounded-lg shadow-lg">
+              <div className="absolute right-0 top-full mt-2 z-50 w-64 p-3 bg-[var(--color-darkest)] text-white text-[14px] font-normal normal-case tracking-normal rounded-lg shadow-lg">
                 <div className="absolute -top-1.5 right-4 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
                 <p className="relative z-10">{badgeReason}</p>
               </div>

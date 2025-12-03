@@ -40,6 +40,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           className="block text-[14px] font-semibold text-[var(--color-darkest)] tracking-wide mb-2"
         >
           {label}
+          {props.required && !optional && (
+            <span className="text-[var(--color-error)] ml-0.5" aria-hidden="true">*</span>
+          )}
           {optional && (
             <span className="text-[var(--color-dark)] font-normal ml-1">
               (optional)
@@ -49,13 +52,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
         {/* Hint - above field per Practical UI */}
         {hint && !error && (
-          <p className="text-[var(--color-dark)] text-[14px] mb-2">{hint}</p>
+          <p id={`${inputId}-hint`} className="text-[var(--color-dark)] text-[14px] mb-2">{hint}</p>
         )}
 
         {/* Error message - above field per Practical UI */}
         {error && (
-          <div className="flex items-center gap-2 text-[var(--color-error)] text-[14px] mb-2">
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <div id={`${inputId}-error`} className="flex items-center gap-2 text-[var(--color-error)] text-[14px] mb-2" role="alert">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
             <span>{error}</span>
           </div>
         )}
@@ -92,6 +95,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               ${className}
             `}
             aria-invalid={hasError}
+            aria-required={props.required}
             aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
             {...props}
           />

@@ -210,3 +210,99 @@ test.describe('Progress Indicator', () => {
     await expect(progressBar).toBeVisible();
   });
 });
+
+// Address Flow E2E Tests
+test.describe('Address Flow with Apartment', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('apartment address auto-matches and skips selection screen', async ({ page }) => {
+    // Type apartment address
+    const addressInput = page.locator('input[placeholder*="address" i]');
+    await addressInput.fill('3031 Oliver St Apt 1214');
+
+    // Wait for Radar autocomplete dropdown
+    await page.waitForSelector('button[role="option"]', { timeout: 5000 });
+
+    // Click the first suggestion (3031 Oliver St Apt 1214, Dallas, TX 75205)
+    const firstSuggestion = page.locator('button[role="option"]').first();
+    await firstSuggestion.click();
+
+    // Verify "Address selected" shows the apartment
+    await expect(page.locator('text=Address selected')).toBeVisible();
+    await expect(page.locator('text=3031 Oliver St, Apt 1214')).toBeVisible();
+
+    // Verify NO separate Apt/Suite field appears
+    await expect(page.locator('label:has-text("Apt/Suite")')).not.toBeVisible();
+
+    // Set move-in date
+    const dateInput = page.locator('input[type="date"]');
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 7);
+    const dateStr = futureDate.toISOString().split('T')[0];
+    await dateInput.fill(dateStr);
+
+    // Click "Check availability"
+    await page.click('button:has-text("Check availability")');
+
+    // Wait for API calls and verify we skip selection screen
+    // Should go directly to "Great news!" (auto-matched APT 1214)
+    await expect(page.locator('h1:has-text("Great news")')).toBeVisible({ timeout: 15000 });
+
+    // Verify we're NOT on the "Confirm your address" selection screen
+    await expect(page.locator('h1:has-text("Confirm your address")')).not.toBeVisible();
+  });
+
+  test('single-family home skips selection screen', async ({ page }) => {
+    // Use a known single-family home address
+    const addressInput = page.locator('input[placeholder*="address" i]');
+    await addressInput.fill('3414 Beverly Dr');
+
+    // Wait for autocomplete
+    await page.waitForSelector('button[role="option"]', { timeout: 5000 });
+
+    // Click suggestion for Highland Park
+    const hpSuggestion = page.locator('button[role="option"]:has-text("Highland Park")').first();
+    await hpSuggestion.click();
+
+    // Set move-in date
+    const dateInput = page.locator('input[type="date"]');
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 7);
+    await dateInput.fill(futureDate.toISOString().split('T')[0]);
+
+    // Click "Check availability"
+    await page.click('button:has-text("Check availability")');
+
+    // Single-family home should go directly to "Great news!"
+    await expect(page.locator('h1:has-text("Great news")')).toBeVisible({ timeout: 15000 });
+  });
+
+  test('apartment without unit shows selection screen', async ({ page }) => {
+    // Type apartment building without unit number
+    const addressInput = page.locator('input[placeholder*="address" i]');
+    await addressInput.fill('3031 Oliver St');
+
+    // Wait for autocomplete
+    await page.waitForSelector('button[role="option"]', { timeout: 5000 });
+
+    // Click suggestion (just the building, no apt)
+    const suggestion = page.locator('button[role="option"]:has-text("Dallas")').first();
+    await suggestion.click();
+
+    // Set move-in date
+    const dateInput = page.locator('input[type="date"]');
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 7);
+    await dateInput.fill(futureDate.toISOString().split('T')[0]);
+
+    // Click "Check availability"
+    await page.click('button:has-text("Check availability")');
+
+    // Should show selection screen since multiple units exist
+    await expect(page.locator('h1:has-text("Confirm your address")')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Select yours to continue')).toBeVisible();
+  });
+});

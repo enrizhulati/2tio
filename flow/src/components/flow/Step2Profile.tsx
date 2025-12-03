@@ -95,6 +95,7 @@ function Step2Profile() {
             onChange={(e) => setFirstName(e.target.value)}
             error={errors.firstName}
             autoComplete="given-name"
+            required
           />
           <Input
             label="Last name"
@@ -103,6 +104,7 @@ function Step2Profile() {
             onChange={(e) => setLastName(e.target.value)}
             error={errors.lastName}
             autoComplete="family-name"
+            required
           />
         </div>
 
@@ -116,6 +118,7 @@ function Step2Profile() {
           error={errors.email}
           leftIcon={<Mail className="w-5 h-5" />}
           autoComplete="email"
+          required
         />
 
         <Input
@@ -128,14 +131,20 @@ function Step2Profile() {
           error={errors.phone}
           leftIcon={<Phone className="w-5 h-5" />}
           autoComplete="tel"
+          required
         />
 
         {/* SMS opt-in */}
-        <Checkbox
-          label="Text me service updates and reminders"
-          checked={smsOptIn}
-          onChange={(e) => setSmsOptIn(e.target.checked)}
-        />
+        <div className="space-y-1">
+          <Checkbox
+            label="Text me service updates and reminders"
+            checked={smsOptIn}
+            onChange={(e) => setSmsOptIn(e.target.checked)}
+          />
+          <p className="text-[14px] text-[var(--color-medium)] ml-7">
+            You'll get setup confirmations, appointment reminders, and outage alerts. About 2-4 texts per month. You can opt out anytime.
+          </p>
+        </div>
       </div>
 
       {/* Navigation buttons - Back always left */}

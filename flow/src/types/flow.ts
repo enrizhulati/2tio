@@ -65,6 +65,9 @@ export interface ServicePlan {
   features: string[];
   badge?: 'RECOMMENDED' | 'POPULAR' | 'BEST_VALUE' | 'GREEN';
   badgeReason?: string;
+  // Enriched fields from usage profile calculation
+  annualCost?: number;
+  renewable?: boolean;
 }
 
 export interface ServiceAvailability {
@@ -176,6 +179,8 @@ export interface FlowState {
   // Electricity ESIID (fetched from ERCOT when address is entered)
   esiidMatches: ESIID[];
   selectedEsiid: ESIID | null;
+  esiidSearchComplete: boolean;
+  esiidConfirmed: boolean;
   usageProfile: UsageProfile | null;
   homeDetails: HomeDetails | null;
   isLoadingElectricity: boolean;
@@ -221,8 +226,9 @@ export interface FlowState {
   initializeUser: () => Promise<void>;
 
   // Electricity actions (ERCOT for Zillow data)
-  fetchESIIDs: (address: string, zip: string) => Promise<void>;
+  fetchESIIDs: (address: string, zip: string, userUnit?: string) => Promise<void>;
   selectESIID: (esiid: ESIID) => void;
+  confirmEsiid: () => Promise<void>;
   fetchUsageProfile: () => Promise<void>;
   fetchElectricityPlans: (zipCode: string) => Promise<void>;
 

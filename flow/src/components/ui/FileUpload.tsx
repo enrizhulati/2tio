@@ -122,7 +122,7 @@ function FileUpload({
                 style={{ width: `${document.progress || 0}%` }}
               />
             </div>
-            <span className="text-[12px] text-[var(--color-dark)] mt-1 block">
+            <span className="text-[14px] text-[var(--color-dark)] mt-1 block">
               {document.progress}%
             </span>
           </div>
@@ -135,7 +135,7 @@ function FileUpload({
                 <span className="text-[14px] text-[var(--color-darkest)] font-medium block">
                   {document.name}
                 </span>
-                <span className="text-[12px] text-[var(--color-dark)]">
+                <span className="text-[14px] text-[var(--color-dark)]">
                   {formatFileSize(document.size)} • Uploaded
                 </span>
               </div>
@@ -144,14 +144,15 @@ function FileUpload({
               type="button"
               onClick={onRemove}
               className="
-                p-2 rounded-lg
+                min-w-12 min-h-12 p-3 rounded-lg
+                flex items-center justify-center
                 text-[var(--color-dark)] hover:text-[var(--color-error)]
                 hover:bg-[var(--color-error-light)]
                 transition-all duration-150
               "
               aria-label="Remove file"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
         ) : (

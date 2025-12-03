@@ -46,13 +46,13 @@ function OrderDetailsModal({
         <div className="bg-[var(--color-lightest)] rounded-xl p-3 sm:p-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <div>
-              <p className="text-[12px] sm:text-[14px] text-[var(--color-dark)]">Order Number</p>
+              <p className="text-[14px] text-[var(--color-dark)]">Order Number</p>
               <p className="text-[16px] sm:text-[18px] font-bold text-[var(--color-darkest)]">
                 {orderConfirmation.orderId}
               </p>
             </div>
             <div className="sm:text-right">
-              <p className="text-[12px] sm:text-[14px] text-[var(--color-dark)]">Order Date</p>
+              <p className="text-[14px] text-[var(--color-dark)]">Order Date</p>
               <p className="text-[14px] sm:text-[16px] font-medium text-[var(--color-darkest)]">
                 {formatShortDate(new Date().toISOString())}
               </p>
@@ -107,12 +107,12 @@ function OrderDetailsModal({
             <p className="text-[14px] sm:text-[16px] font-medium text-[var(--color-darkest)]">
               {profile.firstName} {profile.lastName}
             </p>
-            <div className="flex items-center gap-2 text-[13px] sm:text-[14px] text-[var(--color-dark)]">
-              <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-[14px] text-[var(--color-dark)]">
+              <Mail className="w-4 h-4 flex-shrink-0" />
               <span className="truncate">{profile.email}</span>
             </div>
-            <div className="flex items-center gap-2 text-[13px] sm:text-[14px] text-[var(--color-dark)]">
-              <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-[14px] text-[var(--color-dark)]">
+              <Phone className="w-4 h-4 flex-shrink-0" />
               <span>{profile.phone}</span>
             </div>
           </div>
@@ -142,15 +142,15 @@ function OrderDetailsModal({
                         <p className="text-[14px] sm:text-[16px] font-semibold text-[var(--color-darkest)]">
                           {SERVICE_INFO[service.type].label}
                         </p>
-                        <p className="text-[13px] sm:text-[14px] text-[var(--color-dark)]">
+                        <p className="text-[14px] text-[var(--color-dark)]">
                           {service.provider}
                         </p>
                         {plan && (
                           <>
-                            <p className="text-[13px] sm:text-[14px] text-[var(--color-dark)] mt-1">
+                            <p className="text-[14px] text-[var(--color-dark)] mt-1">
                               {plan.name} - {plan.rate}
                             </p>
-                            <p className="text-[13px] sm:text-[14px] text-[var(--color-dark)]">
+                            <p className="text-[14px] text-[var(--color-dark)]">
                               {plan.contractLabel}
                             </p>
                           </>
@@ -168,7 +168,7 @@ function OrderDetailsModal({
                   {plan && plan.setupFee > 0 && (
                     <div className="mt-3 pt-3 border-t border-[var(--color-light)] flex items-center gap-2">
                       <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--color-dark)]" />
-                      <span className="text-[13px] sm:text-[14px] text-[var(--color-dark)]">
+                      <span className="text-[14px] text-[var(--color-dark)]">
                         Setup fee: ${plan.setupFee}
                       </span>
                     </div>
@@ -181,7 +181,7 @@ function OrderDetailsModal({
 
         {/* Footer note */}
         <div className="bg-[var(--color-teal-light)] rounded-xl p-3 sm:p-4">
-          <p className="text-[13px] sm:text-[14px] text-[var(--color-darkest)]">
+          <p className="text-[14px] text-[var(--color-darkest)]">
             You'll receive confirmation emails from each provider within 24 hours.
             Your services will be active on your move-in date.
           </p>
