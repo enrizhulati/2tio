@@ -293,8 +293,8 @@ function Step5Review() {
             </div>
           )}
 
-          {/* CP Checkout Link - for completing electric enrollment */}
-          {orderConfirmation.checkoutUrl && (
+          {/* CP Order Link - for completing electric enrollment */}
+          {orderConfirmation.cpOrderUrl && (
             <div className="p-5 rounded-xl bg-[var(--color-teal-light)] border-2 border-[var(--color-teal)]">
               <div className="flex items-start gap-3">
                 <ServiceIcon type="electricity" size="md" />
@@ -306,7 +306,7 @@ function Step5Review() {
                     Click below to finalize your electricity service with your selected provider.
                   </p>
                   <a
-                    href={orderConfirmation.checkoutUrl}
+                    href={orderConfirmation.cpOrderUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 mt-3 px-5 py-3 bg-[var(--color-teal)] text-white text-[16px] font-semibold rounded-lg hover:bg-[var(--color-teal-dark)] transition-colors"
