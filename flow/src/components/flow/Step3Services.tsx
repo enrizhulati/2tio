@@ -381,7 +381,9 @@ function ServiceCard({
                   </p>
                   {/* Rate explainer - Practical UI: Explain jargon, 14px min, 4.5:1 contrast */}
                   <p className="text-[16px] text-[var(--color-dark)] mt-1">
-                    Monthly estimates based on ~1,000 kWh/month (typical home usage)
+                    {homeDetails?.foundDetails
+                      ? `Monthly estimates based on your home's ~${Math.round((usageProfile?.usage || []).reduce((a, b) => a + b, 0) / 12).toLocaleString()} kWh/month`
+                      : 'Monthly estimates based on ~1,000 kWh/month (typical home usage)'}
                   </p>
                 </div>
               )}
@@ -483,7 +485,9 @@ function ServiceCard({
                               </span>
                             )}
                             {isElectricity && (
-                              <span className="text-[var(--color-dark)]"> est. for 1000 kWh</span>
+                              <span className="text-[var(--color-dark)]">
+                                {' '}est. for {Math.round((usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900]).reduce((a, b) => a + b, 0) / 12).toLocaleString()} kWh
+                              </span>
                             )}
                             {isInternet && plan.downloadSpeed && (
                               <span className="text-[var(--color-dark)]">

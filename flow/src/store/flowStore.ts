@@ -773,11 +773,10 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
     set({ esiidConfirmed: true, isLoadingElectricity: true });
 
-    // Fetch usage profile and check availability in parallel
-    await Promise.all([
-      fetchUsageProfile(),
-      checkAvailability(),
-    ]);
+    // Fetch usage profile FIRST, then check availability with real usage data
+    // This ensures electricity plans are sorted by actual estimated cost
+    await fetchUsageProfile();
+    await checkAvailability();
 
     set({ isLoadingElectricity: false });
   },
