@@ -266,7 +266,7 @@ export function AddressAutocomplete({
                 onClick={() => handleSelect(address)}
                 onMouseEnter={() => setHighlightedIndex(index)}
                 className={`
-                  w-full px-4 py-3 text-left
+                  w-full px-4 py-4 text-left min-h-[56px]
                   transition-colors duration-100
                   ${
                     index === highlightedIndex
