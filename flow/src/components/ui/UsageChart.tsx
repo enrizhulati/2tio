@@ -93,7 +93,7 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
           >
             <div className="absolute -top-1.5 right-4 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
             <p className="relative z-10">
-              Based on your home&apos;s size and age. Actual usage may vary.
+              No usage history at this address yet. Estimated from home size and age to help you compare plans.
             </p>
           </div>
         )}
