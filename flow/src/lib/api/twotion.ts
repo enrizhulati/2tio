@@ -207,9 +207,33 @@ export async function getServices(zipCode: string): Promise<TwotionService[]> {
 }
 
 export async function getPlans(serviceName: string, zipCode: string): Promise<TwotionPlan[]> {
-  const response = await fetch(`/api/twotion?action=plans&service=${serviceName}&zipCode=${zipCode}`);
-  if (!response.ok) throw new Error('Failed to fetch plans');
-  return response.json();
+  // Retry logic for rate limiting (429 errors)
+  const maxRetries = 3;
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    if (attempt > 0) {
+      // Exponential backoff: 1s, 2s, 4s
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+    }
+
+    const response = await fetch(`/api/twotion?action=plans&service=${serviceName}&zipCode=${zipCode}`);
+
+    if (response.ok) {
+      return response.json();
+    }
+
+    // If rate limited (429), retry
+    if (response.status === 429 && attempt < maxRetries - 1) {
+      console.warn(`Rate limited fetching ${serviceName} plans, retrying (attempt ${attempt + 1}/${maxRetries})...`);
+      continue;
+    }
+
+    // Other errors or final retry failed
+    lastError = new Error(`Failed to fetch ${serviceName} plans: ${response.status}`);
+  }
+
+  throw lastError || new Error('Failed to fetch plans');
 }
 
 export async function getCart(): Promise<Cart> {

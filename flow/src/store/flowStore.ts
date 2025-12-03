@@ -156,10 +156,20 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       const zipCode = address?.zip || '75205';
 
       // Fetch all service plans in parallel from 2TIO API
+      // Each has catch handler to prevent rate limiting errors from killing all services
       const [rawElectricityPlans, rawInternetPlans, rawWaterPlans] = await Promise.all([
-        getPlans('electricity', zipCode) as Promise<TwotionPlan[]>,
-        getPlans('internet', zipCode).catch(() => [] as RawInternetPlan[]) as Promise<RawInternetPlan[]>,
-        getPlans('water', zipCode).catch(() => [] as RawWaterPlan[]) as Promise<RawWaterPlan[]>,
+        getPlans('electricity', zipCode).catch((err) => {
+          console.error('Error fetching electricity plans:', err);
+          return [] as TwotionPlan[];
+        }),
+        getPlans('internet', zipCode).catch((err) => {
+          console.error('Error fetching internet plans:', err);
+          return [] as RawInternetPlan[];
+        }),
+        getPlans('water', zipCode).catch((err) => {
+          console.error('Error fetching water plans:', err);
+          return [] as RawWaterPlan[];
+        }),
       ]);
 
       // Enrich electricity plans with default usage cost estimates

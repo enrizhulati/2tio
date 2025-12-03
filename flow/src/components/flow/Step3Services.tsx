@@ -416,7 +416,7 @@ function ServiceCard({
                             {isElectricity && plan.monthlyEstimate ? (
                               <span className="text-[20px] font-bold text-[var(--color-darkest)]">
                                 {plan.monthlyEstimate}
-                                <span className="text-[14px] font-normal text-[var(--color-dark)]">/mo</span>
+                                <span className="text-[16px] font-normal text-[var(--color-dark)]">/mo</span>
                               </span>
                             ) : isInternet && plan.rate ? (
                               <span className="text-[20px] font-bold text-[var(--color-darkest)]">
@@ -452,14 +452,14 @@ function ServiceCard({
                             <p className="text-[16px] font-medium text-[var(--color-darkest)]">
                               {plan.provider}
                             </p>
-                            <p className="text-[14px] text-[var(--color-dark)]">
+                            <p className="text-[16px] text-[var(--color-dark)]">
                               {plan.name}
                             </p>
                           </div>
                         </div>
 
                         {/* Row 3: Key details - single line with separators */}
-                        <div className="text-[14px] text-[var(--color-dark)]">
+                        <div className="text-[16px] text-[var(--color-dark)]">
                           <span>{plan.rate}</span>
                           <span className="mx-1.5">•</span>
                           <span>{plan.contractLabel}</span>
@@ -476,7 +476,7 @@ function ServiceCard({
                         </div>
 
                         {/* Row 4: Secondary details */}
-                        <div className="space-y-1 text-[14px]">
+                        <div className="space-y-1 text-[16px]">
                           {/* Cancellation fee for electricity */}
                           {isElectricity && plan.cancellationFee && plan.cancellationFee > 0 && (
                             <p className="text-[var(--color-dark)]">
