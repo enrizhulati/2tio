@@ -88,8 +88,8 @@ function RadioOption({
   return (
     <label
       className={`
-        block relative cursor-pointer
-        rounded-lg border-2 overflow-hidden
+        block cursor-pointer
+        rounded-lg border-2
         transition-all duration-150
         has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--color-teal)] has-[:focus-visible]:ring-offset-2
         ${
@@ -109,29 +109,40 @@ function RadioOption({
         className="sr-only peer"
       />
 
-      {/* Header banner for badge - full width like reference */}
+      {/* Header banner for badge - full width with optional tooltip */}
       {badge && (
         <div
           className={`
-            w-full px-3 py-1.5 text-center
+            relative w-full px-3 py-1.5 text-center rounded-t-md
             text-[14px] font-bold
             ${bannerStyles[badgeVariant]}
           `}
-          onMouseEnter={() => badgeReason && setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (badgeReason) setShowTooltip(!showTooltip);
-          }}
         >
-          {badgeText[badge as keyof typeof badgeText] || badge}
-          {badgeReason && <Info className="w-3.5 h-3.5 inline ml-1 -mt-0.5" aria-hidden="true" />}
+          <span>{badgeText[badge as keyof typeof badgeText] || badge}</span>
+          {badgeReason && (
+            <button
+              type="button"
+              className="inline-flex items-center ml-1.5 align-middle"
+              onMouseEnter={() => setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowTooltip(!showTooltip);
+              }}
+              aria-label="More info"
+            >
+              <Info className="w-4 h-4" aria-hidden="true" />
+            </button>
+          )}
 
-          {/* Tooltip */}
+          {/* Tooltip - positioned BELOW banner but OUTSIDE card overflow */}
           {showTooltip && badgeReason && (
-            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 w-64 p-3 bg-[var(--color-darkest)] text-white text-[14px] font-normal text-left rounded-lg shadow-lg">
-              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
+            <div
+              className="absolute left-4 right-4 top-full mt-1 z-[100] p-3 bg-[var(--color-darkest)] text-white text-[14px] font-normal text-left rounded-lg shadow-xl"
+              style={{ position: 'absolute' }}
+            >
+              <div className="absolute -top-1.5 left-6 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
               <p className="relative z-10">{badgeReason}</p>
             </div>
           )}

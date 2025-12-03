@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -26,6 +26,8 @@ const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 const SUMMER_MONTHS = [5, 6, 7]; // June, July, August (0-indexed)
 
 function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
+  const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+
   // Transform usage array into chart data
   const chartData = useMemo(() => {
     return usage.map((kWh, index) => ({
@@ -64,24 +66,34 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
   };
 
   return (
-    <div className={`p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)] overflow-hidden ${className}`}>
+    <div className={`p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)] ${className}`}>
       {/* Header with info tooltip */}
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-3 relative">
         <Home className="w-4 h-4 text-[var(--color-teal)]" aria-hidden="true" />
         <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
           Estimated Usage Profile
         </span>
-        {/* Info tooltip */}
-        <div className="relative group">
-          <Info
-            className="w-4 h-4 text-[var(--color-dark)] cursor-help"
-            aria-label="How we estimate your usage"
-          />
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block z-20 w-56 p-3 bg-[var(--color-darkest)] text-white text-[14px] rounded-lg shadow-lg leading-snug">
-            Based on your home's size and age, we estimate monthly electricity usage. Actual usage may vary.
-            <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-[var(--color-darkest)]" />
+        {/* Info tooltip - click/tap to show on mobile */}
+        <button
+          type="button"
+          onClick={() => setShowInfoTooltip(!showInfoTooltip)}
+          onMouseEnter={() => setShowInfoTooltip(true)}
+          onMouseLeave={() => setShowInfoTooltip(false)}
+          className="p-1 -m-1"
+          aria-label="How we estimate your usage"
+        >
+          <Info className="w-4 h-4 text-[var(--color-dark)]" aria-hidden="true" />
+        </button>
+
+        {/* Tooltip - positioned below on right side, high z-index */}
+        {showInfoTooltip && (
+          <div className="absolute right-0 top-full mt-2 z-[100] w-64 p-3 bg-[var(--color-darkest)] text-white text-[14px] rounded-lg shadow-xl leading-snug">
+            <div className="absolute -top-1.5 right-4 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
+            <p className="relative z-10">
+              Based on your home&apos;s size and age, we estimate monthly electricity usage. Actual usage may vary.
+            </p>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Chart - use 99% width to fix Recharts ResponsiveContainer bug */}
