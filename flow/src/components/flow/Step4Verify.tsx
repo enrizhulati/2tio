@@ -26,7 +26,7 @@ function QuestionInput({
       <div className="space-y-1.5">
         <label
           htmlFor={selectId}
-          className="block text-[16px] font-medium text-[var(--color-darkest)]"
+          className="block text-[16px] font-semibold text-[var(--color-darkest)] tracking-wide"
         >
           {question.question}
           {question.required && <span className="text-[var(--color-error)]"> *</span>}
@@ -98,7 +98,7 @@ function QuestionInput({
       <div className="space-y-2 max-w-[240px]">
         <label
           htmlFor={inputId}
-          className="block text-[16px] font-semibold text-[var(--color-darkest)]"
+          className="block text-[16px] font-semibold text-[var(--color-darkest)] tracking-wide"
         >
           {question.question}
           {question.required && <span className="text-[var(--color-error)]"> *</span>}
