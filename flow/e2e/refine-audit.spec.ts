@@ -63,7 +63,7 @@ test('Capture all screens for refinement audit', async ({ page }) => {
   await page.screenshot({ path: 'e2e/audit/step2-plans-expanded.png', fullPage: true });
 
   // Continue to profile
-  await page.getByRole('button', { name: /continue with/i }).click();
+  await page.getByRole('button', { name: /next: your details/i }).click();
   await page.waitForTimeout(1000);
 
   // Step 3: Profile

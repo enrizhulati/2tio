@@ -202,6 +202,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           cancellationFee: rawPlan?.cancellationFee,
           renewable: plan.renewable,
           renewablePercent: rawPlan?.renewablePercent,
+          // Calculated cost fields from enrichment
+          annualCost: plan.annualCost,
         };
       });
 
