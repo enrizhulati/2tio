@@ -61,11 +61,11 @@ export function UsageSlider({
     onChange(presetValue);
   }, [onChange]);
 
-  // Determine reset target: home estimate if available, otherwise default
-  const resetTarget = hasHomeData && originalEstimate ? originalEstimate : DEFAULT_USAGE;
-  const resetLabel = hasHomeData && originalEstimate
-    ? `Reset to home estimate (${originalEstimate.toLocaleString()} kWh/mo)`
-    : `Reset to default (${DEFAULT_USAGE.toLocaleString()} kWh/mo)`;
+  // Determine reset target: always use original estimate if available
+  const resetTarget = originalEstimate || DEFAULT_USAGE;
+  const resetLabel = hasHomeData
+    ? `Reset to home estimate (${resetTarget.toLocaleString()} kWh/mo)`
+    : `Reset to initial estimate (${resetTarget.toLocaleString()} kWh/mo)`;
 
   // Handle reset to original estimate or default
   const handleReset = useCallback(() => {

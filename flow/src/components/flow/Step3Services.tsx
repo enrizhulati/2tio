@@ -184,7 +184,16 @@ function ServiceCard({
   // Sort plans by annualCost (cheapest first) for electricity
   const sortedPlans = useMemo(() => {
     if (type !== 'electricity') return plans;
-    return [...plans].sort((a, b) => (a.annualCost || Infinity) - (b.annualCost || Infinity));
+    const sorted = [...plans].sort((a, b) => (a.annualCost || Infinity) - (b.annualCost || Infinity));
+    // Debug: Log when plans are sorted
+    if (sorted.length > 0) {
+      console.log('[sortedPlans] Top 3 plans after sort:', sorted.slice(0, 3).map(p => ({
+        name: p.name,
+        provider: p.provider,
+        annualCost: p.annualCost,
+      })));
+    }
+    return sorted;
   }, [plans, type]);
 
   // Top 3 plans for initial display
@@ -399,7 +408,7 @@ function ServiceCard({
                 <UsageSlider
                   value={Math.round((usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900]).reduce((a, b) => a + b, 0) / 12)}
                   onChange={(monthlyKwh) => updateMonthlyUsage(monthlyKwh)}
-                  originalEstimate={homeDetails?.foundDetails ? originalEstimate : undefined}
+                  originalEstimate={originalEstimate}
                   hasHomeData={homeDetails?.foundDetails || false}
                   isLoading={isLoadingElectricity}
                   className="mb-4"
