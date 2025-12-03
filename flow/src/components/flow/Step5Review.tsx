@@ -206,7 +206,7 @@ function Step5Review() {
 
           {/* Heading */}
           <div>
-            <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
+            <h1 className="text-[32px] sm:text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
               You're all set!
             </h1>
             <p className="text-[18px] text-[var(--color-dark)]">
@@ -379,7 +379,7 @@ function Step5Review() {
     <div className="space-y-8">
       {/* Heading */}
       <div>
-        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
+        <h1 className="text-[32px] sm:text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
           Review your order
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">

@@ -245,7 +245,7 @@ function Step1Address() {
         {/* Heading */}
         {/* Practical UI: Front-load important info, be concise */}
         <div className="text-center">
-          <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
+          <h1 className="text-[32px] sm:text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
             Which unit is yours?
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
@@ -357,7 +357,7 @@ function Step1Address() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--color-coral-light)] flex items-center justify-center">
             <AlertCircle className="w-8 h-8 text-[var(--color-coral)]" aria-hidden="true" />
           </div>
-          <h1 className="text-[35px] font-bold text-[var(--color-darkest)] leading-[1.2] tracking-tight mb-3">
+          <h1 className="text-[28px] sm:text-[35px] font-bold text-[var(--color-darkest)] leading-[1.2] tracking-tight mb-3">
             We couldn't verify this address
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
@@ -409,7 +409,7 @@ function Step1Address() {
       <div className="space-y-8">
         {/* Success heading */}
         <div className="text-center">
-          <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
+          <h1 className="text-[32px] sm:text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
             Great news!
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
@@ -563,7 +563,7 @@ function Step1Address() {
     <div className="space-y-8">
       {/* Heading - centered */}
       <div className="text-center">
-        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
+        <h1 className="text-[32px] sm:text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
           Where are you moving?
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">
