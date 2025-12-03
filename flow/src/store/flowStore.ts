@@ -411,15 +411,24 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       delete newSelectedPlans[service];
     }
 
+    // Save current scroll position before state update
+    const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+
     set({
       selectedServices: {
         ...selectedServices,
         [service]: isNowSelected,
       },
       selectedPlans: newSelectedPlans,
-      // Don't auto-expand when adding - let user click "View plans" if they want to change
-      expandedService: null,
+      expandedService: isNowSelected ? service : null,
     });
+
+    // Restore scroll position after state update to prevent jumping
+    if (typeof window !== 'undefined') {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollY);
+      });
+    }
   },
 
   selectPlan: async (service: ServiceType, plan: ServicePlan) => {
