@@ -471,7 +471,7 @@ function Step1Address() {
 
         {/* Available services - show what's possible, not what's selected */}
         <div>
-          <h2 className="text-[20px] font-semibold text-[var(--color-darkest)] mb-2">
+          <h2 className="text-[22px] font-semibold text-[var(--color-darkest)] mb-2">
             Services you can set up
           </h2>
           <p className="text-[16px] text-[var(--color-dark)] mb-4">

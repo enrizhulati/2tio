@@ -143,7 +143,7 @@ test.describe('Desktop Layout', () => {
       test.skip();
     }
     const sidebar = page.locator('aside');
-    await expect(sidebar.locator('text=Your address')).toBeVisible();
+    await expect(sidebar.locator('text=Your home')).toBeVisible();
     await expect(sidebar.locator('text=Services')).toBeVisible();
     await expect(sidebar.locator('text=Your details')).toBeVisible();
     await expect(sidebar.locator('text=Verify')).toBeVisible();

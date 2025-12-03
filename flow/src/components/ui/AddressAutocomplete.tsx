@@ -290,7 +290,7 @@ export function AddressAutocomplete({
                 role="option"
                 aria-selected={index === highlightedIndex}
               >
-                <p className="text-[15px] text-[var(--color-darkest)] font-medium">
+                <p className="text-[16px] text-[var(--color-darkest)] font-medium">
                   {formatDisplayAddress(address)}
                 </p>
                 <p className="text-[16px] text-[var(--color-dark)]">
