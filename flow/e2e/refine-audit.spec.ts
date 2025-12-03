@@ -3,7 +3,7 @@ import { test } from '@playwright/test';
 test('Capture all screens for refinement audit', async ({ page }) => {
   test.setTimeout(120000);
 
-  await page.goto('http://127.0.0.1:3002');
+  await page.goto('/');
   await page.waitForLoadState('networkidle');
 
   // Step 1: Initial
