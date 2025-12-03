@@ -38,6 +38,7 @@ export interface TwotionPlan {
   vendorName: string;
   uPrice: number;      // Price per kWh
   mPrice: number;      // Monthly base fee
+  price?: number;      // Alternative price field (internet plans)
   kWh1000: number;     // Price at 1000 kWh (for comparison)
   term: number;        // Contract length in months
   cancellationFee: number;
@@ -46,6 +47,8 @@ export interface TwotionPlan {
   bulletPoint1?: string;
   bulletPoint2?: string;
   bulletPoint3?: string;
+  bulletPoint4?: string;
+  bulletPoint5?: string;
   logo?: string;
   // Calculated fields (added by client)
   annualCost?: number;

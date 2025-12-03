@@ -219,77 +219,79 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
       // Convert internet plans to ServicePlan format with all API fields
       const internetPlans: ServicePlan[] = rawInternetPlans.map((plan, index) => {
-        const monthlyPrice = plan.uPrice || plan.mPrice || plan.price || 0;
+        const rawPlan = plan as RawServicePlan;
+        const monthlyPrice = rawPlan.uPrice || rawPlan.mPrice || rawPlan.price || 0;
         return {
-          id: plan.id,
-          provider: plan.vendorName,
-          name: plan.name,
+          id: rawPlan.id,
+          provider: rawPlan.vendorName,
+          name: rawPlan.name,
           rate: monthlyPrice > 0 ? `$${monthlyPrice.toFixed(2)}/mo` : 'Contact for pricing',
           rateType: 'flat' as const,
-          contractMonths: plan.term || 0,
-          contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
+          contractMonths: rawPlan.term || 0,
+          contractLabel: rawPlan.term > 0 ? `${rawPlan.term} month contract` : 'No contract',
           setupFee: 0,
           monthlyEstimate: monthlyPrice > 0 ? `$${Math.round(monthlyPrice)}` : undefined,
           features: [
-            plan.bulletPoint1,
-            plan.bulletPoint2,
-            plan.bulletPoint3,
-            plan.bulletPoint4,
-            plan.bulletPoint5,
+            rawPlan.bulletPoint1,
+            rawPlan.bulletPoint2,
+            rawPlan.bulletPoint3,
+            rawPlan.bulletPoint4,
+            rawPlan.bulletPoint5,
           ].filter(Boolean) as string[],
           badge: index === 0 ? 'RECOMMENDED' as const : undefined,
           badgeReason: index === 0 ? 'Best value for your area' : undefined,
           // New fields from 2TIO API
-          logo: plan.logo,
-          leadTime: plan.leadTime,
-          vendorPhone: plan.vendorPhone || plan.callCenterPhone,
-          vendorUrl: plan.vendorUrl,
-          shortDescription: plan.shortDescription,
-          longDescription: plan.longDescription,
-          serviceName: plan.serviceName,
-          cancellationFee: plan.cancellationFee,
-          renewable: plan.renewable,
-          renewablePercent: plan.renewablePercent,
+          logo: rawPlan.logo,
+          leadTime: rawPlan.leadTime,
+          vendorPhone: rawPlan.vendorPhone || rawPlan.callCenterPhone,
+          vendorUrl: rawPlan.vendorUrl,
+          shortDescription: rawPlan.shortDescription,
+          longDescription: rawPlan.longDescription,
+          serviceName: rawPlan.serviceName,
+          cancellationFee: rawPlan.cancellationFee,
+          renewable: rawPlan.renewable,
+          renewablePercent: rawPlan.renewablePercent,
           // Internet-specific fields
-          downloadSpeed: plan.downloadSpeed,
-          uploadSpeed: plan.uploadSpeed,
-          dataCapGB: plan.dataCapGB,
+          downloadSpeed: rawPlan.downloadSpeed,
+          uploadSpeed: rawPlan.uploadSpeed,
+          dataCapGB: rawPlan.dataCapGB,
         };
       });
 
       // Convert water plans to ServicePlan format with all API fields
       const waterPlans: ServicePlan[] = rawWaterPlans.map((plan, index) => {
-        const monthlyPrice = plan.mPrice || plan.uPrice || plan.price || 0;
+        const rawPlan = plan as RawServicePlan;
+        const monthlyPrice = rawPlan.mPrice || rawPlan.uPrice || rawPlan.price || 0;
         return {
-          id: plan.id,
-          provider: plan.vendorName,
-          name: plan.name,
+          id: rawPlan.id,
+          provider: rawPlan.vendorName,
+          name: rawPlan.name,
           rate: monthlyPrice > 0 ? `$${monthlyPrice.toFixed(2)}/mo base` : 'Usage-based',
           rateType: 'tiered' as const,
-          contractMonths: plan.term || 0,
+          contractMonths: rawPlan.term || 0,
           contractLabel: 'No contract',
           setupFee: 0,
           monthlyEstimate: monthlyPrice > 0 ? `$${Math.round(monthlyPrice)}+` : undefined,
           features: [
-            plan.bulletPoint1,
-            plan.bulletPoint2,
-            plan.bulletPoint3,
-            plan.bulletPoint4,
-            plan.bulletPoint5,
+            rawPlan.bulletPoint1,
+            rawPlan.bulletPoint2,
+            rawPlan.bulletPoint3,
+            rawPlan.bulletPoint4,
+            rawPlan.bulletPoint5,
           ].filter(Boolean) as string[],
           badge: index === 0 ? 'RECOMMENDED' as const : undefined,
           badgeReason: index === 0 ? 'Your local water utility' : undefined,
           // New fields from 2TIO API
-          logo: plan.logo,
-          leadTime: plan.leadTime,
-          vendorPhone: plan.vendorPhone || plan.callCenterPhone,
-          vendorUrl: plan.vendorUrl,
-          shortDescription: plan.shortDescription,
-          longDescription: plan.longDescription,
-          serviceName: plan.serviceName,
-          cancellationFee: plan.cancellationFee,
-          renewable: plan.renewable,
-          renewablePercent: plan.renewablePercent,
+          logo: rawPlan.logo,
+          leadTime: rawPlan.leadTime,
+          vendorPhone: rawPlan.vendorPhone || rawPlan.callCenterPhone,
+          vendorUrl: rawPlan.vendorUrl,
+          shortDescription: rawPlan.shortDescription,
+          longDescription: rawPlan.longDescription,
+          serviceName: rawPlan.serviceName,
+          cancellationFee: rawPlan.cancellationFee,
+          renewable: rawPlan.renewable,
+          renewablePercent: rawPlan.renewablePercent,
         };
       });
 
