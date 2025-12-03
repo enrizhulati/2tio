@@ -633,6 +633,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         depositReason: apiResponse.depositReason,
         depositServiceName: apiResponse.depositServiceName,
         depositVendorName: apiResponse.depositVendorName,
+        // CP checkout URL for completing electric enrollment (redirects to ComparePower.com)
+        checkoutUrl: apiResponse.checkoutUrl,
       };
 
       set({

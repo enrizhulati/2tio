@@ -149,6 +149,8 @@ export interface OrderConfirmation {
   depositReason?: string;
   depositServiceName?: string;  // Which service requires deposit
   depositVendorName?: string;   // Which vendor requires deposit
+  // CP checkout URL for completing electric enrollment (redirects to ComparePower.com)
+  checkoutUrl?: string;
 }
 
 export type FlowStep = 1 | 2 | 3 | 4 | 5;
