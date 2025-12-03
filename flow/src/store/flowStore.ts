@@ -938,6 +938,38 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     }
   },
 
+  // Update monthly usage estimate and recalculate plans
+  updateMonthlyUsage: async (monthlyKwh: number) => {
+    const { address, usageProfile } = get();
+    if (!address?.zip) return;
+
+    // Apply Texas seasonal pattern to monthly average
+    // Summer months (Jun-Sep) are ~40% higher, winter/spring are ~20% lower
+    const seasonalMultipliers = [0.85, 0.80, 0.85, 0.95, 1.10, 1.30, 1.40, 1.40, 1.20, 1.00, 0.90, 0.85];
+    const usage = seasonalMultipliers.map(m => Math.round(monthlyKwh * m));
+    const annualKwh = usage.reduce((sum, val) => sum + val, 0);
+
+    // Update usage profile with new estimates
+    set({
+      usageProfile: {
+        usage,
+        home_age: usageProfile?.home_age || 0,
+        square_footage: usageProfile?.square_footage || 0,
+        found_home_details: false, // User-adjusted, not from Zillow
+      },
+      homeDetails: {
+        squareFootage: usageProfile?.square_footage || 0,
+        homeAge: usageProfile?.home_age || 0,
+        yearBuilt: 0,
+        annualKwh,
+        foundDetails: false, // User-adjusted
+      },
+    });
+
+    // Refetch plans with new usage
+    await get().fetchElectricityPlans(address.zip);
+  },
+
   // 2TIO User actions
   initializeUser: async () => {
     // Check if we already have a user ID

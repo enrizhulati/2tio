@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useState, useMemo } from 'react';
 import { useFlowStore } from '@/store/flowStore';
-import { Button, UsageChart } from '@/components/ui';
+import { Button, UsageChart, UsageSlider } from '@/components/ui';
 import { RadioGroup, RadioOption } from '@/components/ui/RadioGroup';
 import {
   ChevronLeft,
@@ -158,7 +158,7 @@ function ServiceCard({
   onExpand: () => void;
   isLoading?: boolean;
 }) {
-  const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile } = useFlowStore();
+  const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile, updateMonthlyUsage, isLoadingElectricity } = useFlowStore();
   const [showAllPlans, setShowAllPlans] = useState(false);
   const service = availableServices?.[type];
   const selectedPlan = selectedPlans[type];
@@ -369,6 +369,17 @@ function ServiceCard({
                     yearBuilt: homeDetails.yearBuilt || 0,
                     annualKwh: (usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900]).reduce((sum, val) => sum + val, 0),
                   } : undefined}
+                  className="mb-4"
+                />
+              )}
+
+              {/* Usage Slider for electricity - allows user to adjust their estimate */}
+              {type === 'electricity' && sortedPlans.length > 0 && (
+                <UsageSlider
+                  value={Math.round((usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900]).reduce((a, b) => a + b, 0) / 12)}
+                  onChange={(monthlyKwh) => updateMonthlyUsage(monthlyKwh)}
+                  hasHomeData={homeDetails?.foundDetails || false}
+                  isLoading={isLoadingElectricity}
                   className="mb-4"
                 />
               )}
