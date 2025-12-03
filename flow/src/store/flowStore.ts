@@ -365,6 +365,9 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     // Water is pre-selected and required - can't be toggled off
     if (service === 'water' && selectedServices.water) return;
 
+    // Save scroll position at the START before any state changes
+    const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+
     const isNowSelected = !selectedServices[service];
 
     // If selecting electricity, fetch real plans from 2TIO
@@ -411,9 +414,6 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       delete newSelectedPlans[service];
     }
 
-    // Save current scroll position before state update
-    const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
-
     set({
       selectedServices: {
         ...selectedServices,
@@ -423,11 +423,17 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       expandedService: isNowSelected ? service : null,
     });
 
-    // Restore scroll position after state update to prevent jumping
+    // Restore scroll position multiple times to catch all re-renders
     if (typeof window !== 'undefined') {
-      requestAnimationFrame(() => {
-        window.scrollTo(0, scrollY);
-      });
+      const restoreScroll = () => window.scrollTo(0, scrollY);
+      // Immediate
+      restoreScroll();
+      // After React re-render
+      requestAnimationFrame(restoreScroll);
+      // After any async updates
+      setTimeout(restoreScroll, 0);
+      setTimeout(restoreScroll, 50);
+      setTimeout(restoreScroll, 100);
     }
   },
 
