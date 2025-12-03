@@ -28,6 +28,7 @@ const PRESETS = [
 const BASE_MIN = 400;
 const BASE_MAX = 5000;
 const STEP = 100;
+const DEFAULT_USAGE = 1000; // Default for apartments/unknown homes
 
 export type { UsageSliderProps };
 
@@ -60,16 +61,20 @@ export function UsageSlider({
     onChange(presetValue);
   }, [onChange]);
 
-  // Handle reset to original estimate
-  const handleReset = useCallback(() => {
-    if (originalEstimate) {
-      setLocalValue(originalEstimate);
-      onChange(originalEstimate);
-    }
-  }, [originalEstimate, onChange]);
+  // Determine reset target: home estimate if available, otherwise default
+  const resetTarget = hasHomeData && originalEstimate ? originalEstimate : DEFAULT_USAGE;
+  const resetLabel = hasHomeData && originalEstimate
+    ? `Reset to home estimate (${originalEstimate.toLocaleString()} kWh/mo)`
+    : `Reset to default (${DEFAULT_USAGE.toLocaleString()} kWh/mo)`;
 
-  // Show reset option when user has deviated from original estimate
-  const showResetOption = hasHomeData && originalEstimate && Math.abs(localValue - originalEstimate) > 50;
+  // Handle reset to original estimate or default
+  const handleReset = useCallback(() => {
+    setLocalValue(resetTarget);
+    onChange(resetTarget);
+  }, [resetTarget, onChange]);
+
+  // Show reset option when user has deviated from reset target
+  const showResetOption = Math.abs(localValue - resetTarget) > 50;
 
   // Handle slider change
   const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,7 +196,7 @@ export function UsageSlider({
         <span>{maxUsage.toLocaleString()} kWh</span>
       </div>
 
-      {/* Reset to original estimate link - only shows when user has changed from original */}
+      {/* Reset link - shows when user has deviated from estimate/default */}
       {showResetOption && (
         <button
           type="button"
@@ -202,7 +207,7 @@ export function UsageSlider({
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
           </svg>
-          <span>Reset to home estimate ({originalEstimate?.toLocaleString()} kWh/mo)</span>
+          <span>{resetLabel}</span>
         </button>
       )}
 
