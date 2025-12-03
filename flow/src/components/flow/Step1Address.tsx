@@ -436,7 +436,7 @@ function Step1Address() {
               {formatNumber(homeDetails.squareFootage)} sq ft • Built {homeDetails.yearBuilt} • Est. {formatNumber(homeDetails.annualKwh)} kWh/year
             </p>
             <p className="text-[16px] text-[var(--color-dark)] mt-1">
-              Your electricity costs will be personalized to your home's actual usage.
+              Your electricity costs will be personalized to your home's estimated usage.
             </p>
           </div>
         )}
