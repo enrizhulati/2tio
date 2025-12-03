@@ -62,10 +62,15 @@ export interface TwotionPlan {
   // Calculated fields (added by client)
   annualCost?: number;
   monthlyEstimate?: number;
-  // Server-calculated pricing fields (from pricing API)
-  totalCost?: number;      // Annual cost with credits, tiered pricing, etc.
-  avgPrice?: number;       // Average price per kWh
-  avgBillAmount?: number;  // Average monthly bill
+  // Server-calculated pricing fields (from pricing API when electricityUsage is provided)
+  totalCost?: number;           // Total annual cost with credits, tiered pricing, etc.
+  averageCostPerMonth?: number; // Average monthly cost
+  averageCostPerKwh?: number;   // Average cost per kWh (in dollars)
+  averageCentsPerKwh?: number;  // Average cost per kWh (in cents)
+  totalUsage?: number;          // Total usage from provided data
+  averageUsage?: number;        // Average monthly usage
+  low?: number;                 // Lowest monthly cost
+  high?: number;                // Highest monthly cost
 }
 
 export interface TwotionInternetPlan {

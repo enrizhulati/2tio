@@ -176,14 +176,16 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         }),
       ]);
 
-      // Use API's totalCost if available, otherwise fallback to client calculation
-      const enrichedPlans = rawElectricityPlans.map((plan) => ({
-        ...plan,
-        annualCost: plan.totalCost ?? enrichPlansWithCosts([plan], usageArray)[0]?.annualCost,
-        monthlyEstimate: plan.totalCost
-          ? plan.totalCost / 12
-          : enrichPlansWithCosts([plan], usageArray)[0]?.monthlyEstimate,
-      }));
+      // Use API's server-calculated costs if available, otherwise fallback to client calculation
+      // Server costs include bill credits, tiered pricing, etc. for accurate comparison
+      const enrichedPlans = rawElectricityPlans.map((plan) => {
+        const clientCosts = enrichPlansWithCosts([plan], usageArray)[0];
+        return {
+          ...plan,
+          annualCost: plan.totalCost ?? clientCosts?.annualCost,
+          monthlyEstimate: plan.averageCostPerMonth ?? (plan.totalCost ? plan.totalCost / 12 : clientCosts?.monthlyEstimate),
+        };
+      });
 
       // Convert electricity plans to ServicePlan format with all API fields
       const electricityPlans: ServicePlan[] = enrichedPlans.map((plan, index) => {
@@ -856,16 +858,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
       // Convert to ServicePlan format for the store with all API fields
       // Note: API returns kWh1000 in cents (e.g., 9 = 9¢/kWh), uPrice is often 0
-      // Use API's totalCost if available, otherwise fallback to client calculation
+      // Use API's server-calculated costs if available (includes bill credits, tiered pricing)
       const servicePlans: ServicePlan[] = rawPlans.map((plan, index) => {
         const rawPlan = plan as unknown as RawServicePlan;
 
-        // Prefer server-calculated totalCost, fallback to client calculation
+        // Prefer server-calculated costs which include bill credits, tiered pricing, etc.
         const clientCosts = enrichPlansWithCosts([plan], usage)[0];
         const annualCost = plan.totalCost ?? clientCosts?.annualCost;
-        const monthlyEstimate = plan.totalCost
-          ? plan.totalCost / 12
-          : clientCosts?.monthlyEstimate;
+        const monthlyEstimate = plan.averageCostPerMonth ?? (plan.totalCost ? plan.totalCost / 12 : clientCosts?.monthlyEstimate);
 
         return {
           id: plan.id,
