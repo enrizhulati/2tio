@@ -80,7 +80,7 @@ function RadioOption({
 
   // Badge display text
   const badgeText = {
-    'BEST FIT': 'Best Fit for Your Home',
+    'BEST FIT': 'Best Fit',
     CHEAPEST: 'Lowest Price!',
     GREEN: '100% Clean Energy!',
     RECOMMENDED: 'Recommended',

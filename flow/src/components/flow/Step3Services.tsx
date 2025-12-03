@@ -377,13 +377,13 @@ function ServiceCard({
               {type === 'electricity' && sortedPlans.length > 0 && sortedPlans[0].annualCost && (
                 <div className="mb-4">
                   <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
-                    Plans ranked by best fit for this home
+                    Plans ranked for homes like yours
                   </p>
                   {/* Rate explainer - Practical UI: Explain jargon, 14px min, 4.5:1 contrast */}
                   <p className="text-[16px] text-[var(--color-dark)] mt-1">
                     {homeDetails?.foundDetails
-                      ? `Based on this home's usage history (~${Math.round((usageProfile?.usage || []).reduce((a, b) => a + b, 0) / 12).toLocaleString()} kWh/month avg)`
-                      : 'Based on typical home usage (~1,000 kWh/month)'}
+                      ? `Similar properties typically use ~${Math.round((usageProfile?.usage || []).reduce((a, b) => a + b, 0) / 12).toLocaleString()} kWh/month. Plans ranked assuming this usage.`
+                      : 'Plans ranked assuming ~1,000 kWh/month (typical home usage).'}
                   </p>
                 </div>
               )}
@@ -412,12 +412,8 @@ function ServiceCard({
                   if (isCheapest) {
                     badge = 'BEST FIT';
                     badgeVariant = 'cheapest';
-                    // Show value proposition
-                    if (homeDetails?.foundDetails) {
-                      badgeReason = 'Best value based on this home\'s usage';
-                    } else {
-                      badgeReason = 'Best value for typical usage';
-                    }
+                    // Show value proposition - use "similar homes" framing
+                    badgeReason = 'Best value for homes with this usage pattern';
                   } else if (isGreen) {
                     badge = 'GREEN';
                     badgeVariant = 'success';
