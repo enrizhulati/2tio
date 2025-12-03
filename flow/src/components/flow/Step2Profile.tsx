@@ -38,24 +38,24 @@ function Step2Profile() {
     const newErrors: Record<string, string> = {};
 
     if (!firstName.trim()) {
-      newErrors.firstName = 'Enter your first name.';
+      newErrors.firstName = 'Enter your first name';
     }
 
     if (!lastName.trim()) {
-      newErrors.lastName = 'Enter your last name.';
+      newErrors.lastName = 'Enter your last name';
     }
 
     if (!email.trim()) {
-      newErrors.email = 'Enter your email address.';
+      newErrors.email = 'Enter your email address';
     } else if (!validateEmail(email)) {
       newErrors.email = 'Enter a valid email address like name@example.com';
     }
 
     const phoneNumbers = phone.replace(/\D/g, '');
     if (!phone.trim()) {
-      newErrors.phone = 'Enter your phone number.';
+      newErrors.phone = 'Enter your phone number';
     } else if (phoneNumbers.length !== 10) {
-      newErrors.phone = 'Enter a 10-digit phone number.';
+      newErrors.phone = 'Enter a 10-digit phone number';
     }
 
     setErrors(newErrors);
@@ -148,7 +148,7 @@ function Step2Profile() {
             onChange={(e) => setSmsOptIn(e.target.checked)}
           />
           <p className="text-[14px] text-[var(--color-dark)] ml-9">
-            You&apos;ll get setup confirmations, appointment reminders, and outage alerts. About 2-4 texts per month. You can opt out anytime.
+            Setup confirmations and appointment reminders. You can opt out anytime.
           </p>
         </div>
       </div>
