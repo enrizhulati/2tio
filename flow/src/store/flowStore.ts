@@ -911,8 +911,24 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           console.log(`[Plan ${index}] ${plan.name}: API totalCost=${plan.totalCost}, client=${clientCosts?.annualCost}, using=${annualCost}`);
         }
 
-        // Use effective rate from API (includes bill credits) or fall back to base rate
-        const effectiveRate = plan.averageCentsPerKwh ?? plan.kWh1000;
+        // Calculate effective rate per kWh in cents
+        // kWh1000 should be in cents (e.g., 9.0 = 9¢/kWh)
+        // If values seem too high, they might be in wrong units
+        let effectiveRate = plan.kWh1000;
+
+        // If we have totalCost and usage, calculate effective rate directly
+        if (annualCost && annualCost > 0) {
+          const annualUsage = usage.reduce((a, b) => a + b, 0);
+          if (annualUsage > 0) {
+            // annualCost is in dollars, convert to cents per kWh
+            effectiveRate = (annualCost / annualUsage) * 100;
+          }
+        }
+
+        // Debug log
+        if (index < 3) {
+          console.log(`[Plan ${index}] Rate: calculated=${effectiveRate?.toFixed(2)}¢, kWh1000=${plan.kWh1000}, annualCost=$${annualCost}`);
+        }
 
         return {
           id: plan.id,
