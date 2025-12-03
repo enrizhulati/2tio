@@ -8,6 +8,8 @@ interface UsageSliderProps {
   value: number;
   /** Callback when value changes */
   onChange: (value: number) => void;
+  /** Original estimate from home data (for reset functionality) */
+  originalEstimate?: number;
   /** Whether we have real home data (vs default) */
   hasHomeData?: boolean;
   /** Loading state while recalculating */
@@ -32,6 +34,7 @@ export type { UsageSliderProps };
 export function UsageSlider({
   value,
   onChange,
+  originalEstimate,
   hasHomeData = false,
   isLoading = false,
   className = '',
@@ -56,6 +59,17 @@ export function UsageSlider({
     setLocalValue(presetValue);
     onChange(presetValue);
   }, [onChange]);
+
+  // Handle reset to original estimate
+  const handleReset = useCallback(() => {
+    if (originalEstimate) {
+      setLocalValue(originalEstimate);
+      onChange(originalEstimate);
+    }
+  }, [originalEstimate, onChange]);
+
+  // Show reset option when user has deviated from original estimate
+  const showResetOption = hasHomeData && originalEstimate && Math.abs(localValue - originalEstimate) > 50;
 
   // Handle slider change
   const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,6 +190,21 @@ export function UsageSlider({
         <span>{minUsage.toLocaleString()} kWh</span>
         <span>{maxUsage.toLocaleString()} kWh</span>
       </div>
+
+      {/* Reset to original estimate link - only shows when user has changed from original */}
+      {showResetOption && (
+        <button
+          type="button"
+          onClick={handleReset}
+          disabled={isLoading}
+          className="mt-3 flex items-center gap-1.5 text-[14px] text-[var(--color-teal)] hover:text-[var(--color-teal-hover)] transition-colors disabled:opacity-50"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+          </svg>
+          <span>Reset to home estimate ({originalEstimate?.toLocaleString()} kWh/mo)</span>
+        </button>
+      )}
 
       {/* Loading indicator */}
       {isLoading && (

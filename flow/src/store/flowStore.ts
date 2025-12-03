@@ -860,9 +860,17 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     try {
       // Use usage profile or default usage for cost calculations
       const usage = usageProfile?.usage || DEFAULT_USAGE;
+      const monthlyAvg = Math.round(usage.reduce((a, b) => a + b, 0) / 12);
+      console.log('[fetchElectricityPlans] Usage monthly avg:', monthlyAvg, 'kWh');
 
       // Fetch plans from 2TIO with usage for server-side cost calculation
       const rawPlans: TwotionPlan[] = await getPlans('electricity', zipCode, usage);
+
+      // Debug: Log first 3 plans' API pricing fields
+      console.log('[fetchElectricityPlans] API returned', rawPlans.length, 'plans. First 3:');
+      rawPlans.slice(0, 3).forEach((p, i) => {
+        console.log(`  [${i}] ${p.vendorName} - totalCost: ${p.totalCost}, kWh1000: ${p.kWh1000}`);
+      });
 
       // Convert to ServicePlan format for the store with all API fields
       // Note: API returns kWh1000 in cents (e.g., 9 = 9¢/kWh), uPrice is often 0
@@ -940,8 +948,12 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
   // Update monthly usage estimate and recalculate plans
   updateMonthlyUsage: async (monthlyKwh: number) => {
+    console.log('[updateMonthlyUsage] Called with monthlyKwh:', monthlyKwh);
     const { address, usageProfile } = get();
-    if (!address?.zip) return;
+    if (!address?.zip) {
+      console.log('[updateMonthlyUsage] No zip code, aborting');
+      return;
+    }
 
     // Apply Texas seasonal pattern to monthly average
     // Summer months (Jun-Sep) are ~40% higher, winter/spring are ~20% lower
@@ -967,7 +979,9 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     });
 
     // Refetch plans with new usage
+    console.log('[updateMonthlyUsage] State updated, now refetching plans with new usage:', usage.slice(0, 3), '...');
     await get().fetchElectricityPlans(address.zip);
+    console.log('[updateMonthlyUsage] Refetch complete');
   },
 
   // 2TIO User actions

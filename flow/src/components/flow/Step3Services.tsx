@@ -160,6 +160,13 @@ function ServiceCard({
 }) {
   const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile, updateMonthlyUsage, isLoadingElectricity } = useFlowStore();
   const [showAllPlans, setShowAllPlans] = useState(false);
+
+  // Track original estimate for reset functionality (captured on first render)
+  const [originalEstimate] = useState(() => {
+    const usage = usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900];
+    return Math.round(usage.reduce((a, b) => a + b, 0) / 12);
+  });
+
   const service = availableServices?.[type];
   const selectedPlan = selectedPlans[type];
 
@@ -384,6 +391,7 @@ function ServiceCard({
                 <UsageSlider
                   value={Math.round((usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900]).reduce((a, b) => a + b, 0) / 12)}
                   onChange={(monthlyKwh) => updateMonthlyUsage(monthlyKwh)}
+                  originalEstimate={homeDetails?.foundDetails ? originalEstimate : undefined}
                   hasHomeData={homeDetails?.foundDetails || false}
                   isLoading={isLoadingElectricity}
                   className="mb-4"
