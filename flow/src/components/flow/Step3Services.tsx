@@ -21,6 +21,38 @@ import {
 import { SERVICE_INFO, type ServiceType, type ServicePlan } from '@/types/flow';
 import { ServiceIcon } from '@/components/ui';
 
+// Water tooltip with touch/keyboard access
+function WaterTooltip() {
+  const [show, setShow] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setShow(!show)}
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        className="w-6 h-6 rounded bg-[var(--color-teal)] flex items-center justify-center"
+        aria-label="Water service is required"
+        aria-expanded={show}
+      >
+        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+        </svg>
+      </button>
+      {show && (
+        <div
+          role="tooltip"
+          className="absolute left-8 top-0 z-[100] w-52 p-3 bg-[var(--color-darkest)] text-white text-[16px] rounded-lg shadow-xl leading-snug"
+        >
+          <div className="absolute -left-1.5 top-2 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
+          <p className="relative z-10">Water is required when moving to a new address in Texas.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Cart summary component
 function CartSummary() {
   const { selectedServices, selectedPlans, cart } = useFlowStore();
@@ -166,17 +198,7 @@ function ServiceCard({
             <div className="mt-1">
               {isWater ? (
                 // Water is always selected - show locked checkmark with tooltip
-                <div className="relative group">
-                  <div className="w-6 h-6 rounded bg-[var(--color-teal)] flex items-center justify-center cursor-help">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  {/* Tooltip */}
-                  <div className="absolute left-8 top-0 hidden group-hover:block z-10 w-48 p-2 bg-[var(--color-darkest)] text-white text-[16px] rounded-lg shadow-lg">
-                    Water service is required by your city when you move to a new address
-                  </div>
-                </div>
+                <WaterTooltip />
               ) : (
                 // Toggle for other services
                 <button

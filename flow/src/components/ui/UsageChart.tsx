@@ -87,10 +87,13 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
 
         {/* Tooltip - positioned below on right side, high z-index */}
         {showInfoTooltip && (
-          <div className="absolute right-0 top-full mt-2 z-[100] w-64 p-3 bg-[var(--color-darkest)] text-white text-[14px] rounded-lg shadow-xl leading-snug">
+          <div
+            role="tooltip"
+            className="absolute right-0 top-full mt-2 z-[100] w-64 p-3 bg-[var(--color-darkest)] text-white text-[16px] rounded-lg shadow-xl leading-snug"
+          >
             <div className="absolute -top-1.5 right-4 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
             <p className="relative z-10">
-              Based on your home&apos;s size and age, we estimate monthly electricity usage. Actual usage may vary.
+              Based on your home&apos;s size and age. Actual usage may vary.
             </p>
           </div>
         )}

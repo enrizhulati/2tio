@@ -139,8 +139,8 @@ function RadioOption({
           {/* Tooltip - positioned BELOW banner but OUTSIDE card overflow */}
           {showTooltip && badgeReason && (
             <div
-              className="absolute left-4 right-4 top-full mt-1 z-[100] p-3 bg-[var(--color-darkest)] text-white text-[14px] font-normal text-left rounded-lg shadow-xl"
-              style={{ position: 'absolute' }}
+              role="tooltip"
+              className="absolute left-4 right-4 top-full mt-1 z-[100] p-3 bg-[var(--color-darkest)] text-white text-[16px] font-normal text-left rounded-lg shadow-xl leading-snug"
             >
               <div className="absolute -top-1.5 left-6 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
               <p className="relative z-10">{badgeReason}</p>
