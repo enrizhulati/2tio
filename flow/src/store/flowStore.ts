@@ -573,6 +573,12 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         address: address!,
         moveInDate: moveInDate!,
         services,
+        // Extract deposit info from API response (if credit check requires deposit)
+        depositRequired: apiResponse.depositRequired,
+        depositAmount: apiResponse.depositAmount,
+        depositReason: apiResponse.depositReason,
+        depositServiceName: apiResponse.depositServiceName,
+        depositVendorName: apiResponse.depositVendorName,
       };
 
       set({

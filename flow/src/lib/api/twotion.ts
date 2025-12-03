@@ -135,6 +135,12 @@ export interface OrderConfirmation {
     planName: string;
     startDate: string;
   }[];
+  // Deposit information (if credit check requires deposit)
+  depositRequired?: boolean;
+  depositAmount?: number;
+  depositReason?: string;
+  depositServiceName?: string;  // Which service requires deposit
+  depositVendorName?: string;   // Which vendor requires deposit
 }
 
 export interface OrderStatus {

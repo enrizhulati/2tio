@@ -45,7 +45,7 @@ function Logo() {
 // Order: Address → Services → Your details → Verify → Confirm
 // (Services before Profile so "Choose my services" CTA is fulfilled immediately)
 const STEPS = [
-  { step: 1, label: 'Your address', icon: MapPin },
+  { step: 1, label: 'Your home', icon: MapPin },
   { step: 2, label: 'Services', icon: Zap },
   { step: 3, label: 'Your details', icon: User },
   { step: 4, label: 'Verify', icon: Settings },

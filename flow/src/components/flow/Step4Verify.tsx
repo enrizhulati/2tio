@@ -426,14 +426,35 @@ function Step4Verify() {
     }
   }, [effectiveSteps, checkoutAnswers, documents, nextStep]);
 
-  // Loading state
+  // Loading state - skeleton for better perceived performance
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-teal)] mb-4" aria-hidden="true" />
-        <p className="text-[16px] text-[var(--color-dark)]">
-          Loading verification requirements...
-        </p>
+      <div className="space-y-8" aria-busy="true" aria-label="Loading verification requirements">
+        {/* Heading skeleton */}
+        <div>
+          <div className="h-12 w-3/4 bg-[var(--color-light)] rounded-lg animate-pulse mb-3" />
+          <div className="h-5 w-1/2 bg-[var(--color-light)] rounded animate-pulse" />
+        </div>
+
+        {/* Form skeleton */}
+        <div className="p-6 rounded-xl border-2 border-[var(--color-light)] space-y-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-[var(--color-light)] animate-pulse" />
+            <div className="h-6 w-40 bg-[var(--color-light)] rounded animate-pulse" />
+          </div>
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="space-y-2">
+              <div className="h-4 w-32 bg-[var(--color-light)] rounded animate-pulse" />
+              <div className="h-14 w-full bg-[var(--color-light)] rounded-xl animate-pulse" />
+            </div>
+          ))}
+        </div>
+
+        {/* Button skeleton */}
+        <div className="pt-4 flex gap-3">
+          <div className="h-14 w-24 bg-[var(--color-light)] rounded-xl animate-pulse" />
+          <div className="h-14 flex-1 bg-[var(--color-light)] rounded-xl animate-pulse" />
+        </div>
       </div>
     );
   }

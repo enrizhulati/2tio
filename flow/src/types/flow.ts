@@ -140,6 +140,12 @@ export interface OrderConfirmation {
     plan: string;
     status: 'pending' | 'processing' | 'confirmed';
   }[];
+  // Deposit information (if credit check requires deposit)
+  depositRequired?: boolean;
+  depositAmount?: number;
+  depositReason?: string;
+  depositServiceName?: string;  // Which service requires deposit
+  depositVendorName?: string;   // Which vendor requires deposit
 }
 
 export type FlowStep = 1 | 2 | 3 | 4 | 5;

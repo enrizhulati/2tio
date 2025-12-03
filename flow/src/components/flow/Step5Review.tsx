@@ -16,6 +16,7 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
+  AlertCircle,
 } from 'lucide-react';
 import { SERVICE_INFO, type ServicePlan, type TwotionCheckoutStep } from '@/types/flow';
 
@@ -271,6 +272,27 @@ function Step5Review() {
             </div>
           </div>
 
+          {/* Deposit Notice - shown if credit check requires deposit */}
+          {orderConfirmation.depositRequired && orderConfirmation.depositAmount && (
+            <div className="p-4 rounded-xl bg-[var(--color-warning-light)] border border-[var(--color-warning)]">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-[var(--color-warning)] flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <div>
+                  <p className="text-[16px] font-medium text-[var(--color-darkest)]">
+                    Deposit Required: ${orderConfirmation.depositAmount.toLocaleString()}
+                  </p>
+                  <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                    {orderConfirmation.depositVendorName && (
+                      <span>{orderConfirmation.depositVendorName} requires a deposit </span>
+                    )}
+                    {orderConfirmation.depositReason || 'based on the credit check for your account.'}
+                    {' '}You'll receive payment instructions via email.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* What happens next - Practical UI: Use proper numbered list semantics */}
           <div className="text-left">
             <h2 className="text-[22px] font-semibold text-[var(--color-darkest)] mb-4">
@@ -372,6 +394,9 @@ function Step5Review() {
         </p>
         <p className="text-[14px] text-[var(--color-dark)] mt-1">
           You'll receive separate bills from each provider after service starts on {moveInDate && formatDate(moveInDate)}.
+        </p>
+        <p className="text-[14px] text-[var(--color-dark)] mt-2">
+          If a provider requires a deposit based on your credit history, we'll let you know the amount after checkout.
         </p>
       </div>
 
