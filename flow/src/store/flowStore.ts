@@ -35,17 +35,29 @@ import {
 // Default usage profile for cost estimates (when Zillow data unavailable)
 const DEFAULT_USAGE = [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900];
 
-// Water/Internet plan response type from 2TIO API
+// Full 2TIO API plan response type
 interface RawServicePlan {
   id: string;
   name: string;
   vendorId: string;
   vendorName: string;
+  serviceId?: string;
   serviceName?: string;
-  uPrice?: number;        // Monthly price (some APIs use this)
-  mPrice?: number;        // Monthly price (some APIs use this)
-  price?: number;         // Monthly price (some APIs use this)
+  regionId?: string;
+  uPrice?: number;        // Price per kWh or usage-based
+  mPrice?: number;        // Monthly base price
+  price?: number;         // Alternative monthly price field
+  kWh1000?: number;       // Price at 1000 kWh (cents)
   term: number;
+  cancellationFee?: number;
+  bundleOnly?: boolean;
+  prepaid?: boolean;
+  favorite?: boolean;
+  business?: boolean;
+  active?: boolean;
+  renewable?: boolean;
+  renewablePercent?: number;
+  bounty?: number;
   shortDescription?: string;
   longDescription?: string;
   bulletPoint1?: string;
@@ -54,6 +66,22 @@ interface RawServicePlan {
   bulletPoint4?: string;
   bulletPoint5?: string;
   logo?: string;
+  leadTime?: number;      // Days until service starts
+  vendorPhone?: string;
+  vendorUrl?: string;
+  callCenterPhone?: string;
+  // Service availability days
+  isSaturday?: boolean;
+  isSunday?: boolean;
+  isMonday?: boolean;
+  isTuesday?: boolean;
+  isWednesday?: boolean;
+  isThursday?: boolean;
+  isFriday?: boolean;
+  tdspId?: string;
+  duns?: string;
+  offerCode?: string;
+  bannerText?: string;
 }
 
 // Alias for backwards compatibility
@@ -133,31 +161,47 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       // Enrich electricity plans with default usage cost estimates
       const enrichedPlans = enrichPlansWithCosts(rawElectricityPlans, DEFAULT_USAGE);
 
-      // Convert electricity plans to ServicePlan format
-      const electricityPlans: ServicePlan[] = enrichedPlans.map((plan, index) => ({
-        id: plan.id,
-        provider: plan.vendorName,
-        name: plan.name,
-        rate: `$${(plan.kWh1000 / 100).toFixed(3)}/kWh`,
-        rateType: 'flat' as const,
-        contractMonths: plan.term,
-        contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
-        setupFee: 0,
-        monthlyEstimate: plan.monthlyEstimate ? `$${Math.round(plan.monthlyEstimate)}` : undefined,
-        features: [
-          plan.bulletPoint1,
-          plan.bulletPoint2,
-          plan.bulletPoint3,
-        ].filter(Boolean) as string[],
-        badge: plan.renewable ? 'GREEN' as const : index === 0 ? 'RECOMMENDED' as const : undefined,
-        badgeReason: plan.renewable
-          ? '100% renewable energy from Texas wind and solar'
-          : index === 0
-          ? 'Best value based on estimated usage'
-          : undefined,
-      }));
+      // Convert electricity plans to ServicePlan format with all API fields
+      const electricityPlans: ServicePlan[] = enrichedPlans.map((plan, index) => {
+        const rawPlan = rawElectricityPlans[index] as unknown as RawServicePlan;
+        return {
+          id: plan.id,
+          provider: plan.vendorName,
+          name: plan.name,
+          rate: `$${(plan.kWh1000 / 100).toFixed(3)}/kWh`,
+          rateType: 'flat' as const,
+          contractMonths: plan.term,
+          contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
+          setupFee: 0,
+          monthlyEstimate: plan.monthlyEstimate ? `$${Math.round(plan.monthlyEstimate)}` : undefined,
+          features: [
+            rawPlan?.bulletPoint1,
+            rawPlan?.bulletPoint2,
+            rawPlan?.bulletPoint3,
+            rawPlan?.bulletPoint4,
+            rawPlan?.bulletPoint5,
+          ].filter(Boolean) as string[],
+          badge: plan.renewable ? 'GREEN' as const : index === 0 ? 'RECOMMENDED' as const : undefined,
+          badgeReason: plan.renewable
+            ? '100% renewable energy from Texas wind and solar'
+            : index === 0
+            ? 'Best value based on estimated usage'
+            : undefined,
+          // New fields from 2TIO API
+          logo: rawPlan?.logo,
+          leadTime: rawPlan?.leadTime,
+          vendorPhone: rawPlan?.vendorPhone || rawPlan?.callCenterPhone,
+          vendorUrl: rawPlan?.vendorUrl,
+          shortDescription: rawPlan?.shortDescription,
+          longDescription: rawPlan?.longDescription,
+          serviceName: rawPlan?.serviceName,
+          cancellationFee: rawPlan?.cancellationFee,
+          renewable: plan.renewable,
+          renewablePercent: rawPlan?.renewablePercent,
+        };
+      });
 
-      // Convert internet plans to ServicePlan format
+      // Convert internet plans to ServicePlan format with all API fields
       const internetPlans: ServicePlan[] = rawInternetPlans.map((plan, index) => {
         const monthlyPrice = plan.uPrice || plan.mPrice || plan.price || 0;
         return {
@@ -179,10 +223,21 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           ].filter(Boolean) as string[],
           badge: index === 0 ? 'RECOMMENDED' as const : undefined,
           badgeReason: index === 0 ? 'Best value for your area' : undefined,
+          // New fields from 2TIO API
+          logo: plan.logo,
+          leadTime: plan.leadTime,
+          vendorPhone: plan.vendorPhone || plan.callCenterPhone,
+          vendorUrl: plan.vendorUrl,
+          shortDescription: plan.shortDescription,
+          longDescription: plan.longDescription,
+          serviceName: plan.serviceName,
+          cancellationFee: plan.cancellationFee,
+          renewable: plan.renewable,
+          renewablePercent: plan.renewablePercent,
         };
       });
 
-      // Convert water plans to ServicePlan format
+      // Convert water plans to ServicePlan format with all API fields
       const waterPlans: ServicePlan[] = rawWaterPlans.map((plan, index) => {
         const monthlyPrice = plan.mPrice || plan.uPrice || plan.price || 0;
         return {
@@ -200,10 +255,21 @@ export const useFlowStore = create<FlowState>((set, get) => ({
             plan.bulletPoint2,
             plan.bulletPoint3,
             plan.bulletPoint4,
-            plan.shortDescription,
+            plan.bulletPoint5,
           ].filter(Boolean) as string[],
           badge: index === 0 ? 'RECOMMENDED' as const : undefined,
           badgeReason: index === 0 ? 'Your local water utility' : undefined,
+          // New fields from 2TIO API
+          logo: plan.logo,
+          leadTime: plan.leadTime,
+          vendorPhone: plan.vendorPhone || plan.callCenterPhone,
+          vendorUrl: plan.vendorUrl,
+          shortDescription: plan.shortDescription,
+          longDescription: plan.longDescription,
+          serviceName: plan.serviceName,
+          cancellationFee: plan.cancellationFee,
+          renewable: plan.renewable,
+          renewablePercent: plan.renewablePercent,
         };
       });
 
@@ -730,33 +796,48 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       // Enrich plans with annual cost calculations
       const enrichedPlans = enrichPlansWithCosts(rawPlans, usage);
 
-      // Convert to ServicePlan format for the store
+      // Convert to ServicePlan format for the store with all API fields
       // Note: API returns kWh1000 in cents (e.g., 9 = 9¢/kWh), uPrice is often 0
-      const servicePlans: ServicePlan[] = enrichedPlans.map((plan, index) => ({
-        id: plan.id,
-        provider: plan.vendorName,
-        name: plan.name,
-        rate: `$${(plan.kWh1000 / 100).toFixed(3)}/kWh`,
-        rateType: 'flat' as const,
-        contractMonths: plan.term,
-        contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
-        setupFee: 0,
-        monthlyEstimate: plan.monthlyEstimate ? `$${Math.round(plan.monthlyEstimate)}` : undefined,
-        features: [
-          plan.bulletPoint1,
-          plan.bulletPoint2,
-          plan.bulletPoint3,
-        ].filter(Boolean) as string[],
-        badge: plan.renewable ? 'GREEN' : index === 0 ? 'RECOMMENDED' : undefined,
-        badgeReason: plan.renewable
-          ? '100% renewable energy from Texas wind and solar'
-          : index === 0
-          ? 'Best value based on your home\'s usage profile'
-          : undefined,
-        // Enriched fields from usage calculation
-        annualCost: plan.annualCost,
-        renewable: plan.renewable,
-      }));
+      const servicePlans: ServicePlan[] = enrichedPlans.map((plan, index) => {
+        const rawPlan = rawPlans[index] as unknown as RawServicePlan;
+        return {
+          id: plan.id,
+          provider: plan.vendorName,
+          name: plan.name,
+          rate: `$${(plan.kWh1000 / 100).toFixed(3)}/kWh`,
+          rateType: 'flat' as const,
+          contractMonths: plan.term,
+          contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
+          setupFee: 0,
+          monthlyEstimate: plan.monthlyEstimate ? `$${Math.round(plan.monthlyEstimate)}` : undefined,
+          features: [
+            rawPlan?.bulletPoint1,
+            rawPlan?.bulletPoint2,
+            rawPlan?.bulletPoint3,
+            rawPlan?.bulletPoint4,
+            rawPlan?.bulletPoint5,
+          ].filter(Boolean) as string[],
+          badge: plan.renewable ? 'GREEN' : index === 0 ? 'RECOMMENDED' : undefined,
+          badgeReason: plan.renewable
+            ? '100% renewable energy from Texas wind and solar'
+            : index === 0
+            ? 'Best value based on your home\'s usage profile'
+            : undefined,
+          // Enriched fields from usage calculation
+          annualCost: plan.annualCost,
+          renewable: plan.renewable,
+          // New fields from 2TIO API
+          logo: rawPlan?.logo,
+          leadTime: rawPlan?.leadTime,
+          vendorPhone: rawPlan?.vendorPhone || rawPlan?.callCenterPhone,
+          vendorUrl: rawPlan?.vendorUrl,
+          shortDescription: rawPlan?.shortDescription,
+          longDescription: rawPlan?.longDescription,
+          serviceName: rawPlan?.serviceName,
+          cancellationFee: rawPlan?.cancellationFee,
+          renewablePercent: rawPlan?.renewablePercent,
+        };
+      });
 
       // Update available services with real electricity plans
       const updatedServices: AvailableServices = {

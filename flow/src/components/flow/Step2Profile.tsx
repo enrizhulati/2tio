@@ -148,7 +148,7 @@ function Step2Profile() {
             onChange={(e) => setSmsOptIn(e.target.checked)}
           />
           <p className="text-[14px] text-[var(--color-dark)] ml-9">
-            Setup confirmations and appointment reminders. You can opt out anytime.
+            Order confirmations and reminders. You can opt out anytime.
           </p>
         </div>
       </div>

@@ -69,6 +69,16 @@ export interface ServicePlan {
   // Enriched fields from usage profile calculation
   annualCost?: number;
   renewable?: boolean;
+  // New fields from 2TIO API
+  logo?: string;              // Base64 encoded provider logo
+  leadTime?: number;          // Days until service starts
+  vendorPhone?: string;       // Provider support phone
+  vendorUrl?: string;         // Provider website
+  shortDescription?: string;  // Plan summary
+  longDescription?: string;   // Detailed plan info
+  serviceName?: string;       // Service type from API (Water, Electricity, etc.)
+  cancellationFee?: number;   // Early termination fee
+  renewablePercent?: number;  // Percentage of renewable energy
 }
 
 export interface ServiceAvailability {
