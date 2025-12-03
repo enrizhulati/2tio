@@ -896,20 +896,29 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
       // Convert to ServicePlan format for the store with all API fields
       // Note: API returns kWh1000 in cents (e.g., 9 = 9¢/kWh), uPrice is often 0
-      // Always use client-side cost calculation based on user's actual usage
+      // Prefer API's totalCost which includes bill credits, tiered pricing, etc.
       const servicePlans: ServicePlan[] = rawPlans.map((plan, index) => {
         const rawPlan = plan as unknown as RawServicePlan;
 
-        // Calculate costs based on user's actual usage (ensures costs update when usage changes)
+        // Use API's server-calculated costs (accounts for bill credits, tiered pricing)
+        // Fall back to client calculation if API doesn't provide totalCost
         const clientCosts = enrichPlansWithCosts([plan], usage)[0];
-        const annualCost = clientCosts?.annualCost;
-        const monthlyEstimate = clientCosts?.monthlyEstimate;
+        const annualCost = plan.totalCost ?? clientCosts?.annualCost;
+        const monthlyEstimate = plan.averageCostPerMonth ?? (annualCost ? annualCost / 12 : clientCosts?.monthlyEstimate);
+
+        // Debug: Log cost source
+        if (index < 3) {
+          console.log(`[Plan ${index}] ${plan.name}: API totalCost=${plan.totalCost}, client=${clientCosts?.annualCost}, using=${annualCost}`);
+        }
+
+        // Use effective rate from API (includes bill credits) or fall back to base rate
+        const effectiveRate = plan.averageCentsPerKwh ?? plan.kWh1000;
 
         return {
           id: plan.id,
           provider: plan.vendorName,
           name: plan.name,
-          rate: `$${(plan.kWh1000 / 100).toFixed(3)}/kWh`,
+          rate: `${effectiveRate.toFixed(1)}¢`,
           rateType: 'flat' as const,
           contractMonths: plan.term,
           contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',

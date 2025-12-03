@@ -269,7 +269,7 @@ function ServiceCard({
                       {selectedPlan?.name || 'City Water Service'}
                     </p>
                     {selectedPlan?.shortDescription && (
-                      <p className="text-[14px] text-[var(--color-dark)] mt-1 line-clamp-2">
+                      <p className="text-[14px] text-[var(--color-dark)] mt-1">
                         {selectedPlan.shortDescription}
                       </p>
                     )}
