@@ -340,12 +340,18 @@ function ServiceCard({
             aria-controls={`${type}-plan-section`}
           >
             <div className="flex-1 min-w-0">
-              <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
-                {selectedPlan ? `${selectedPlan.provider} - ${selectedPlan.name}` : 'Choose your plan'}
-              </span>
-              {selectedPlan && (
-                <span className="text-[16px] text-[var(--color-dark)] ml-2 block sm:inline mt-0.5 sm:mt-0">
-                  {selectedPlan.rate} • {selectedPlan.contractLabel}
+              {selectedPlan ? (
+                <>
+                  <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
+                    {selectedPlan.provider}
+                  </span>
+                  <span className="text-[16px] text-[var(--color-teal)] ml-2">
+                    {isExpanded ? 'Change plan' : 'Tap to change'}
+                  </span>
+                </>
+              ) : (
+                <span className="text-[16px] font-semibold text-[var(--color-teal)]">
+                  Choose your plan
                 </span>
               )}
             </div>
