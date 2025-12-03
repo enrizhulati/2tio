@@ -205,9 +205,39 @@ function VendorSection({
         </div>
       )}
 
-      {/* Document uploads - shown first for less friction */}
+      {/* 1. Personal information FIRST (quick fields - SSN, DOB) */}
+      {step.AppQuestions.length > 0 && (
+        <div className="space-y-5">
+          {/* Section header with icon for visual grouping */}
+          <div className="flex items-center gap-2">
+            <h2 className="text-[18px] font-bold text-[var(--color-darkest)]">
+              Personal information
+            </h2>
+          </div>
+          <div className="space-y-5">
+            {step.AppQuestions.map((q) => (
+              <QuestionInput
+                key={q.id}
+                question={q}
+                value={answers[q.id] || ''}
+                onChange={(value) => onAnswerChange(q.id, value)}
+                error={errors[q.id]}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 2. Document uploads SECOND (more effort required) */}
       {(step.IsDLUpload || step.IsLeaseUpload || step.IsOwnUpload) && (
         <div className="space-y-4">
+          {/* Section header for documents */}
+          <div className="flex items-center gap-2">
+            <h2 className="text-[18px] font-bold text-[var(--color-darkest)]">
+              Identity documents
+            </h2>
+          </div>
+
           {step.IsDLUpload && (
             <FileUpload
               label="Driver's license or state ID"
@@ -267,27 +297,6 @@ function VendorSection({
               error={errors['own']}
             />
           )}
-        </div>
-      )}
-
-      {/* Application questions - SSN/DOB with visual separator */}
-      {step.AppQuestions.length > 0 && (
-        <div className="space-y-5 pt-2">
-          {/* Section header for personal info - creates visual grouping */}
-          <h2 className="text-[18px] font-semibold text-[var(--color-darkest)]">
-            Personal information
-          </h2>
-          <div className="space-y-5">
-            {step.AppQuestions.map((q) => (
-              <QuestionInput
-                key={q.id}
-                question={q}
-                value={answers[q.id] || ''}
-                onChange={(value) => onAnswerChange(q.id, value)}
-                error={errors[q.id]}
-              />
-            ))}
-          </div>
         </div>
       )}
     </div>
