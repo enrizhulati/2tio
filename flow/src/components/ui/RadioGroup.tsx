@@ -70,10 +70,11 @@ function RadioOption({
   const isSelected = value === selectedValue;
 
   // Header banner styles - full width colored banner like reference design
+  // Uses brand colors: Coral for best value, Success green for eco, Teal for default
   const bannerStyles = {
     default: 'bg-[var(--color-teal)] text-white',
     success: 'bg-[var(--color-success)] text-white',
-    cheapest: 'bg-[var(--color-darkest)] text-white',
+    cheapest: 'bg-[var(--color-coral)] text-white',
   };
 
   // Badge display text
