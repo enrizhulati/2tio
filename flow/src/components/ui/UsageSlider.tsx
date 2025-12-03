@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Home, Building2, Castle } from 'lucide-react';
 
 interface UsageSliderProps {
@@ -18,24 +18,15 @@ interface UsageSliderProps {
 
 // Usage presets with icons and descriptions
 const PRESETS = [
-  { value: 600, label: 'Small', description: 'Apartment or small home', icon: Building2 },
-  { value: 1000, label: 'Medium', description: 'Average home', icon: Home },
-  { value: 1500, label: 'Large', description: 'Large home', icon: Castle },
+  { value: 750, label: 'Small', description: 'Apartment', icon: Building2 },
+  { value: 1500, label: 'Medium', description: 'Avg home', icon: Home },
+  { value: 3500, label: 'Large', description: 'Large home', icon: Castle },
 ];
 
-const MIN_USAGE = 400;
-const MAX_USAGE = 2500;
-const STEP = 50;
+const BASE_MIN = 400;
+const BASE_MAX = 5000;
+const STEP = 100;
 
-/**
- * UsageSlider - Allows users to adjust their estimated monthly electricity usage
- *
- * Practical UI principles applied:
- * - Clear label and current value display
- * - 48pt minimum touch targets on preset buttons
- * - Immediate visual feedback
- * - Accessible with keyboard navigation
- */
 export type { UsageSliderProps };
 
 export function UsageSlider({
@@ -45,28 +36,20 @@ export function UsageSlider({
   isLoading = false,
   className = '',
 }: UsageSliderProps) {
+  // Dynamic range - extends to accommodate any incoming value
+  const { minUsage, maxUsage } = useMemo(() => {
+    const min = BASE_MIN;
+    // Max extends if incoming value is higher (rounded up to nearest 1000)
+    const max = Math.max(BASE_MAX, Math.ceil(value / 1000) * 1000 + 1000);
+    return { minUsage: min, maxUsage: max };
+  }, [value]);
+
   const [localValue, setLocalValue] = useState(value);
-  const [isDragging, setIsDragging] = useState(false);
 
   // Sync local value with prop
   useEffect(() => {
-    if (!isDragging) {
-      setLocalValue(value);
-    }
-  }, [value, isDragging]);
-
-  // Debounce the onChange callback to avoid too many API calls
-  const handleChange = useCallback((newValue: number) => {
-    setLocalValue(newValue);
-  }, []);
-
-  // Commit the change when user stops dragging
-  const handleChangeEnd = useCallback(() => {
-    setIsDragging(false);
-    if (localValue !== value) {
-      onChange(localValue);
-    }
-  }, [localValue, value, onChange]);
+    setLocalValue(value);
+  }, [value]);
 
   // Handle preset button click
   const handlePresetClick = useCallback((presetValue: number) => {
@@ -74,8 +57,21 @@ export function UsageSlider({
     onChange(presetValue);
   }, [onChange]);
 
+  // Handle slider change
+  const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = Number(e.target.value);
+    setLocalValue(newValue);
+  }, []);
+
+  // Commit value on mouse/touch up
+  const handleCommit = useCallback(() => {
+    if (localValue !== value) {
+      onChange(localValue);
+    }
+  }, [localValue, value, onChange]);
+
   // Calculate slider position percentage
-  const percentage = ((localValue - MIN_USAGE) / (MAX_USAGE - MIN_USAGE)) * 100;
+  const percentage = Math.min(100, Math.max(0, ((localValue - minUsage) / (maxUsage - minUsage)) * 100));
 
   // Find closest preset for highlighting
   const closestPreset = PRESETS.reduce((prev, curr) =>
@@ -84,7 +80,7 @@ export function UsageSlider({
 
   return (
     <div className={`bg-[var(--color-lightest)] rounded-xl p-4 sm:p-5 ${className}`}>
-      {/* Header with current value - Practical UI: Clear hierarchy */}
+      {/* Header with current value */}
       <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
@@ -104,12 +100,12 @@ export function UsageSlider({
         </div>
       </div>
 
-      {/* Preset buttons - Practical UI: 48pt touch targets, clear labels */}
+      {/* Preset buttons */}
       <div className="grid grid-cols-3 gap-2 mb-4">
         {PRESETS.map((preset) => {
           const Icon = preset.icon;
           const isActive = closestPreset.value === preset.value &&
-            Math.abs(localValue - preset.value) < 150;
+            Math.abs(localValue - preset.value) < 400;
 
           return (
             <button
@@ -138,56 +134,47 @@ export function UsageSlider({
         })}
       </div>
 
-      {/* Slider - Practical UI: Accessible, visual feedback */}
-      <div className="relative">
+      {/* Slider with visible track and thumb */}
+      <div className="relative h-6 flex items-center">
         {/* Track background */}
-        <div className="h-2 bg-[var(--color-light)] rounded-full">
+        <div className="absolute inset-x-0 h-2 bg-[var(--color-light)] rounded-full">
           {/* Filled portion */}
           <div
-            className="h-full bg-[var(--color-teal)] rounded-full transition-all duration-100"
+            className="h-full bg-[var(--color-teal)] rounded-full transition-all duration-75"
             style={{ width: `${percentage}%` }}
           />
         </div>
 
-        {/* Range input - styled but accessible */}
-        <input
-          type="range"
-          min={MIN_USAGE}
-          max={MAX_USAGE}
-          step={STEP}
-          value={localValue}
-          onChange={(e) => {
-            setIsDragging(true);
-            handleChange(Number(e.target.value));
-          }}
-          onMouseUp={handleChangeEnd}
-          onTouchEnd={handleChangeEnd}
-          onKeyUp={handleChangeEnd}
-          disabled={isLoading}
-          className="absolute inset-0 w-full h-2 opacity-0 cursor-pointer disabled:cursor-not-allowed"
-          aria-label="Monthly electricity usage in kWh"
-          aria-valuemin={MIN_USAGE}
-          aria-valuemax={MAX_USAGE}
-          aria-valuenow={localValue}
-          aria-valuetext={`${localValue} kilowatt hours per month`}
+        {/* Custom thumb */}
+        <div
+          className="absolute w-6 h-6 bg-white border-2 border-[var(--color-teal)] rounded-full shadow-md pointer-events-none z-10"
+          style={{ left: `calc(${percentage}% - 12px)` }}
         />
 
-        {/* Custom thumb indicator */}
-        <div
-          className={`
-            absolute top-1/2 -translate-y-1/2 w-5 h-5
-            bg-white border-2 border-[var(--color-teal)] rounded-full
-            shadow-md pointer-events-none transition-all duration-100
-            ${isDragging ? 'scale-110 shadow-lg' : ''}
-          `}
-          style={{ left: `calc(${percentage}% - 10px)` }}
+        {/* Actual range input - full height, visible cursor */}
+        <input
+          type="range"
+          min={minUsage}
+          max={maxUsage}
+          step={STEP}
+          value={localValue}
+          onChange={handleSliderChange}
+          onMouseUp={handleCommit}
+          onTouchEnd={handleCommit}
+          onKeyUp={handleCommit}
+          disabled={isLoading}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-20"
+          aria-label="Monthly electricity usage in kWh"
+          aria-valuemin={minUsage}
+          aria-valuemax={maxUsage}
+          aria-valuenow={localValue}
         />
       </div>
 
       {/* Min/Max labels */}
       <div className="flex justify-between mt-2 text-[12px] text-[var(--color-medium)]">
-        <span>{MIN_USAGE.toLocaleString()} kWh</span>
-        <span>{MAX_USAGE.toLocaleString()} kWh</span>
+        <span>{minUsage.toLocaleString()} kWh</span>
+        <span>{maxUsage.toLocaleString()} kWh</span>
       </div>
 
       {/* Loading indicator */}
