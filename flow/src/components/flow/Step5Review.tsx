@@ -13,8 +13,20 @@ import {
   Download,
   CheckCircle,
   Clock,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { SERVICE_INFO } from '@/types/flow';
+
+const TERMS_TEXT = `By submitting my order, I authorize 2turniton and Fulcrum Retail Energy, LLC d/b/a Amigo Energy to perform all necessary tasks to establish my electricity service.
+
+I authorize Amigo Energy to perform a credit check and review my credit and payment history with credit reporting agencies, its affiliates, and my previous electricity providers based on my information that I have provided for enrollment. I understand that if I do not qualify under Amigo Energy's deposit criteria and payment history, I may be required to pay a deposit and/or an outstanding balance before my enrollment is complete.
+
+Yes, I wish to sign up for the selected electricity plan.
+
+I have read and understand the Terms of Service, Electricity Facts Label, and Your Rights as a Customer documents. I understand that a move-in or switch request can only be made by the electric service applicant or the applicant's authorized agent and I agree to allow Amigo Energy to perform the necessary tasks to complete a switch or move-in for my service with Amigo Energy. I verify that I am at least 18 years of age and legally authorized to buy electricity for the address listed above. I agree to pay the price as specified above. The price includes (i) the Energy Charge, (ii) applicable Transmission and Distribution Utility ("TDU") tariff, if not included in the Energy Charge, (iii) a Monthly Base charge per ESI-ID, and (iv) all recurring charges. This price does not include applicable federal, state and local taxes or any fees (including gross receipt tax reimbursement), other amounts charged by a governmental entity, and all other non-recurring fees. By selecting a specific switch date, you are agreeing to an off-cycle switch fee that is passed-through from your TDSP without mark-up. See the Electricity Facts Label for specific pricing details. If a switch transaction was selected, I may rescind this agreement without penalty before midnight of the third federal business day after submitting this enrollment. After this period or for new (move-in) service, an early termination fee of $175 per ESIID for each full and partial year left in the term will apply if I cancel this agreement without providing proof of my move (including a forwarding address). I can print and save copies of these documents which are provided above. I understand that after submitting this enrollment request, I will also receive a copy of these documents, including the Terms of Service, from Amigo Energy via email, and upon request, via US mail, and that these documents, including the Terms of Service, explain all the terms of the agreement and how to exercise the right of rescission, if applicable.
+
+I understand that any Nights Free plans are not available for premises with distributed generation. If solar panels, energy storage, or similar systems are installed before or after the authorization of the contract for any Nights Free plans, Amigo Energy may switch my ESIID to a Variable Price Product with 14 days' notice. I will refer to the Terms of Service and Electricity Facts Label (EFL); and I will contact Amigo Energy before installing such systems to explore eligible plan options.`;
 
 function Step5Review() {
   const {
@@ -32,6 +44,8 @@ function Step5Review() {
   } = useFlowStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [termsAgreed, setTermsAgreed] = useState(false);
+  const [termsExpanded, setTermsExpanded] = useState(false);
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -353,18 +367,72 @@ function Step5Review() {
         </div>
       </div>
 
-      {/* Legal */}
-      <p className="text-[14px] text-[var(--color-dark)]">
-        By placing this order, you agree to the{' '}
-        <a href="/terms" target="_blank" className="text-[var(--color-teal)] underline">
+      {/* Terms Agreement */}
+      <div className="border-b border-[var(--color-light)] pb-6">
+        <h3 className="text-[22px] font-semibold text-[var(--color-darkest)] mb-4">
           Terms of Service
-        </a>{' '}
-        and{' '}
-        <a href="/privacy" target="_blank" className="text-[var(--color-teal)] underline">
-          Privacy Policy
-        </a>
-        , and authorize us to set up utilities on your behalf.
-      </p>
+        </h3>
+
+        {/* Expandable terms */}
+        <div className="border border-[var(--color-light)] rounded-lg overflow-hidden mb-4">
+          <button
+            onClick={() => setTermsExpanded(!termsExpanded)}
+            className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--color-lightest)] transition-colors"
+          >
+            <span className="text-[16px] text-[var(--color-darkest)]">
+              View full terms and conditions
+            </span>
+            {termsExpanded ? (
+              <ChevronUp className="w-5 h-5 text-[var(--color-dark)]" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-[var(--color-dark)]" />
+            )}
+          </button>
+          {termsExpanded && (
+            <div className="px-4 pb-4 max-h-64 overflow-y-auto border-t border-[var(--color-light)]">
+              <p className="text-[14px] text-[var(--color-dark)] whitespace-pre-line leading-relaxed pt-4">
+                {TERMS_TEXT}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Checkbox with proper touch target (48px) */}
+        <label className="flex items-start gap-4 cursor-pointer group p-3 -mx-3 rounded-lg hover:bg-[var(--color-lightest)] transition-colors">
+          <div className="flex items-center justify-center w-6 h-6 mt-0.5 flex-shrink-0">
+            <input
+              type="checkbox"
+              checked={termsAgreed}
+              onChange={(e) => setTermsAgreed(e.target.checked)}
+              className="w-5 h-5 rounded border-2 border-[var(--color-medium)] text-[var(--color-teal)] focus:ring-2 focus:ring-[var(--color-teal)] focus:ring-offset-2 cursor-pointer"
+            />
+          </div>
+          <span className="text-[16px] leading-relaxed text-[var(--color-darkest)]">
+            I agree to the{' '}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setTermsExpanded(true);
+              }}
+              className="text-[var(--color-teal)] underline hover:text-[var(--color-teal-dark)]"
+            >
+              Terms of Service
+            </button>
+            {' '}and{' '}
+            <a
+              href="/privacy"
+              target="_blank"
+              onClick={(e) => e.stopPropagation()}
+              className="text-[var(--color-teal)] underline hover:text-[var(--color-teal-dark)]"
+            >
+              Privacy Policy
+            </a>
+            , and authorize 2turniton.com to set up utilities on my behalf.
+          </span>
+        </label>
+      </div>
 
       {/* Navigation buttons - Back always left */}
       <div className="pt-4 flex flex-col-reverse sm:flex-row gap-3">
@@ -382,10 +450,16 @@ function Step5Review() {
           isLoading={isSubmitting}
           loadingText="Placing order..."
           className="sm:flex-1"
+          disabled={!termsAgreed}
         >
           Place order
         </Button>
       </div>
+      {!termsAgreed && (
+        <p className="text-[14px] text-[var(--color-dark)] text-center">
+          Please agree to the Terms of Service to continue
+        </p>
+      )}
     </div>
   );
 }
