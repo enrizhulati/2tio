@@ -52,6 +52,25 @@ export interface TwotionPlan {
   monthlyEstimate?: number;
 }
 
+export interface TwotionInternetPlan {
+  id: string;
+  name: string;
+  vendorId: string;
+  vendorName: string;
+  serviceName: string;
+  price: number;           // Monthly price
+  term: number;            // Contract length in months
+  downloadSpeed?: number;  // Mbps
+  uploadSpeed?: number;    // Mbps
+  dataCapGB?: number;      // Data cap in GB (null = unlimited)
+  bulletPoint1?: string;
+  bulletPoint2?: string;
+  bulletPoint3?: string;
+  bulletPoint4?: string;
+  bulletPoint5?: string;
+  logo?: string;
+}
+
 export interface PlanOption {
   id: string;
   type: 'single' | 'multi';

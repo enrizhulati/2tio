@@ -52,48 +52,24 @@ const mockWaterService = {
   ],
 };
 
-const mockInternetService = {
-  available: true,
-  providerCount: 5,
-  startingRate: '$39.99/mo',
-  plans: [
-    {
-      id: 'att-fiber-300',
-      provider: 'AT&T Fiber',
-      name: '300 Mbps',
-      rate: '$55/mo',
-      rateType: 'flat' as const,
-      contractMonths: 12,
-      contractLabel: '12 month price lock',
-      setupFee: 0,
-      features: ['Symmetrical upload/download', 'No data caps'],
-    },
-    {
-      id: 'spectrum-500',
-      provider: 'Spectrum',
-      name: '500 Mbps',
-      rate: '$49.99/mo',
-      rateType: 'flat' as const,
-      contractMonths: 0,
-      contractLabel: 'No contract',
-      setupFee: 0,
-      features: ['Free modem', 'No data caps', 'Free installation this month'],
-      badge: 'RECOMMENDED' as const,
-      badgeReason: 'Fastest speeds at the lowest price with no contract. Free modem and installation included this month.',
-    },
-    {
-      id: 'frontier-gig',
-      provider: 'Frontier',
-      name: '1 Gbps',
-      rate: '$79.99/mo',
-      rateType: 'flat' as const,
-      contractMonths: 24,
-      contractLabel: '2 year price lock',
-      setupFee: 0,
-      features: ['Fastest option available', 'Free eero mesh WiFi'],
-    },
-  ],
-};
+// Internet plan response type from 2TIO API
+interface RawInternetPlan {
+  id: string;
+  name: string;
+  vendorId: string;
+  vendorName: string;
+  serviceName?: string;
+  uPrice?: number;        // Monthly price (some APIs use this)
+  mPrice?: number;        // Monthly price (some APIs use this)
+  price?: number;         // Monthly price (some APIs use this)
+  term: number;
+  bulletPoint1?: string;
+  bulletPoint2?: string;
+  bulletPoint3?: string;
+  bulletPoint4?: string;
+  bulletPoint5?: string;
+  logo?: string;
+}
 
 const initialState = {
   currentStep: 1 as FlowStep,
@@ -156,15 +132,18 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     set({ isCheckingAvailability: true });
 
     try {
-      // Fetch real electricity plans from 2TIO
       const zipCode = address?.zip || '75205';
-      const rawPlans: TwotionPlan[] = await getPlans('electricity', zipCode);
 
-      // Enrich plans with default usage cost estimates
-      const enrichedPlans = enrichPlansWithCosts(rawPlans, DEFAULT_USAGE);
+      // Fetch electricity and internet plans in parallel
+      const [rawElectricityPlans, rawInternetPlans] = await Promise.all([
+        getPlans('electricity', zipCode) as Promise<TwotionPlan[]>,
+        getPlans('internet', zipCode).catch(() => [] as RawInternetPlan[]) as Promise<RawInternetPlan[]>,
+      ]);
 
-      // Convert to ServicePlan format
-      // Note: API returns kWh1000 in cents (e.g., 9 = 9¢/kWh), uPrice is often 0
+      // Enrich electricity plans with default usage cost estimates
+      const enrichedPlans = enrichPlansWithCosts(rawElectricityPlans, DEFAULT_USAGE);
+
+      // Convert electricity plans to ServicePlan format
       const electricityPlans: ServicePlan[] = enrichedPlans.map((plan, index) => ({
         id: plan.id,
         provider: plan.vendorName,
@@ -188,7 +167,33 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           : undefined,
       }));
 
-      // Build available services with real electricity data
+      // Convert internet plans to ServicePlan format
+      // API may return price in different fields - check uPrice, mPrice, or price
+      const internetPlans: ServicePlan[] = rawInternetPlans.map((plan, index) => {
+        const monthlyPrice = plan.uPrice || plan.mPrice || plan.price || 0;
+        return {
+          id: plan.id,
+          provider: plan.vendorName,
+          name: plan.name,
+          rate: monthlyPrice > 0 ? `$${monthlyPrice.toFixed(2)}/mo` : 'Contact for pricing',
+          rateType: 'flat' as const,
+          contractMonths: plan.term || 0,
+          contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
+          setupFee: 0,
+          monthlyEstimate: monthlyPrice > 0 ? `$${Math.round(monthlyPrice)}` : undefined,
+          features: [
+            plan.bulletPoint1,
+            plan.bulletPoint2,
+            plan.bulletPoint3,
+            plan.bulletPoint4,
+            plan.bulletPoint5,
+          ].filter(Boolean) as string[],
+          badge: index === 0 ? 'RECOMMENDED' as const : undefined,
+          badgeReason: index === 0 ? 'Best value for your area' : undefined,
+        };
+      });
+
+      // Build available services with real data
       const availableServices: AvailableServices = {
         water: mockWaterService,
         electricity: {
@@ -197,7 +202,12 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           startingRate: electricityPlans.length > 0 ? electricityPlans[0].rate : undefined,
           plans: electricityPlans,
         },
-        internet: mockInternetService,
+        internet: {
+          available: internetPlans.length > 0,
+          providerCount: new Set(internetPlans.map(p => p.provider)).size,
+          startingRate: internetPlans.length > 0 ? internetPlans[0].rate : undefined,
+          plans: internetPlans,
+        },
       };
 
       set({
@@ -209,18 +219,21 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         },
       });
     } catch (error) {
-      console.error('Error fetching electricity plans:', error);
-      // Still show availability but with empty electricity plans
-      // The UI should show an error message
+      console.error('Error fetching plans:', error);
+      // Still show availability but with empty plans
       set({
         availableServices: {
           water: mockWaterService,
           electricity: {
-            available: false, // Mark as unavailable if API fails
+            available: false,
             providerCount: 0,
             plans: [],
           },
-          internet: mockInternetService,
+          internet: {
+            available: false,
+            providerCount: 0,
+            plans: [],
+          },
         },
         isCheckingAvailability: false,
         availabilityChecked: true,
