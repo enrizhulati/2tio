@@ -473,22 +473,28 @@ function Step1Address() {
           </p>
 
           <div className="space-y-3">
-            {availableServices.water.available && (
-              <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-white flex items-center gap-4">
-                <ServiceIcon type="water" size="xl" />
-                <div className="flex-1">
-                  <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
-                    {SERVICE_INFO.water.label}
-                  </p>
-                  <p className="text-[14px] text-[var(--color-dark)]">
-                    {availableServices.water.provider}
-                  </p>
-                </div>
+            <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-white flex items-center gap-4">
+              <ServiceIcon type="water" size="xl" />
+              <div className="flex-1">
+                <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
+                  {SERVICE_INFO.water.label}
+                </p>
+                <p className="text-[14px] text-[var(--color-dark)]">
+                  {availableServices.water.available
+                    ? availableServices.water.provider
+                    : 'Could not load plans'}
+                </p>
+              </div>
+              {availableServices.water.available ? (
                 <span className="text-[14px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
                   Available
                 </span>
-              </div>
-            )}
+              ) : (
+                <span className="text-[14px] text-[var(--color-warning)] font-medium bg-[var(--color-warning-light)] px-2 py-1 rounded">
+                  Retry later
+                </span>
+              )}
+            </div>
 
             <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-white flex items-center gap-4">
               <ServiceIcon type="electricity" size="xl" />
@@ -513,22 +519,28 @@ function Step1Address() {
               )}
             </div>
 
-            {availableServices.internet.available && (
-              <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-white flex items-center gap-4">
-                <ServiceIcon type="internet" size="xl" />
-                <div className="flex-1">
-                  <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
-                    {SERVICE_INFO.internet.label}
-                  </p>
-                  <p className="text-[14px] text-[var(--color-dark)]">
-                    {availableServices.internet.providerCount} providers
-                  </p>
-                </div>
+            <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-white flex items-center gap-4">
+              <ServiceIcon type="internet" size="xl" />
+              <div className="flex-1">
+                <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
+                  {SERVICE_INFO.internet.label}
+                </p>
+                <p className="text-[14px] text-[var(--color-dark)]">
+                  {availableServices.internet.available
+                    ? `${availableServices.internet.providerCount} providers`
+                    : 'Could not load plans'}
+                </p>
+              </div>
+              {availableServices.internet.available ? (
                 <span className="text-[14px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
                   Available
                 </span>
-              </div>
-            )}
+              ) : (
+                <span className="text-[14px] text-[var(--color-warning)] font-medium bg-[var(--color-warning-light)] px-2 py-1 rounded">
+                  Retry later
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
