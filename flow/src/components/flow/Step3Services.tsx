@@ -21,7 +21,7 @@ import {
 import { SERVICE_INFO, type ServiceType, type ServicePlan } from '@/types/flow';
 import { ServiceIcon } from '@/components/ui';
 
-// Water tooltip with touch/keyboard access
+// Water tooltip with touch/keyboard access - Practical UI: Match checkbox size
 function WaterTooltip() {
   const [show, setShow] = useState(false);
 
@@ -32,7 +32,7 @@ function WaterTooltip() {
         onClick={() => setShow(!show)}
         onMouseEnter={() => setShow(true)}
         onMouseLeave={() => setShow(false)}
-        className="w-6 h-6 rounded bg-[var(--color-teal)] flex items-center justify-center"
+        className="w-7 h-7 rounded-md bg-[var(--color-teal)] flex items-center justify-center"
         aria-label="Water service is required"
         aria-expanded={show}
       >
@@ -92,19 +92,19 @@ function CartSummary() {
   if (selectedCount === 0) return null;
 
   return (
-    <div className="p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)]">
-      <div className="flex items-center gap-2 mb-3">
-        <ShoppingCart className="w-4 h-4 text-[var(--color-teal)]" aria-hidden="true" />
-        <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
+    <div className="p-5 sm:p-6 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)]">
+      <div className="flex items-center gap-2.5 mb-4">
+        <ShoppingCart className="w-5 h-5 text-[var(--color-teal)]" aria-hidden="true" />
+        <span className="text-[18px] font-bold text-[var(--color-darkest)]">
           Your services
         </span>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {selectedServices.water && selectedPlans.water && (
           <div className="flex justify-between text-[16px]">
             <span className="text-[var(--color-dark)]">Water</span>
-            <span className="text-[var(--color-darkest)]">~$55/mo</span>
+            <span className="text-[var(--color-darkest)] font-medium">~$55/mo</span>
           </div>
         )}
 
@@ -113,7 +113,7 @@ function CartSummary() {
             <span className="text-[var(--color-dark)]">
               {selectedPlans.electricity.provider}
             </span>
-            <span className="text-[var(--color-darkest)]">
+            <span className="text-[var(--color-darkest)] font-medium">
               {selectedPlans.electricity.monthlyEstimate || selectedPlans.electricity.rate}/mo
             </span>
           </div>
@@ -124,18 +124,18 @@ function CartSummary() {
             <span className="text-[var(--color-dark)]">
               {selectedPlans.internet.provider}
             </span>
-            <span className="text-[var(--color-darkest)]">
+            <span className="text-[var(--color-darkest)] font-medium">
               {selectedPlans.internet.rate}
             </span>
           </div>
         )}
       </div>
 
-      <div className="mt-3 pt-3 border-t border-[var(--color-light)] flex justify-between">
-        <span className="text-[16px] font-medium text-[var(--color-darkest)]">
+      <div className="mt-4 pt-4 border-t border-[var(--color-light)] flex justify-between items-center">
+        <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
           Est. monthly total
         </span>
-        <span className="text-[16px] font-bold text-[var(--color-teal)]">
+        <span className="text-[18px] font-bold text-[var(--color-teal)]">
           ~${Math.round(monthlyTotal)}/mo
         </span>
       </div>
@@ -190,12 +190,12 @@ function ServiceCard({
         ${isSelected ? 'border-[var(--color-teal)] bg-white' : 'border-[var(--color-light)] bg-white'}
       `}
     >
-      {/* Card header */}
-      <div className="p-4">
+      {/* Card header - Practical UI: M=24px padding, 48px touch targets */}
+      <div className="p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 flex-1">
-            {/* Checkbox/indicator */}
-            <div className="mt-1">
+            {/* Checkbox/indicator - 28px with padding for 48px touch target */}
+            <div className="mt-0.5">
               {isWater ? (
                 // Water is always selected - show locked checkmark with tooltip
                 <WaterTooltip />
@@ -204,8 +204,8 @@ function ServiceCard({
                 <button
                   onClick={onToggle}
                   className={`
-                    w-6 h-6 rounded border-2 flex items-center justify-center
-                    transition-colors duration-150
+                    w-7 h-7 rounded-md border-2 flex items-center justify-center
+                    transition-colors duration-150 min-h-[28px]
                     ${isSelected
                       ? 'bg-[var(--color-teal)] border-[var(--color-teal)]'
                       : 'bg-white border-[var(--color-medium)] hover:border-[var(--color-dark)]'
@@ -223,9 +223,9 @@ function ServiceCard({
 
             {/* Service info */}
             <div className="flex-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <ServiceIcon type={type} size="xl" />
-                <h3 className="text-[22px] font-semibold text-[var(--color-darkest)]">
+                <h3 className="text-[22px] font-bold text-[var(--color-darkest)] tracking-tight">
                   {SERVICE_INFO[type].label}
                 </h3>
                 {isWater && (
@@ -237,24 +237,24 @@ function ServiceCard({
 
               {isWater && service.provider ? (
                 // Water shows city branding from API
-                <div className="mt-3">
+                <div className="mt-4">
                   {service.logo && (
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-3 mb-3">
                       <Image
                         src={service.logo}
                         alt={service.provider}
                         width={140}
                         height={36}
-                        className="h-8 w-auto"
+                        className="h-9 w-auto"
                       />
                     </div>
                   )}
                   <p className="text-[16px] text-[var(--color-dark)]">
                     {service.logo ? 'Official city water service' : service.provider}
                   </p>
-                  <div className="flex items-center gap-4 mt-2 text-[16px] text-[var(--color-dark)]">
-                    <span>Est. ~$45-65/mo</span>
-                    <span className="text-[var(--color-teal)] font-medium">$0 setup fee</span>
+                  <div className="flex items-center gap-4 mt-3 text-[16px]">
+                    <span className="text-[var(--color-darkest)] font-medium">Est. ~$45-65/mo</span>
+                    <span className="text-[var(--color-teal)] font-semibold">$0 setup fee</span>
                   </div>
                 </div>
               ) : isLoading && type === 'electricity' ? (
@@ -264,23 +264,23 @@ function ServiceCard({
                   <span className="text-[16px]">Loading personalized rates...</span>
                 </div>
               ) : (
-                // Other services show provider count
-                <div className="mt-1">
-                  <p className="text-[16px] text-[var(--color-dark)]">
+                // Other services show provider count - Practical UI: Clear hierarchy
+                <div className="mt-3 space-y-1.5">
+                  <p className="text-[16px] text-[var(--color-darkest)] font-medium">
                     {service.providerCount} providers available
                   </p>
                   <p className="text-[16px] text-[var(--color-dark)]">
-                    Starting at {service.startingRate}
+                    Starting at <span className="font-semibold text-[var(--color-darkest)]">{service.startingRate}</span>
                   </p>
                   {/* Show home-based estimate for electricity */}
                   {type === 'electricity' && homeDetails?.foundDetails && plans.length > 0 && plans[0].monthlyEstimate && (
-                    <p className="text-[16px] text-[var(--color-teal)] font-medium mt-1">
+                    <p className="text-[16px] text-[var(--color-teal)] font-semibold">
                       Est. {plans[0].monthlyEstimate}/mo based on your home
                     </p>
                   )}
                   {/* Show speed info for internet */}
                   {type === 'internet' && plans.length > 0 && plans[0].downloadSpeed && (
-                    <p className="text-[16px] text-[var(--color-teal)] font-medium mt-1">
+                    <p className="text-[16px] text-[var(--color-teal)] font-semibold">
                       Up to {plans[0].downloadSpeed}
                       {plans[0].uploadSpeed ? `/${plans[0].uploadSpeed}` : ''} Mbps
                       {plans[0].dataCapGB === null || plans[0].dataCapGB === undefined || plans[0].dataCapGB === 0
@@ -293,24 +293,24 @@ function ServiceCard({
 
               {/* Upsell message for non-selected services */}
               {!isWater && !isSelected && upsellMessages[type as 'electricity' | 'internet'] && (
-                <div className="flex items-center gap-1 mt-2 text-[16px] text-[var(--color-teal)]">
-                  <Star className="w-4 h-4" aria-hidden="true" />
-                  <span>{upsellMessages[type as 'electricity' | 'internet']}</span>
+                <div className="flex items-center gap-1.5 mt-3 text-[16px] text-[var(--color-teal)]">
+                  <Star className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                  <span className="font-medium">{upsellMessages[type as 'electricity' | 'internet']}</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Add/Remove button for non-water services */}
+          {/* Add/Remove button - Practical UI: 48px min touch target, prominent CTA */}
           {!isWater && (
             <button
               onClick={onToggle}
               className={`
-                flex items-center gap-1 px-3 py-1.5 rounded-lg text-[16px] font-medium
-                transition-colors duration-150
+                flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-[16px] font-semibold
+                transition-all duration-150 min-h-[44px] shadow-sm
                 ${isSelected
-                  ? 'text-[var(--color-error)] hover:bg-[var(--color-error-light)]'
-                  : 'text-[var(--color-teal)] bg-[var(--color-teal-light)] hover:bg-[var(--color-teal)] hover:text-white'
+                  ? 'text-[var(--color-error)] bg-[var(--color-lightest)] hover:bg-[var(--color-error-light)] border border-[var(--color-light)]'
+                  : 'text-white bg-[var(--color-teal)] hover:bg-[var(--color-teal-dark)] shadow-md'
                 }
               `}
             >
@@ -330,34 +330,36 @@ function ServiceCard({
         </div>
       </div>
 
-      {/* Expandable plan selection - Practical UI: Accessible disclosure */}
+      {/* Expandable plan selection - Practical UI: Accessible disclosure, 48px touch target */}
       {isSelected && !isWater && (
         <div className="border-t border-[var(--color-light)]">
           <button
             onClick={onExpand}
-            className="w-full p-4 flex items-center justify-between text-left hover:bg-[var(--color-lightest)] transition-colors"
+            className="w-full px-5 sm:px-6 py-4 flex items-center justify-between text-left hover:bg-[var(--color-lightest)] transition-colors min-h-[56px]"
             aria-expanded={isExpanded}
             aria-controls={`${type}-plan-section`}
           >
-            <div>
-              <span className="text-[16px] font-medium text-[var(--color-darkest)]">
+            <div className="flex-1 min-w-0">
+              <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
                 {selectedPlan ? `${selectedPlan.provider} - ${selectedPlan.name}` : 'Choose your plan'}
               </span>
               {selectedPlan && (
-                <span className="text-[16px] text-[var(--color-dark)] ml-2">
+                <span className="text-[16px] text-[var(--color-dark)] ml-2 block sm:inline mt-0.5 sm:mt-0">
                   {selectedPlan.rate} • {selectedPlan.contractLabel}
                 </span>
               )}
             </div>
-            {isExpanded ? (
-              <ChevronUp className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
-            )}
+            <div className="flex-shrink-0 ml-3">
+              {isExpanded ? (
+                <ChevronUp className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
+              )}
+            </div>
           </button>
 
           {isExpanded && (
-            <div id={`${type}-plan-section`} className="px-4 pb-4 animate-slide-up overflow-hidden">
+            <div id={`${type}-plan-section`} className="px-5 sm:px-6 pb-5 sm:pb-6 animate-slide-up overflow-hidden">
               {/* Usage Chart for electricity - show with real or default usage */}
               {type === 'electricity' && sortedPlans.length > 0 && sortedPlans[0].annualCost && (
                 <UsageChart
