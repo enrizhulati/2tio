@@ -922,11 +922,10 @@ export const useFlowStore = create<FlowState>((set, get) => ({
             rawPlan?.bulletPoint4,
             rawPlan?.bulletPoint5,
           ].filter(Boolean) as string[],
-          badge: plan.renewable ? 'GREEN' : index === 0 ? 'RECOMMENDED' : undefined,
+          // Badge assigned dynamically in component after sorting by cost
+          badge: plan.renewable ? 'GREEN' : undefined,
           badgeReason: plan.renewable
             ? '100% renewable energy from Texas wind and solar'
-            : index === 0
-            ? 'Best value based on your home\'s usage profile'
             : undefined,
           // Enriched fields from usage calculation
           annualCost,

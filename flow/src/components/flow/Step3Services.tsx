@@ -181,19 +181,22 @@ function ServiceCard({
   const isWater = type === 'water';
   const plans = service.plans;
 
-  // Sort plans by annualCost (cheapest first) for electricity
+  // Sort plans by annualCost (cheapest first) and assign RECOMMENDED badge to cheapest
   const sortedPlans = useMemo(() => {
     if (type !== 'electricity') return plans;
     const sorted = [...plans].sort((a, b) => (a.annualCost || Infinity) - (b.annualCost || Infinity));
-    // Debug: Log when plans are sorted
-    if (sorted.length > 0) {
-      console.log('[sortedPlans] Top 3 plans after sort:', sorted.slice(0, 3).map(p => ({
-        name: p.name,
-        provider: p.provider,
-        annualCost: p.annualCost,
-      })));
-    }
-    return sorted;
+
+    // Assign RECOMMENDED badge to cheapest non-renewable plan
+    return sorted.map((plan, index) => {
+      if (index === 0 && !plan.renewable) {
+        return {
+          ...plan,
+          badge: 'RECOMMENDED' as const,
+          badgeReason: 'Best value based on your usage estimate',
+        };
+      }
+      return plan;
+    });
   }, [plans, type]);
 
   // Top 3 plans for initial display
