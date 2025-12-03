@@ -149,16 +149,20 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   setMoveInDate: (date: string) => set({ moveInDate: date }),
 
   checkAvailability: async () => {
-    const { address } = get();
+    const { address, usageProfile } = get();
     set({ isCheckingAvailability: true });
 
     try {
       const zipCode = address?.zip || '75205';
 
+      // Use usage profile or default for cost calculations
+      const usageArray = usageProfile?.usage || DEFAULT_USAGE;
+
       // Fetch all service plans in parallel from 2TIO API
       // Each has catch handler to prevent rate limiting errors from killing all services
+      // Pass usage to electricity API for server-side cost calculation
       const [rawElectricityPlans, rawInternetPlans, rawWaterPlans] = await Promise.all([
-        getPlans('electricity', zipCode).catch((err) => {
+        getPlans('electricity', zipCode, usageArray).catch((err) => {
           console.error('Error fetching electricity plans:', err);
           return [] as TwotionPlan[];
         }),
@@ -172,8 +176,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         }),
       ]);
 
-      // Enrich electricity plans with default usage cost estimates
-      const enrichedPlans = enrichPlansWithCosts(rawElectricityPlans, DEFAULT_USAGE);
+      // Use API's totalCost if available, otherwise fallback to client calculation
+      const enrichedPlans = rawElectricityPlans.map((plan) => ({
+        ...plan,
+        annualCost: plan.totalCost ?? enrichPlansWithCosts([plan], usageArray)[0]?.annualCost,
+        monthlyEstimate: plan.totalCost
+          ? plan.totalCost / 12
+          : enrichPlansWithCosts([plan], usageArray)[0]?.monthlyEstimate,
+      }));
 
       // Convert electricity plans to ServicePlan format with all API fields
       const electricityPlans: ServicePlan[] = enrichedPlans.map((plan, index) => {
@@ -839,19 +849,25 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     set({ isLoadingElectricity: true });
 
     try {
-      // Fetch plans from 2TIO
-      const rawPlans: TwotionPlan[] = await getPlans('electricity', zipCode);
-
       // Use usage profile or default usage for cost calculations
-      const usage = usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900];
+      const usage = usageProfile?.usage || DEFAULT_USAGE;
 
-      // Enrich plans with annual cost calculations
-      const enrichedPlans = enrichPlansWithCosts(rawPlans, usage);
+      // Fetch plans from 2TIO with usage for server-side cost calculation
+      const rawPlans: TwotionPlan[] = await getPlans('electricity', zipCode, usage);
 
       // Convert to ServicePlan format for the store with all API fields
       // Note: API returns kWh1000 in cents (e.g., 9 = 9¢/kWh), uPrice is often 0
-      const servicePlans: ServicePlan[] = enrichedPlans.map((plan, index) => {
-        const rawPlan = rawPlans[index] as unknown as RawServicePlan;
+      // Use API's totalCost if available, otherwise fallback to client calculation
+      const servicePlans: ServicePlan[] = rawPlans.map((plan, index) => {
+        const rawPlan = plan as unknown as RawServicePlan;
+
+        // Prefer server-calculated totalCost, fallback to client calculation
+        const clientCosts = enrichPlansWithCosts([plan], usage)[0];
+        const annualCost = plan.totalCost ?? clientCosts?.annualCost;
+        const monthlyEstimate = plan.totalCost
+          ? plan.totalCost / 12
+          : clientCosts?.monthlyEstimate;
+
         return {
           id: plan.id,
           provider: plan.vendorName,
@@ -861,7 +877,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           contractMonths: plan.term,
           contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
           setupFee: 0,
-          monthlyEstimate: plan.monthlyEstimate ? `$${Math.round(plan.monthlyEstimate)}` : undefined,
+          monthlyEstimate: monthlyEstimate ? `$${Math.round(monthlyEstimate)}` : undefined,
           features: [
             rawPlan?.bulletPoint1,
             rawPlan?.bulletPoint2,
@@ -876,7 +892,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
             ? 'Best value based on your home\'s usage profile'
             : undefined,
           // Enriched fields from usage calculation
-          annualCost: plan.annualCost,
+          annualCost,
           renewable: plan.renewable,
           // New fields from 2TIO API
           logo: rawPlan?.logo,

@@ -62,6 +62,10 @@ export interface TwotionPlan {
   // Calculated fields (added by client)
   annualCost?: number;
   monthlyEstimate?: number;
+  // Server-calculated pricing fields (from pricing API)
+  totalCost?: number;      // Annual cost with credits, tiered pricing, etc.
+  avgPrice?: number;       // Average price per kWh
+  avgBillAmount?: number;  // Average monthly bill
 }
 
 export interface TwotionInternetPlan {
@@ -218,7 +222,11 @@ export async function getServices(zipCode: string): Promise<TwotionService[]> {
   return response.json();
 }
 
-export async function getPlans(serviceName: string, zipCode: string): Promise<TwotionPlan[]> {
+export async function getPlans(
+  serviceName: string,
+  zipCode: string,
+  electricityUsage?: number[]
+): Promise<TwotionPlan[]> {
   // Retry logic for rate limiting (429 errors)
   const maxRetries = 3;
   let lastError: Error | null = null;
@@ -229,7 +237,13 @@ export async function getPlans(serviceName: string, zipCode: string): Promise<Tw
       await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
     }
 
-    const response = await fetch(`/api/twotion?action=plans&service=${serviceName}&zipCode=${zipCode}`);
+    // Build URL with optional electricity usage for server-side cost calculation
+    let url = `/api/twotion?action=plans&service=${serviceName}&zipCode=${zipCode}`;
+    if (serviceName === 'electricity' && electricityUsage && electricityUsage.length > 0) {
+      url += `&electricityUsage=${electricityUsage.join(',')}`;
+    }
+
+    const response = await fetch(url);
 
     if (response.ok) {
       return response.json();

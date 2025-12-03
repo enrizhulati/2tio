@@ -156,12 +156,19 @@ export async function GET(request: NextRequest) {
     if (action === 'plans') {
       const serviceName = searchParams.get('service') || 'electricity';
       const zipCode = searchParams.get('zipCode');
+      const electricityUsage = searchParams.get('electricityUsage');
 
       if (!zipCode) {
         return NextResponse.json({ error: 'Zip code required' }, { status: 400 });
       }
 
-      const url = `${TWOTION_API}/services/${serviceName}/plans?zipCode=${zipCode}`;
+      let url = `${TWOTION_API}/services/${serviceName}/plans?zipCode=${zipCode}`;
+
+      // Pass electricity usage to API for server-side cost calculation
+      if (serviceName === 'electricity' && electricityUsage) {
+        url += `&electricityUsage=${encodeURIComponent(electricityUsage)}`;
+      }
+
       const headers = getTwotionHeaders();
 
       const response = await fetch(url, { headers });
