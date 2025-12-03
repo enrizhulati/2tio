@@ -482,7 +482,7 @@ function Step1Address() {
                 <p className="text-[14px] text-[var(--color-dark)]">
                   {availableServices.water.available
                     ? availableServices.water.provider
-                    : 'Could not load plans'}
+                    : 'Temporarily unavailable'}
                 </p>
               </div>
               {availableServices.water.available ? (
@@ -491,7 +491,7 @@ function Step1Address() {
                 </span>
               ) : (
                 <span className="text-[14px] text-[var(--color-warning)] font-medium bg-[var(--color-warning-light)] px-2 py-1 rounded">
-                  Retry later
+                  Check back
                 </span>
               )}
             </div>
@@ -505,7 +505,7 @@ function Step1Address() {
                 <p className="text-[14px] text-[var(--color-dark)]">
                   {availableServices.electricity.available
                     ? `${availableServices.electricity.providerCount} providers`
-                    : 'Could not load plans'}
+                    : 'Temporarily unavailable'}
                 </p>
               </div>
               {availableServices.electricity.available ? (
@@ -514,7 +514,7 @@ function Step1Address() {
                 </span>
               ) : (
                 <span className="text-[14px] text-[var(--color-warning)] font-medium bg-[var(--color-warning-light)] px-2 py-1 rounded">
-                  Retry later
+                  Check back
                 </span>
               )}
             </div>
@@ -528,7 +528,7 @@ function Step1Address() {
                 <p className="text-[14px] text-[var(--color-dark)]">
                   {availableServices.internet.available
                     ? `${availableServices.internet.providerCount} providers`
-                    : 'Could not load plans'}
+                    : 'Temporarily unavailable'}
                 </p>
               </div>
               {availableServices.internet.available ? (
@@ -537,7 +537,7 @@ function Step1Address() {
                 </span>
               ) : (
                 <span className="text-[14px] text-[var(--color-warning)] font-medium bg-[var(--color-warning-light)] px-2 py-1 rounded">
-                  Retry later
+                  Check back
                 </span>
               )}
             </div>

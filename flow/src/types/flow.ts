@@ -79,6 +79,10 @@ export interface ServicePlan {
   serviceName?: string;       // Service type from API (Water, Electricity, etc.)
   cancellationFee?: number;   // Early termination fee
   renewablePercent?: number;  // Percentage of renewable energy
+  // Internet-specific fields
+  downloadSpeed?: number;     // Mbps download speed
+  uploadSpeed?: number;       // Mbps upload speed
+  dataCapGB?: number;         // Data cap in GB (null = unlimited)
 }
 
 export interface ServiceAvailability {
@@ -173,6 +177,12 @@ export interface TwotionCheckoutStep {
   IsDLUpload: boolean;
   IsLeaseUpload: boolean;
   IsOwnUpload: boolean;
+  // Terms and consent text from API
+  Terms?: string;
+  ConsentText?: string;
+  TermsUrl?: string;
+  EflUrl?: string;  // Electricity Facts Label
+  YracUrl?: string; // Your Rights as a Customer
 }
 
 export interface FlowState {

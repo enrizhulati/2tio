@@ -234,6 +234,10 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           cancellationFee: plan.cancellationFee,
           renewable: plan.renewable,
           renewablePercent: plan.renewablePercent,
+          // Internet-specific fields
+          downloadSpeed: plan.downloadSpeed,
+          uploadSpeed: plan.uploadSpeed,
+          dataCapGB: plan.dataCapGB,
         };
       });
 

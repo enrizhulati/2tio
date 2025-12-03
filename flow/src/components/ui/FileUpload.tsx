@@ -123,7 +123,7 @@ function FileUpload({
               />
             </div>
             <span className="text-[14px] text-[var(--color-dark)] mt-1 block">
-              {document.progress}%
+              Uploading... {document.progress}%
             </span>
           </div>
         ) : document.status === 'uploaded' ? (

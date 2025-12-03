@@ -81,6 +81,7 @@ function RadioOption({
         block relative cursor-pointer
         p-4 rounded-lg border-2
         transition-all duration-150
+        has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--color-teal)] has-[:focus-visible]:ring-offset-2
         ${
           isSelected
             ? 'border-[var(--color-teal)] bg-[var(--color-teal-light)]'
@@ -95,7 +96,7 @@ function RadioOption({
         value={value}
         checked={isSelected}
         onChange={() => onChange(value)}
-        className="sr-only"
+        className="sr-only peer"
       />
 
       <div className="flex items-start gap-3">

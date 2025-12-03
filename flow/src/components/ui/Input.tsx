@@ -82,7 +82,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               border-2 rounded-xl
               transition-colors duration-150
               placeholder:text-[var(--color-medium)]
-              focus:outline-none focus:border-[var(--color-teal)]
+              focus:outline-none focus:border-[var(--color-teal)] focus:ring-2 focus:ring-[var(--color-teal)] focus:ring-opacity-20
               disabled:bg-[var(--color-lightest)] disabled:text-[var(--color-medium)] disabled:cursor-not-allowed
               ${leftIcon ? 'pl-12' : ''}
               ${rightIcon ? 'pr-12' : ''}

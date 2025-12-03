@@ -15,18 +15,140 @@ import {
   Clock,
   ChevronDown,
   ChevronUp,
+  ExternalLink,
 } from 'lucide-react';
-import { SERVICE_INFO } from '@/types/flow';
+import { SERVICE_INFO, type ServicePlan, type TwotionCheckoutStep } from '@/types/flow';
 
-const TERMS_TEXT = `By submitting my order, I authorize 2turniton and Fulcrum Retail Energy, LLC d/b/a Amigo Energy to perform all necessary tasks to establish my electricity service.
+// Generate terms text for a vendor - uses API terms if available, otherwise generic
+function generateVendorTerms(
+  vendorName: string,
+  serviceName: string,
+  plan?: ServicePlan,
+  checkoutStep?: TwotionCheckoutStep
+): string {
+  // If API provides terms, use them
+  if (checkoutStep?.Terms) {
+    return checkoutStep.Terms;
+  }
 
-I authorize Amigo Energy to perform a credit check and review my credit and payment history with credit reporting agencies, its affiliates, and my previous electricity providers based on my information that I have provided for enrollment. I understand that if I do not qualify under Amigo Energy's deposit criteria and payment history, I may be required to pay a deposit and/or an outstanding balance before my enrollment is complete.
+  // Generate dynamic terms based on the vendor
+  const cancellationFee = plan?.cancellationFee || 175;
+  const contractMonths = plan?.contractMonths || 0;
+
+  if (serviceName === 'Electricity') {
+    return `By submitting my order, I authorize 2turniton and ${vendorName} to perform all necessary tasks to establish my electricity service.
+
+I authorize ${vendorName} to perform a credit check and review my credit and payment history with credit reporting agencies, its affiliates, and my previous electricity providers based on my information that I have provided for enrollment. I understand that if I do not qualify under ${vendorName}'s deposit criteria and payment history, I may be required to pay a deposit and/or an outstanding balance before my enrollment is complete.
 
 Yes, I wish to sign up for the selected electricity plan.
 
-I have read and understand the Terms of Service, Electricity Facts Label, and Your Rights as a Customer documents. I understand that a move-in or switch request can only be made by the electric service applicant or the applicant's authorized agent and I agree to allow Amigo Energy to perform the necessary tasks to complete a switch or move-in for my service with Amigo Energy. I verify that I am at least 18 years of age and legally authorized to buy electricity for the address listed above. I agree to pay the price as specified above. The price includes (i) the Energy Charge, (ii) applicable Transmission and Distribution Utility ("TDU") tariff, if not included in the Energy Charge, (iii) a Monthly Base charge per ESI-ID, and (iv) all recurring charges. This price does not include applicable federal, state and local taxes or any fees (including gross receipt tax reimbursement), other amounts charged by a governmental entity, and all other non-recurring fees. By selecting a specific switch date, you are agreeing to an off-cycle switch fee that is passed-through from your TDSP without mark-up. See the Electricity Facts Label for specific pricing details. If a switch transaction was selected, I may rescind this agreement without penalty before midnight of the third federal business day after submitting this enrollment. After this period or for new (move-in) service, an early termination fee of $175 per ESIID for each full and partial year left in the term will apply if I cancel this agreement without providing proof of my move (including a forwarding address). I can print and save copies of these documents which are provided above. I understand that after submitting this enrollment request, I will also receive a copy of these documents, including the Terms of Service, from Amigo Energy via email, and upon request, via US mail, and that these documents, including the Terms of Service, explain all the terms of the agreement and how to exercise the right of rescission, if applicable.
+I have read and understand the Terms of Service, Electricity Facts Label, and Your Rights as a Customer documents. I understand that a move-in or switch request can only be made by the electric service applicant or the applicant's authorized agent and I agree to allow ${vendorName} to perform the necessary tasks to complete a switch or move-in for my service with ${vendorName}. I verify that I am at least 18 years of age and legally authorized to buy electricity for the address listed above. I agree to pay the price as specified above. The price includes (i) the Energy Charge, (ii) applicable Transmission and Distribution Utility ("TDU") tariff, if not included in the Energy Charge, (iii) a Monthly Base charge per ESI-ID, and (iv) all recurring charges. This price does not include applicable federal, state and local taxes or any fees (including gross receipt tax reimbursement), other amounts charged by a governmental entity, and all other non-recurring fees. By selecting a specific switch date, you are agreeing to an off-cycle switch fee that is passed-through from your TDSP without mark-up. See the Electricity Facts Label for specific pricing details. If a switch transaction was selected, I may rescind this agreement without penalty before midnight of the third federal business day after submitting this enrollment. ${contractMonths > 0 ? `After this period or for new (move-in) service, an early termination fee of $${cancellationFee} per ESIID for each full and partial year left in the term will apply if I cancel this agreement without providing proof of my move (including a forwarding address).` : ''} I can print and save copies of these documents which are provided above. I understand that after submitting this enrollment request, I will also receive a copy of these documents, including the Terms of Service, from ${vendorName} via email, and upon request, via US mail, and that these documents, including the Terms of Service, explain all the terms of the agreement and how to exercise the right of rescission, if applicable.`;
+  }
 
-I understand that any Nights Free plans are not available for premises with distributed generation. If solar panels, energy storage, or similar systems are installed before or after the authorization of the contract for any Nights Free plans, Amigo Energy may switch my ESIID to a Variable Price Product with 14 days' notice. I will refer to the Terms of Service and Electricity Facts Label (EFL); and I will contact Amigo Energy before installing such systems to explore eligible plan options.`;
+  if (serviceName === 'Internet') {
+    return `By submitting my order, I authorize 2turniton and ${vendorName} to perform all necessary tasks to establish my internet service.
+
+I authorize ${vendorName} to verify my identity and service address. I understand that service availability and pricing may vary based on my location.
+
+Yes, I wish to sign up for the selected internet plan.
+
+I have read and understand the Terms of Service. I verify that I am at least 18 years of age and legally authorized to establish internet service for the address listed above.${contractMonths > 0 ? ` I understand that an early termination fee of $${cancellationFee} may apply if I cancel this agreement before the end of my ${contractMonths}-month contract term.` : ''} I understand that after submitting this enrollment request, I will receive confirmation from ${vendorName} via email.`;
+  }
+
+  // Generic terms for other services (water, etc.)
+  return `By submitting my order, I authorize 2turniton and ${vendorName} to perform all necessary tasks to establish my ${serviceName.toLowerCase()} service.
+
+I have read and understand the Terms of Service. I verify that I am at least 18 years of age and legally authorized to establish ${serviceName.toLowerCase()} service for the address listed above. I understand that after submitting this enrollment request, I will receive confirmation from ${vendorName} via email.`;
+}
+
+// Per-vendor terms expandable section
+function VendorTermsSection({
+  vendorName,
+  serviceName,
+  plan,
+  checkoutStep,
+  isExpanded,
+  onToggle,
+}: {
+  vendorName: string;
+  serviceName: string;
+  plan?: ServicePlan;
+  checkoutStep?: TwotionCheckoutStep;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const termsText = generateVendorTerms(vendorName, serviceName, plan, checkoutStep);
+  const sectionId = `terms-${serviceName.toLowerCase()}`;
+
+  return (
+    <div className="border border-[var(--color-light)] rounded-lg overflow-hidden">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--color-lightest)] transition-colors"
+        aria-expanded={expanded}
+        aria-controls={sectionId}
+      >
+        <div className="flex items-center gap-2">
+          <ServiceIcon type={serviceName.toLowerCase() as 'electricity' | 'internet' | 'water'} size="sm" />
+          <span className="text-[16px] font-medium text-[var(--color-darkest)]">
+            {vendorName} - {serviceName}
+          </span>
+        </div>
+        {expanded ? (
+          <ChevronUp className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
+        ) : (
+          <ChevronDown className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
+        )}
+      </button>
+      {expanded && (
+        <div id={sectionId} className="px-4 pb-4 border-t border-[var(--color-light)]">
+          <p className="text-[14px] text-[var(--color-dark)] whitespace-pre-line leading-relaxed pt-4">
+            {termsText}
+          </p>
+          {/* Show document links if available from API */}
+          {(checkoutStep?.TermsUrl || checkoutStep?.EflUrl || checkoutStep?.YracUrl) && (
+            <div className="mt-4 flex flex-wrap gap-3">
+              {checkoutStep.TermsUrl && (
+                <a
+                  href={checkoutStep.TermsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[14px] text-[var(--color-teal)] underline"
+                >
+                  Terms of Service
+                  <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                </a>
+              )}
+              {checkoutStep.EflUrl && (
+                <a
+                  href={checkoutStep.EflUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[14px] text-[var(--color-teal)] underline"
+                >
+                  Electricity Facts Label
+                  <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                </a>
+              )}
+              {checkoutStep.YracUrl && (
+                <a
+                  href={checkoutStep.YracUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[14px] text-[var(--color-teal)] underline"
+                >
+                  Your Rights as a Customer
+                  <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Step5Review() {
   const {
@@ -38,6 +160,7 @@ function Step5Review() {
     documents,
     isSubmitting,
     orderConfirmation,
+    checkoutSteps,
     submitOrder,
     prevStep,
     goToStep,
@@ -110,26 +233,41 @@ function Step5Review() {
             <div className="border-t border-[var(--color-light)] my-4" />
 
             {/* Services status */}
-            <div className="space-y-3">
-              {orderConfirmation.services.map((service) => (
-                <div key={service.type} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <ServiceIcon type={service.type} size="md" />
-                    <div>
-                      <p className="text-[16px] font-medium text-[var(--color-darkest)]">
-                        {SERVICE_INFO[service.type].label}
-                      </p>
-                      <p className="text-[14px] text-[var(--color-dark)]">
-                        {service.provider}
-                      </p>
+            <div className="space-y-4">
+              {orderConfirmation.services.map((service) => {
+                const plan = selectedPlans[service.type];
+                return (
+                  <div key={service.type} className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      <ServiceIcon type={service.type} size="md" />
+                      <div>
+                        <p className="text-[16px] font-medium text-[var(--color-darkest)]">
+                          {SERVICE_INFO[service.type].label}
+                        </p>
+                        <p className="text-[14px] text-[var(--color-dark)]">
+                          {service.provider}
+                        </p>
+                        {/* Show lead time from API */}
+                        {plan?.leadTime !== undefined && plan.leadTime > 0 && (
+                          <p className="text-[14px] text-[var(--color-teal)]">
+                            Ready in {plan.leadTime} {plan.leadTime === 1 ? 'day' : 'days'}
+                          </p>
+                        )}
+                        {/* Show vendor contact from API */}
+                        {plan?.vendorPhone && (
+                          <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                            Support: <a href={`tel:${plan.vendorPhone}`} className="text-[var(--color-teal)] underline">{plan.vendorPhone}</a>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 text-[14px] text-[var(--color-warning)]">
+                      <Clock className="w-4 h-4" aria-hidden="true" />
+                      <span>Setting up...</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-[14px] text-[var(--color-warning)]">
-                    <Clock className="w-4 h-4" aria-hidden="true" />
-                    <span>Setting up...</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -315,6 +453,12 @@ function Step5Review() {
                 <p className="text-[14px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.water.name} • Setup: ${selectedPlans.water.setupFee}
                 </p>
+                {/* Show vendor contact from API */}
+                {selectedPlans.water.vendorPhone && (
+                  <p className="text-[14px] text-[var(--color-dark)] ml-7 mt-1">
+                    Support: <a href={`tel:${selectedPlans.water.vendorPhone}`} className="text-[var(--color-teal)] underline">{selectedPlans.water.vendorPhone}</a>
+                  </p>
+                )}
               </div>
             )}
 
@@ -332,10 +476,22 @@ function Step5Review() {
                 <p className="text-[14px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.electricity.rate} • {selectedPlans.electricity.contractLabel}
                 </p>
-                {/* Show ETF info for contracts - Practical UI: Be upfront, 14px min, 4.5:1 contrast */}
-                {selectedPlans.electricity.contractMonths && selectedPlans.electricity.contractMonths > 0 && (
+                {/* Show ETF info from API */}
+                {selectedPlans.electricity.contractMonths && selectedPlans.electricity.contractMonths > 0 && selectedPlans.electricity.cancellationFee && (
                   <p className="text-[14px] text-[var(--color-dark)] ml-7 mt-1">
-                    Early cancellation fee: $175 per remaining year
+                    Early cancellation fee: ${selectedPlans.electricity.cancellationFee}
+                  </p>
+                )}
+                {/* Show lead time from API */}
+                {selectedPlans.electricity.leadTime !== undefined && selectedPlans.electricity.leadTime > 0 && (
+                  <p className="text-[14px] text-[var(--color-teal)] ml-7 mt-1">
+                    Service starts in {selectedPlans.electricity.leadTime} {selectedPlans.electricity.leadTime === 1 ? 'day' : 'days'}
+                  </p>
+                )}
+                {/* Show vendor contact from API */}
+                {selectedPlans.electricity.vendorPhone && (
+                  <p className="text-[14px] text-[var(--color-dark)] ml-7 mt-1">
+                    Support: <a href={`tel:${selectedPlans.electricity.vendorPhone}`} className="text-[var(--color-teal)] underline">{selectedPlans.electricity.vendorPhone}</a>
                   </p>
                 )}
               </div>
@@ -355,6 +511,18 @@ function Step5Review() {
                 <p className="text-[14px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.internet.rate} • {selectedPlans.internet.contractLabel}
                 </p>
+                {/* Show lead time from API */}
+                {selectedPlans.internet.leadTime !== undefined && selectedPlans.internet.leadTime > 0 && (
+                  <p className="text-[14px] text-[var(--color-teal)] ml-7 mt-1">
+                    Service starts in {selectedPlans.internet.leadTime} {selectedPlans.internet.leadTime === 1 ? 'day' : 'days'}
+                  </p>
+                )}
+                {/* Show vendor contact from API */}
+                {selectedPlans.internet.vendorPhone && (
+                  <p className="text-[14px] text-[var(--color-dark)] ml-7 mt-1">
+                    Support: <a href={`tel:${selectedPlans.internet.vendorPhone}`} className="text-[var(--color-teal)] underline">{selectedPlans.internet.vendorPhone}</a>
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -391,35 +559,45 @@ function Step5Review() {
         </div>
       </div>
 
-      {/* Terms Agreement */}
+      {/* Terms Agreement - Per vendor */}
       <div className="border-b border-[var(--color-light)] pb-6">
         <h3 className="text-[22px] font-semibold text-[var(--color-darkest)] mb-4">
           Terms of Service
         </h3>
 
-        {/* Expandable terms - Practical UI: Accessible disclosure */}
-        <div className="border border-[var(--color-light)] rounded-lg overflow-hidden mb-4">
-          <button
-            onClick={() => setTermsExpanded(!termsExpanded)}
-            className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--color-lightest)] transition-colors"
-            aria-expanded={termsExpanded}
-            aria-controls="terms-content"
-          >
-            <span className="text-[16px] text-[var(--color-darkest)]">
-              {termsExpanded ? 'Hide terms and conditions' : 'View full terms and conditions'}
-            </span>
-            {termsExpanded ? (
-              <ChevronUp className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
-            )}
-          </button>
-          {termsExpanded && (
-            <div id="terms-content" className="px-4 pb-4 max-h-64 overflow-y-auto border-t border-[var(--color-light)]">
-              <p className="text-[14px] text-[var(--color-dark)] whitespace-pre-line leading-relaxed pt-4">
-                {TERMS_TEXT}
-              </p>
-            </div>
+        {/* Show terms per selected service/vendor */}
+        <div className="space-y-3 mb-4">
+          {selectedServices.electricity && selectedPlans.electricity && (
+            <VendorTermsSection
+              vendorName={selectedPlans.electricity.provider}
+              serviceName="Electricity"
+              plan={selectedPlans.electricity}
+              checkoutStep={checkoutSteps?.find(s => s.VendorName === selectedPlans.electricity?.provider)}
+              isExpanded={termsExpanded}
+              onToggle={() => setTermsExpanded(!termsExpanded)}
+            />
+          )}
+
+          {selectedServices.internet && selectedPlans.internet && (
+            <VendorTermsSection
+              vendorName={selectedPlans.internet.provider}
+              serviceName="Internet"
+              plan={selectedPlans.internet}
+              checkoutStep={checkoutSteps?.find(s => s.VendorName === selectedPlans.internet?.provider)}
+              isExpanded={termsExpanded}
+              onToggle={() => setTermsExpanded(!termsExpanded)}
+            />
+          )}
+
+          {selectedServices.water && selectedPlans.water && (
+            <VendorTermsSection
+              vendorName={selectedPlans.water.provider}
+              serviceName="Water"
+              plan={selectedPlans.water}
+              checkoutStep={checkoutSteps?.find(s => s.VendorName === selectedPlans.water?.provider)}
+              isExpanded={termsExpanded}
+              onToggle={() => setTermsExpanded(!termsExpanded)}
+            />
           )}
         </div>
 
@@ -434,19 +612,7 @@ function Step5Review() {
             />
           </div>
           <span className="text-[16px] leading-relaxed text-[var(--color-darkest)]">
-            I agree to the{' '}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setTermsExpanded(true);
-              }}
-              className="text-[var(--color-teal)] underline hover:text-[var(--color-teal-dark)]"
-            >
-              Terms of Service
-            </button>
-            {' '}and{' '}
+            I agree to the Terms of Service for each selected provider and the{' '}
             <a
               href="/privacy"
               target="_blank"

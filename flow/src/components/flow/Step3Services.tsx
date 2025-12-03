@@ -255,6 +255,12 @@ function ServiceCard({
                       Est. {plans[0].monthlyEstimate}/mo based on your home
                     </p>
                   )}
+                  {/* Show speed info for internet */}
+                  {type === 'internet' && plans.length > 0 && plans[0].downloadSpeed && (
+                    <p className="text-[14px] text-[var(--color-teal)] font-medium mt-1">
+                      Up to {plans[0].downloadSpeed} Mbps
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -397,24 +403,51 @@ function ServiceCard({
                       badgeReason={badgeReason}
                     >
                       <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
-                            {plan.provider} - {plan.name}
-                          </p>
+                        <div className="flex items-start justify-between gap-3">
+                          {/* Provider logo + name */}
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            {plan.logo && (
+                              <Image
+                                src={plan.logo}
+                                alt={plan.provider}
+                                width={40}
+                                height={40}
+                                className="w-10 h-10 object-contain rounded flex-shrink-0"
+                              />
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[16px] font-semibold text-[var(--color-darkest)] truncate">
+                                {plan.provider}
+                              </p>
+                              <p className="text-[14px] text-[var(--color-dark)] truncate">
+                                {plan.name}
+                              </p>
+                            </div>
+                          </div>
                           {/* Show monthly estimate for electricity if available */}
                           {isElectricity && plan.monthlyEstimate && (
-                            <p className="text-[16px] font-bold text-[var(--color-teal)]">
+                            <p className="text-[16px] font-bold text-[var(--color-teal)] flex-shrink-0">
                               {plan.monthlyEstimate}/mo
                             </p>
                           )}
                         </div>
-                        <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                        <p className="text-[14px] text-[var(--color-dark)] mt-2">
                           {plan.rate} • {plan.contractLabel}
+                          {/* Show speed for internet plans */}
+                          {type === 'internet' && plan.downloadSpeed && (
+                            <> • {plan.downloadSpeed} Mbps</>
+                          )}
                         </p>
-                        {/* Show contract commitment info - Practical UI: Be upfront, 14px min, 4.5:1 contrast */}
-                        {isElectricity && plan.contractMonths && plan.contractMonths > 0 && (
+                        {/* Show contract commitment info with actual cancellation fee from API */}
+                        {isElectricity && plan.contractMonths && plan.contractMonths > 0 && plan.cancellationFee && (
                           <p className="text-[14px] text-[var(--color-dark)] mt-1">
-                            $175 early cancellation fee per remaining year
+                            ${plan.cancellationFee} early cancellation fee
+                          </p>
+                        )}
+                        {/* Show lead time - when service starts */}
+                        {plan.leadTime !== undefined && plan.leadTime > 0 && (
+                          <p className="text-[14px] text-[var(--color-teal)] mt-1">
+                            Service starts in {plan.leadTime} {plan.leadTime === 1 ? 'day' : 'days'}
                           </p>
                         )}
                         {/* Show WHY this is the cheapest plan - inline text */}
@@ -422,6 +455,19 @@ function ServiceCard({
                           <p className="text-[14px] text-[var(--color-teal)] font-medium mt-1">
                             {badgeReason}
                           </p>
+                        )}
+                        {/* Show features from API bulletPoints */}
+                        {plan.features && plan.features.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {plan.features.slice(0, 3).map((feature, i) => (
+                              <span
+                                key={i}
+                                className="text-[12px] text-[var(--color-dark)] bg-[var(--color-lightest)] px-2 py-0.5 rounded"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </div>
                     </RadioOption>
@@ -465,12 +511,6 @@ function Step3Services() {
   } = useFlowStore();
 
   const selectedCount = Object.values(selectedServices).filter(Boolean).length;
-
-  const getButtonText = () => {
-    if (selectedCount === 1) return 'Continue with water';
-    if (selectedCount === 2) return 'Continue with 2 services';
-    return 'Continue with 3 services';
-  };
 
   const handleAddAll = () => {
     if (!selectedServices.electricity) toggleService('electricity');
@@ -535,7 +575,7 @@ function Step3Services() {
             rightIcon={<ChevronRight className="w-5 h-5" />}
             className="sm:flex-1"
           >
-            {getButtonText()}
+            Next: Your details
           </Button>
         </div>
 

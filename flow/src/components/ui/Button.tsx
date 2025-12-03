@@ -44,6 +44,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       font-semibold rounded-xl
       transition-all duration-150 ease-out
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+      active:scale-[0.98]
     `;
 
     // Static variant structural styles (no colors)
@@ -126,8 +127,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ${sizeStyles[size]}
           ${widthStyle}
           ${disabledStyle}
-          ${!isDisabled && variant === 'primary' ? 'hover:brightness-95' : ''}
-          ${!isDisabled && variant === 'secondary' ? 'hover:bg-[var(--color-teal-light)]' : ''}
+          ${colorScheme === 'teal' ? 'focus-visible:ring-[var(--color-teal)]' : 'focus-visible:ring-[var(--color-coral)]'}
+          ${!isDisabled && variant === 'primary' ? 'hover:brightness-95 active:brightness-90' : ''}
+          ${!isDisabled && variant === 'secondary' ? (colorScheme === 'teal' ? 'hover:bg-[var(--color-teal-light)]' : 'hover:bg-[var(--color-coral-light)]') : ''}
+          ${!isDisabled && variant === 'tertiary' ? 'hover:opacity-80' : ''}
           ${className}
         `}
         style={getInlineStyles()}

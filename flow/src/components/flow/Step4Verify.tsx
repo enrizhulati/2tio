@@ -372,7 +372,14 @@ function Step4Verify() {
     effectiveSteps?.forEach((step) => {
       step.AppQuestions.forEach((q) => {
         if (q.required && !checkoutAnswers[q.id]) {
-          newErrors[q.id] = 'This field is required';
+          // Generate specific error based on question type
+          if (q.type === 'date') {
+            newErrors[q.id] = 'Select a date';
+          } else if (q.type === 'select') {
+            newErrors[q.id] = 'Select an option';
+          } else {
+            newErrors[q.id] = `Enter your ${q.question.toLowerCase()}`;
+          }
         }
 
         // SSN validation - Practical UI: Be direct, avoid "Please"

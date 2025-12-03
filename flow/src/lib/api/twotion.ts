@@ -107,6 +107,12 @@ export interface CheckoutStep {
   IsDLUpload: boolean;
   IsLeaseUpload: boolean;
   IsOwnUpload: boolean;
+  // Terms and consent text from API
+  Terms?: string;
+  ConsentText?: string;
+  TermsUrl?: string;
+  EflUrl?: string;  // Electricity Facts Label
+  YracUrl?: string; // Your Rights as a Customer
 }
 
 export interface CheckoutData {
