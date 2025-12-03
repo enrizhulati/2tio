@@ -92,11 +92,31 @@ export interface TwotionInternetPlan {
   logo?: string;
 }
 
+export interface PlanOptionChoice {
+  id: string;
+  name: string;
+  description?: string;
+  price?: number;
+}
+
 export interface PlanOption {
   id: string;
+  name: string;
   type: 'single' | 'multi';
+  required?: boolean;
+  choices?: PlanOptionChoice[];
   selectedInt?: number;
   selectedValues?: string[];
+}
+
+export interface PlanDetails {
+  id: string;
+  name: string;
+  vendorId: string;
+  vendorName: string;
+  serviceName: string;
+  options?: PlanOption[];
+  // ... other plan fields
 }
 
 export interface CartItem {
@@ -265,6 +285,16 @@ export async function getPlans(
   }
 
   throw lastError || new Error('Failed to fetch plans');
+}
+
+export async function getPlanDetails(serviceName: string, planId: string): Promise<PlanDetails> {
+  const response = await fetch(`/api/twotion?action=plan-details&service=${serviceName}&planId=${planId}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch plan details: ${response.status}`);
+  }
+
+  return response.json();
 }
 
 export async function getCart(): Promise<Cart> {
