@@ -69,22 +69,31 @@ function RadioOption({
   const { name, value: selectedValue, onChange } = context;
   const isSelected = value === selectedValue;
 
-  const badgeStyles = {
-    default: 'bg-[var(--color-teal-light)] text-[var(--color-teal)]',
-    success: 'bg-[var(--color-success-light)] text-[var(--color-success)]',
-    cheapest: 'bg-[var(--color-teal)] text-white',
+  // Header banner styles - full width colored banner like reference design
+  const bannerStyles = {
+    default: 'bg-[var(--color-teal)] text-white',
+    success: 'bg-[var(--color-success)] text-white',
+    cheapest: 'bg-[var(--color-darkest)] text-white',
+  };
+
+  // Badge display text
+  const badgeText = {
+    CHEAPEST: 'Lowest Price!',
+    GREEN: '100% Clean Energy!',
+    RECOMMENDED: 'Recommended',
+    POPULAR: 'Popular Choice!',
   };
 
   return (
     <label
       className={`
         block relative cursor-pointer
-        p-4 rounded-lg border-2
+        rounded-lg border-2 overflow-hidden
         transition-all duration-150
         has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--color-teal)] has-[:focus-visible]:ring-offset-2
         ${
           isSelected
-            ? 'border-[var(--color-teal)] bg-[var(--color-teal-light)]'
+            ? 'border-[var(--color-teal)] bg-white'
             : 'border-[var(--color-light)] hover:border-[var(--color-medium)] bg-white'
         }
         ${className}
@@ -99,11 +108,41 @@ function RadioOption({
         className="sr-only peer"
       />
 
-      <div className="flex items-start gap-3">
+      {/* Header banner for badge - full width like reference */}
+      {badge && (
+        <div
+          className={`
+            w-full px-3 py-1.5 text-center
+            text-[14px] font-bold
+            ${bannerStyles[badgeVariant]}
+          `}
+          onMouseEnter={() => badgeReason && setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (badgeReason) setShowTooltip(!showTooltip);
+          }}
+        >
+          {badgeText[badge as keyof typeof badgeText] || badge}
+          {badgeReason && <Info className="w-3.5 h-3.5 inline ml-1 -mt-0.5" aria-hidden="true" />}
+
+          {/* Tooltip */}
+          {showTooltip && badgeReason && (
+            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 w-64 p-3 bg-[var(--color-darkest)] text-white text-[14px] font-normal text-left rounded-lg shadow-lg">
+              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
+              <p className="relative z-10">{badgeReason}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Main content area */}
+      <div className="p-3 flex items-start gap-3">
         {/* Radio circle - Practical UI: 24px minimum for radio buttons */}
         <div
           className={`
-            flex-shrink-0 w-6 h-6 mt-0.5
+            flex-shrink-0 w-5 h-5 mt-1
             rounded-full border-2
             flex items-center justify-center
             transition-colors duration-150
@@ -115,44 +154,12 @@ function RadioOption({
           `}
         >
           {isSelected && (
-            <div className="w-3 h-3 rounded-full bg-[var(--color-teal)]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-teal)]" />
           )}
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">{children}</div>
-
-        {/* Badge with tooltip */}
-        {badge && (
-          <div className="relative flex-shrink-0">
-            <div
-              className={`
-                flex items-center gap-1 px-2 py-1
-                text-[12px] font-bold uppercase tracking-wider
-                rounded cursor-help
-                ${badgeStyles[badgeVariant]}
-              `}
-              onMouseEnter={() => badgeReason && setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (badgeReason) setShowTooltip(!showTooltip);
-              }}
-            >
-              {badge}
-              {badgeReason && <Info className="w-3 h-3" aria-hidden="true" />}
-            </div>
-
-            {/* Tooltip */}
-            {showTooltip && badgeReason && (
-              <div className="absolute right-0 top-full mt-2 z-50 w-64 p-3 bg-[var(--color-darkest)] text-white text-[16px] font-normal normal-case tracking-normal rounded-lg shadow-lg">
-                <div className="absolute -top-1.5 right-4 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
-                <p className="relative z-10">{badgeReason}</p>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </label>
   );

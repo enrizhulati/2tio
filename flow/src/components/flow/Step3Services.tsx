@@ -401,110 +401,108 @@ function ServiceCard({
                     badge = 'POPULAR';
                   }
 
+                  // Extract rate per kWh for electricity (e.g., "$0.090/kWh" -> "9.0¢")
+                  const ratePerKwh = isElectricity && plan.rate
+                    ? (parseFloat(plan.rate.replace('$', '').replace('/kWh', '')) * 100).toFixed(1) + '¢'
+                    : null;
+
                   return (
                     <RadioOption
                       key={plan.id}
                       value={plan.id}
                       badge={badge}
                       badgeVariant={badgeVariant}
+                      badgeReason={badgeReason}
                     >
-                      {/* Clean card layout - stacked for mobile, readable on all screens */}
-                      <div className="space-y-2">
-                        {/* Row 1: Price (prominent) + Green badge if applicable */}
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            {isElectricity && plan.monthlyEstimate ? (
-                              <span className="text-[20px] font-bold text-[var(--color-darkest)]">
-                                {plan.monthlyEstimate}
-                                <span className="text-[16px] font-normal text-[var(--color-dark)]">/mo</span>
-                              </span>
-                            ) : isInternet && plan.rate ? (
-                              <span className="text-[20px] font-bold text-[var(--color-darkest)]">
-                                {plan.rate}
-                              </span>
-                            ) : (
-                              <span className="text-[18px] font-bold text-[var(--color-darkest)]">
-                                {plan.rate}
-                              </span>
-                            )}
-                            {/* Green energy indicator */}
+                      {/* 3-column horizontal grid - matches reference design */}
+                      <div className="grid grid-cols-[1fr_auto] gap-3">
+                        {/* LEFT + MIDDLE: Main content */}
+                        <div className="min-w-0">
+                          {/* Row 1: Term + Green badge */}
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[18px] font-bold text-[var(--color-darkest)]">
+                              {plan.contractMonths > 0 ? `${plan.contractMonths} Mo` : 'No Contract'}
+                            </span>
                             {isElectricity && renewablePct > 0 && (
-                              <span className="flex items-center gap-1 text-[12px] font-bold uppercase tracking-wider text-[var(--color-success)] bg-[var(--color-success-light)] px-2 py-0.5 rounded">
-                                <Leaf className="w-3 h-3" aria-hidden="true" />
+                              <span className="text-[14px] text-[var(--color-success)]">
                                 {renewablePct}% Green
                               </span>
                             )}
                           </div>
-                        </div>
 
-                        {/* Row 2: Provider logo + name */}
-                        <div className="flex items-center gap-2">
-                          {plan.logo && (
-                            <Image
-                              src={plan.logo}
-                              alt={plan.provider}
-                              width={32}
-                              height={32}
-                              className="w-8 h-8 object-contain rounded flex-shrink-0"
-                            />
-                          )}
-                          <div>
-                            <p className="text-[16px] font-medium text-[var(--color-darkest)]">
-                              {plan.provider}
-                            </p>
-                            <p className="text-[16px] text-[var(--color-dark)]">
-                              {plan.name}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Row 3: Key details - single line with separators */}
-                        <div className="text-[16px] text-[var(--color-dark)]">
-                          <span>{plan.rate}</span>
-                          <span className="mx-1.5">•</span>
-                          <span>{plan.contractLabel}</span>
-                          {/* Internet speeds */}
-                          {isInternet && plan.downloadSpeed && (
-                            <>
-                              <span className="mx-1.5">•</span>
-                              <span>
-                                {plan.downloadSpeed}
-                                {plan.uploadSpeed ? `/${plan.uploadSpeed}` : ''} Mbps
+                          {/* Row 2: Provider logo + name + plan name (horizontal) */}
+                          <div className="flex items-center gap-2 mb-2">
+                            {plan.logo && (
+                              <Image
+                                src={plan.logo}
+                                alt={plan.provider}
+                                width={80}
+                                height={40}
+                                className="h-8 w-auto object-contain flex-shrink-0"
+                              />
+                            )}
+                            <div className="min-w-0">
+                              <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
+                                {plan.name}
                               </span>
-                            </>
+                            </div>
+                          </div>
+
+                          {/* Row 3: Monthly estimate + details */}
+                          <div className="text-[14px] text-[var(--color-dark)]">
+                            {isElectricity && plan.monthlyEstimate && (
+                              <span className="font-semibold text-[var(--color-darkest)]">
+                                {plan.monthlyEstimate}/mo
+                              </span>
+                            )}
+                            {isInternet && plan.rate && (
+                              <span className="font-semibold text-[var(--color-darkest)]">
+                                {plan.rate}
+                              </span>
+                            )}
+                            {isElectricity && (
+                              <span className="text-[var(--color-dark)]"> est. for 1000 kWh</span>
+                            )}
+                            {isInternet && plan.downloadSpeed && (
+                              <span className="text-[var(--color-dark)]">
+                                {' '}• {plan.downloadSpeed}{plan.uploadSpeed ? `/${plan.uploadSpeed}` : ''} Mbps
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Row 4: Secondary details (cancellation, lead time) */}
+                          {(plan.cancellationFee || plan.leadTime) && (
+                            <div className="text-[14px] text-[var(--color-dark)] mt-1">
+                              {isElectricity && plan.cancellationFee && plan.cancellationFee > 0 && (
+                                <span>${plan.cancellationFee} cancel fee</span>
+                              )}
+                              {isInternet && (
+                                <span>
+                                  {plan.dataCapGB === null || plan.dataCapGB === undefined || plan.dataCapGB === 0
+                                    ? 'Unlimited data'
+                                    : `${plan.dataCapGB} GB cap`}
+                                </span>
+                              )}
+                              {plan.leadTime !== undefined && plan.leadTime > 0 && (
+                                <span className="text-[var(--color-teal)]">
+                                  {' '}• Starts in {plan.leadTime}d
+                                </span>
+                              )}
+                            </div>
                           )}
                         </div>
 
-                        {/* Row 4: Secondary details */}
-                        <div className="space-y-1 text-[16px]">
-                          {/* Cancellation fee for electricity */}
-                          {isElectricity && plan.cancellationFee && plan.cancellationFee > 0 && (
-                            <p className="text-[var(--color-dark)]">
-                              ${plan.cancellationFee} early cancellation fee
-                            </p>
-                          )}
-                          {/* Data cap for internet */}
-                          {isInternet && (
-                            <p className="text-[var(--color-dark)] flex items-center gap-1">
-                              <Wifi className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
-                              {plan.dataCapGB === null || plan.dataCapGB === undefined || plan.dataCapGB === 0
-                                ? 'Unlimited data'
-                                : `${plan.dataCapGB} GB data cap`}
-                            </p>
-                          )}
-                          {/* Lead time */}
-                          {plan.leadTime !== undefined && plan.leadTime > 0 && (
-                            <p className="text-[var(--color-teal)]">
-                              Service starts in {plan.leadTime} {plan.leadTime === 1 ? 'day' : 'days'}
-                            </p>
-                          )}
-                          {/* Savings callout */}
-                          {isCheapest && badgeReason && (
-                            <p className="text-[var(--color-teal)] font-medium">
-                              {badgeReason}
-                            </p>
-                          )}
-                        </div>
+                        {/* RIGHT: Rate highlight (electricity only) */}
+                        {isElectricity && ratePerKwh && (
+                          <div className="flex flex-col items-center justify-center pl-3 border-l border-[var(--color-light)]">
+                            <span className="text-[24px] font-bold text-[var(--color-coral)]">
+                              {ratePerKwh}
+                            </span>
+                            <span className="text-[12px] text-[var(--color-dark)]">
+                              per kWh
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </RadioOption>
                   );
