@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, AlertCircle } from 'lucide-react';
 
 export interface AddressResult {
   street: string;
@@ -302,7 +302,10 @@ export function AddressAutocomplete({
         )}
       </div>
       {error && (
-        <p className="text-[14px] text-[var(--color-error)]">{error}</p>
+        <div className="flex items-center gap-2 text-[14px] text-[var(--color-error)]" role="alert">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+          <span>{error}</span>
+        </div>
       )}
     </div>
   );

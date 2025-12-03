@@ -13,9 +13,10 @@ import {
   Plus,
   X,
   Star,
-  Home,
   Loader2,
   ShoppingCart,
+  Leaf,
+  Wifi,
 } from 'lucide-react';
 import { SERVICE_INFO, type ServiceType, type ServicePlan } from '@/types/flow';
 import { ServiceIcon } from '@/components/ui';
@@ -258,7 +259,11 @@ function ServiceCard({
                   {/* Show speed info for internet */}
                   {type === 'internet' && plans.length > 0 && plans[0].downloadSpeed && (
                     <p className="text-[14px] text-[var(--color-teal)] font-medium mt-1">
-                      Up to {plans[0].downloadSpeed} Mbps
+                      Up to {plans[0].downloadSpeed}
+                      {plans[0].uploadSpeed ? `/${plans[0].uploadSpeed}` : ''} Mbps
+                      {plans[0].dataCapGB === null || plans[0].dataCapGB === undefined || plans[0].dataCapGB === 0
+                        ? ' • Unlimited'
+                        : ` • ${plans[0].dataCapGB} GB cap`}
                     </p>
                   )}
                 </div>
@@ -369,8 +374,10 @@ function ServiceCard({
                 {displayedPlans.map((plan, index) => {
                   // For electricity: first plan is cheapest, show GREEN badge if renewable
                   const isElectricity = type === 'electricity';
+                  const isInternet = type === 'internet';
                   const isCheapest = isElectricity && index === 0;
                   const isGreen = plan.renewable || plan.badge === 'GREEN';
+                  const renewablePct = plan.renewablePercent || (isGreen ? 100 : 0);
 
                   let badge: 'CHEAPEST' | 'GREEN' | 'RECOMMENDED' | 'POPULAR' | undefined;
                   let badgeVariant: 'default' | 'success' | 'cheapest' = 'default';
@@ -389,7 +396,7 @@ function ServiceCard({
                   } else if (isGreen) {
                     badge = 'GREEN';
                     badgeVariant = 'success';
-                    badgeReason = '100% renewable energy';
+                    badgeReason = renewablePct >= 100 ? '100% renewable energy' : `${renewablePct}% renewable energy`;
                   } else if (plan.badge === 'POPULAR') {
                     badge = 'POPULAR';
                   }
@@ -416,12 +423,27 @@ function ServiceCard({
                               />
                             )}
                             <div className="min-w-0 flex-1">
-                              <p className="text-[16px] font-semibold text-[var(--color-darkest)] truncate">
-                                {plan.provider}
-                              </p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-[16px] font-semibold text-[var(--color-darkest)] truncate">
+                                  {plan.provider}
+                                </p>
+                                {/* Green energy leaf indicator */}
+                                {isElectricity && renewablePct > 0 && (
+                                  <span className="flex items-center gap-0.5 text-[12px] text-[var(--color-success)] bg-[var(--color-success-light)] px-1.5 py-0.5 rounded" title={`${renewablePct}% renewable`}>
+                                    <Leaf className="w-3 h-3" aria-hidden="true" />
+                                    {renewablePct}%
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-[14px] text-[var(--color-dark)] truncate">
                                 {plan.name}
                               </p>
+                              {/* Short description from API */}
+                              {plan.shortDescription && (
+                                <p className="text-[13px] text-[var(--color-medium)] mt-0.5 line-clamp-1">
+                                  {plan.shortDescription}
+                                </p>
+                              )}
                             </div>
                           </div>
                           {/* Show monthly estimate for electricity if available */}
@@ -433,11 +455,23 @@ function ServiceCard({
                         </div>
                         <p className="text-[14px] text-[var(--color-dark)] mt-2">
                           {plan.rate} • {plan.contractLabel}
-                          {/* Show speed for internet plans */}
-                          {type === 'internet' && plan.downloadSpeed && (
-                            <> • {plan.downloadSpeed} Mbps</>
+                          {/* Show speeds for internet plans: download/upload */}
+                          {isInternet && plan.downloadSpeed && (
+                            <>
+                              {' '}• {plan.downloadSpeed}
+                              {plan.uploadSpeed ? `/${plan.uploadSpeed}` : ''} Mbps
+                            </>
                           )}
                         </p>
+                        {/* Show data cap for internet - Unlimited or specific cap */}
+                        {isInternet && (
+                          <p className="text-[14px] text-[var(--color-dark)] mt-1 flex items-center gap-1">
+                            <Wifi className="w-3.5 h-3.5" aria-hidden="true" />
+                            {plan.dataCapGB === null || plan.dataCapGB === undefined || plan.dataCapGB === 0
+                              ? 'Unlimited data'
+                              : `${plan.dataCapGB} GB data cap`}
+                          </p>
+                        )}
                         {/* Show contract commitment info with actual cancellation fee from API */}
                         {isElectricity && plan.contractMonths && plan.contractMonths > 0 && plan.cancellationFee && (
                           <p className="text-[14px] text-[var(--color-dark)] mt-1">

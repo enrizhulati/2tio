@@ -82,6 +82,10 @@ interface RawServicePlan {
   duns?: string;
   offerCode?: string;
   bannerText?: string;
+  // Internet-specific fields
+  downloadSpeed?: number;
+  uploadSpeed?: number;
+  dataCapGB?: number;
 }
 
 // Alias for backwards compatibility

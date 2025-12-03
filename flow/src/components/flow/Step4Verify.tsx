@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { useFlowStore } from '@/store/flowStore';
 import { Button, Input, FileUpload } from '@/components/ui';
-import { ChevronLeft, ChevronRight, Lock, Loader2, Building2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Lock, Loader2, Building2, AlertCircle } from 'lucide-react';
 import type { TwotionCheckoutStep, TwotionCheckoutQuestion } from '@/types/flow';
 
 // Question input component
@@ -54,7 +54,10 @@ function QuestionInput({
           ))}
         </select>
         {error && (
-          <p id={errorId} className="text-[14px] text-[var(--color-error)]" role="alert">{error}</p>
+          <div id={errorId} className="flex items-center gap-2 text-[14px] text-[var(--color-error)]" role="alert">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+            <span>{error}</span>
+          </div>
         )}
       </div>
     );
@@ -104,9 +107,12 @@ function QuestionInput({
         <p id={hintId} className="text-[14px] text-[var(--color-dark)]">
           Soft credit check only — won't affect your credit score. Required by utility providers.
         </p>
-        {/* Error above input per Practical UI */}
+        {/* Error above input per Practical UI - Icon + color for accessibility */}
         {error && (
-          <p id={errorId} className="text-[14px] text-[var(--color-error)]" role="alert">{error}</p>
+          <div id={errorId} className="flex items-center gap-2 text-[14px] text-[var(--color-error)]" role="alert">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+            <span>{error}</span>
+          </div>
         )}
         <input
           id={inputId}
