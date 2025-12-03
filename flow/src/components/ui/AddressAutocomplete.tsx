@@ -220,7 +220,7 @@ export function AddressAutocomplete({
     <div className="space-y-2">
       <label
         htmlFor={inputId}
-        className="block text-[14px] font-semibold text-[var(--color-darkest)] tracking-wide"
+        className="block text-[16px] font-semibold text-[var(--color-darkest)] tracking-wide"
       >
         Street address
       </label>
@@ -293,7 +293,7 @@ export function AddressAutocomplete({
                 <p className="text-[15px] text-[var(--color-darkest)] font-medium">
                   {formatDisplayAddress(address)}
                 </p>
-                <p className="text-[14px] text-[var(--color-dark)]">
+                <p className="text-[16px] text-[var(--color-dark)]">
                   {toTitleCase(address.city)}, {address.state} {address.zipCode}
                 </p>
               </button>
@@ -302,7 +302,7 @@ export function AddressAutocomplete({
         )}
       </div>
       {error && (
-        <div className="flex items-center gap-2 text-[14px] text-[var(--color-error)]" role="alert">
+        <div className="flex items-center gap-2 text-[16px] text-[var(--color-error)]" role="alert">
           <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
           <span>{error}</span>
         </div>

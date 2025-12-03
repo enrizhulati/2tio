@@ -104,7 +104,7 @@ function VendorTermsSection({
       </button>
       {expanded && (
         <div id={sectionId} className="px-4 pb-4 border-t border-[var(--color-light)]">
-          <p className="text-[14px] text-[var(--color-dark)] whitespace-pre-line leading-relaxed pt-4">
+          <p className="text-[16px] text-[var(--color-dark)] whitespace-pre-line leading-relaxed pt-4">
             {termsText}
           </p>
           {/* Show document links if available from API */}
@@ -115,7 +115,7 @@ function VendorTermsSection({
                   href={checkoutStep.TermsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[14px] text-[var(--color-teal)] underline"
+                  className="inline-flex items-center gap-1 text-[16px] text-[var(--color-teal)] underline"
                 >
                   Terms of Service
                   <ExternalLink className="w-3 h-3" aria-hidden="true" />
@@ -126,7 +126,7 @@ function VendorTermsSection({
                   href={checkoutStep.EflUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[14px] text-[var(--color-teal)] underline"
+                  className="inline-flex items-center gap-1 text-[16px] text-[var(--color-teal)] underline"
                 >
                   Electricity Facts Label
                   <ExternalLink className="w-3 h-3" aria-hidden="true" />
@@ -137,7 +137,7 @@ function VendorTermsSection({
                   href={checkoutStep.YracUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[14px] text-[var(--color-teal)] underline"
+                  className="inline-flex items-center gap-1 text-[16px] text-[var(--color-teal)] underline"
                 >
                   Your Rights as a Customer
                   <ExternalLink className="w-3 h-3" aria-hidden="true" />
@@ -216,7 +216,7 @@ function Step5Review() {
 
           {/* Order card */}
           <div className="p-6 rounded-xl border-2 border-[var(--color-light)] bg-white text-left">
-            <p className="text-[14px] text-[var(--color-dark)] mb-2">
+            <p className="text-[16px] text-[var(--color-dark)] mb-2">
               Order #{orderConfirmation.orderId}
             </p>
             <p className="text-[18px] font-semibold text-[var(--color-darkest)]">
@@ -245,24 +245,24 @@ function Step5Review() {
                         <p className="text-[16px] font-medium text-[var(--color-darkest)]">
                           {SERVICE_INFO[service.type].label}
                         </p>
-                        <p className="text-[14px] text-[var(--color-dark)]">
+                        <p className="text-[16px] text-[var(--color-dark)]">
                           {service.provider}
                         </p>
                         {/* Show lead time from API */}
                         {plan?.leadTime !== undefined && plan.leadTime > 0 && (
-                          <p className="text-[14px] text-[var(--color-teal)]">
+                          <p className="text-[16px] text-[var(--color-teal)]">
                             Ready in {plan.leadTime} {plan.leadTime === 1 ? 'day' : 'days'}
                           </p>
                         )}
                         {/* Show vendor contact from API */}
                         {plan?.vendorPhone && (
-                          <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                          <p className="text-[16px] text-[var(--color-dark)] mt-1">
                             Support: <a href={`tel:${plan.vendorPhone}`} className="text-[var(--color-teal)] underline">{plan.vendorPhone}</a>
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 text-[14px] text-[var(--color-warning)]">
+                    <div className="flex items-center gap-1 text-[16px] text-[var(--color-warning)]">
                       <Clock className="w-4 h-4" aria-hidden="true" />
                       <span>Setting up...</span>
                     </div>
@@ -281,7 +281,7 @@ function Step5Review() {
                   <p className="text-[16px] font-medium text-[var(--color-darkest)]">
                     Deposit Required: ${orderConfirmation.depositAmount.toLocaleString()}
                   </p>
-                  <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                  <p className="text-[16px] text-[var(--color-dark)] mt-1">
                     {orderConfirmation.depositVendorName && (
                       <span>{orderConfirmation.depositVendorName} requires a deposit </span>
                     )}
@@ -300,7 +300,7 @@ function Step5Review() {
             </h2>
             <ol className="space-y-3">
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[14px] font-bold flex items-center justify-center" aria-hidden="true">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
                   1
                 </span>
                 <span className="text-[16px] text-[var(--color-darkest)]">
@@ -308,7 +308,7 @@ function Step5Review() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[14px] font-bold flex items-center justify-center" aria-hidden="true">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
                   2
                 </span>
                 <span className="text-[16px] text-[var(--color-darkest)]">
@@ -316,7 +316,7 @@ function Step5Review() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[14px] font-bold flex items-center justify-center" aria-hidden="true">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
                   3
                 </span>
                 <span className="text-[16px] text-[var(--color-darkest)]">
@@ -328,14 +328,14 @@ function Step5Review() {
 
           {/* Important reminder - Practical UI: Front-load key info */}
           <div className="p-4 rounded-xl bg-[var(--color-lightest)] text-left">
-            <p className="text-[14px] text-[var(--color-dark)]">
+            <p className="text-[16px] text-[var(--color-dark)]">
               <strong>Check your email</strong> — You'll receive confirmation from each provider within 24 hours.
               If you don't see it, check your spam folder or contact us.
             </p>
           </div>
 
           {/* Support */}
-          <p className="text-[14px] text-[var(--color-dark)]">
+          <p className="text-[16px] text-[var(--color-dark)]">
             Questions? Contact{' '}
             <a
               href="mailto:support@2tion.com"
@@ -392,10 +392,10 @@ function Step5Review() {
         <p className="text-[16px] font-medium text-[var(--color-darkest)]">
           No payment due today
         </p>
-        <p className="text-[14px] text-[var(--color-dark)] mt-1">
+        <p className="text-[16px] text-[var(--color-dark)] mt-1">
           You'll receive separate bills from each provider after service starts on {moveInDate && formatDate(moveInDate)}.
         </p>
-        <p className="text-[14px] text-[var(--color-dark)] mt-2">
+        <p className="text-[16px] text-[var(--color-dark)] mt-2">
           If a provider requires a deposit based on your credit history, we'll let you know the amount after checkout.
         </p>
       </div>
@@ -410,7 +410,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(1)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline"
             >
               <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
@@ -436,7 +436,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(3)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline"
             >
               <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
@@ -457,7 +457,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(2)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline"
             >
               <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
@@ -472,15 +472,15 @@ function Step5Review() {
                     {SERVICE_INFO.water.label}
                   </span>
                 </div>
-                <p className="text-[14px] text-[var(--color-dark)] ml-7">
+                <p className="text-[16px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.water.provider}
                 </p>
-                <p className="text-[14px] text-[var(--color-dark)] ml-7">
+                <p className="text-[16px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.water.name} • Setup: ${selectedPlans.water.setupFee}
                 </p>
                 {/* Show vendor contact from API */}
                 {selectedPlans.water.vendorPhone && (
-                  <p className="text-[14px] text-[var(--color-dark)] ml-7 mt-1">
+                  <p className="text-[16px] text-[var(--color-dark)] ml-7 mt-1">
                     Support: <a href={`tel:${selectedPlans.water.vendorPhone}`} className="text-[var(--color-teal)] underline">{selectedPlans.water.vendorPhone}</a>
                   </p>
                 )}
@@ -495,27 +495,27 @@ function Step5Review() {
                     {SERVICE_INFO.electricity.label}
                   </span>
                 </div>
-                <p className="text-[14px] text-[var(--color-dark)] ml-7">
+                <p className="text-[16px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.electricity.provider} - {selectedPlans.electricity.name}
                 </p>
-                <p className="text-[14px] text-[var(--color-dark)] ml-7">
+                <p className="text-[16px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.electricity.rate} • {selectedPlans.electricity.contractLabel}
                 </p>
                 {/* Show ETF info from API */}
                 {selectedPlans.electricity.contractMonths && selectedPlans.electricity.contractMonths > 0 && selectedPlans.electricity.cancellationFee && (
-                  <p className="text-[14px] text-[var(--color-dark)] ml-7 mt-1">
+                  <p className="text-[16px] text-[var(--color-dark)] ml-7 mt-1">
                     Early cancellation fee: ${selectedPlans.electricity.cancellationFee}
                   </p>
                 )}
                 {/* Show lead time from API */}
                 {selectedPlans.electricity.leadTime !== undefined && selectedPlans.electricity.leadTime > 0 && (
-                  <p className="text-[14px] text-[var(--color-teal)] ml-7 mt-1">
+                  <p className="text-[16px] text-[var(--color-teal)] ml-7 mt-1">
                     Service starts in {selectedPlans.electricity.leadTime} {selectedPlans.electricity.leadTime === 1 ? 'day' : 'days'}
                   </p>
                 )}
                 {/* Show vendor contact from API */}
                 {selectedPlans.electricity.vendorPhone && (
-                  <p className="text-[14px] text-[var(--color-dark)] ml-7 mt-1">
+                  <p className="text-[16px] text-[var(--color-dark)] ml-7 mt-1">
                     Support: <a href={`tel:${selectedPlans.electricity.vendorPhone}`} className="text-[var(--color-teal)] underline">{selectedPlans.electricity.vendorPhone}</a>
                   </p>
                 )}
@@ -530,21 +530,21 @@ function Step5Review() {
                     {SERVICE_INFO.internet.label}
                   </span>
                 </div>
-                <p className="text-[14px] text-[var(--color-dark)] ml-7">
+                <p className="text-[16px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.internet.provider} - {selectedPlans.internet.name}
                 </p>
-                <p className="text-[14px] text-[var(--color-dark)] ml-7">
+                <p className="text-[16px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.internet.rate} • {selectedPlans.internet.contractLabel}
                 </p>
                 {/* Show lead time from API */}
                 {selectedPlans.internet.leadTime !== undefined && selectedPlans.internet.leadTime > 0 && (
-                  <p className="text-[14px] text-[var(--color-teal)] ml-7 mt-1">
+                  <p className="text-[16px] text-[var(--color-teal)] ml-7 mt-1">
                     Service starts in {selectedPlans.internet.leadTime} {selectedPlans.internet.leadTime === 1 ? 'day' : 'days'}
                   </p>
                 )}
                 {/* Show vendor contact from API */}
                 {selectedPlans.internet.vendorPhone && (
-                  <p className="text-[14px] text-[var(--color-dark)] ml-7 mt-1">
+                  <p className="text-[16px] text-[var(--color-dark)] ml-7 mt-1">
                     Support: <a href={`tel:${selectedPlans.internet.vendorPhone}`} className="text-[var(--color-teal)] underline">{selectedPlans.internet.vendorPhone}</a>
                   </p>
                 )}
@@ -561,7 +561,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(4)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline"
             >
               <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
@@ -675,7 +675,7 @@ function Step5Review() {
       </div>
       {/* Practical UI: Disabled button explanation with aria-describedby */}
       {!termsAgreed && (
-        <p id="terms-required-message" className="text-[14px] text-[var(--color-dark)] text-center">
+        <p id="terms-required-message" className="text-[16px] text-[var(--color-dark)] text-center">
           Agree to the Terms of Service to continue
         </p>
       )}

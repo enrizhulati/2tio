@@ -46,14 +46,14 @@ function OrderDetailsModal({
         <div className="bg-[var(--color-lightest)] rounded-xl p-3 sm:p-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <div>
-              <p className="text-[14px] text-[var(--color-dark)]">Order Number</p>
+              <p className="text-[16px] text-[var(--color-dark)]">Order Number</p>
               <p className="text-[16px] sm:text-[18px] font-bold text-[var(--color-darkest)]">
                 {orderConfirmation.orderId}
               </p>
             </div>
             <div className="sm:text-right">
-              <p className="text-[14px] text-[var(--color-dark)]">Order Date</p>
-              <p className="text-[14px] sm:text-[16px] font-medium text-[var(--color-darkest)]">
+              <p className="text-[16px] text-[var(--color-dark)]">Order Date</p>
+              <p className="text-[16px] sm:text-[16px] font-medium text-[var(--color-darkest)]">
                 {formatShortDate(new Date().toISOString())}
               </p>
             </div>
@@ -69,11 +69,11 @@ function OrderDetailsModal({
             </h3>
           </div>
           <div className="pl-6 sm:pl-7">
-            <p className="text-[14px] sm:text-[16px] text-[var(--color-darkest)]">
+            <p className="text-[16px] sm:text-[16px] text-[var(--color-darkest)]">
               {orderConfirmation.address.street}
               {orderConfirmation.address.unit && `, ${orderConfirmation.address.unit}`}
             </p>
-            <p className="text-[14px] sm:text-[16px] text-[var(--color-dark)]">
+            <p className="text-[16px] sm:text-[16px] text-[var(--color-dark)]">
               {orderConfirmation.address.city}, {orderConfirmation.address.state}{' '}
               {orderConfirmation.address.zip}
             </p>
@@ -89,7 +89,7 @@ function OrderDetailsModal({
             </h3>
           </div>
           <div className="pl-6 sm:pl-7">
-            <p className="text-[14px] sm:text-[16px] text-[var(--color-darkest)]">
+            <p className="text-[16px] sm:text-[16px] text-[var(--color-darkest)]">
               {formatDate(orderConfirmation.moveInDate)}
             </p>
           </div>
@@ -104,14 +104,14 @@ function OrderDetailsModal({
             </h3>
           </div>
           <div className="pl-6 sm:pl-7 space-y-1">
-            <p className="text-[14px] sm:text-[16px] font-medium text-[var(--color-darkest)]">
+            <p className="text-[16px] sm:text-[16px] font-medium text-[var(--color-darkest)]">
               {profile.firstName} {profile.lastName}
             </p>
-            <div className="flex items-center gap-2 text-[14px] text-[var(--color-dark)]">
+            <div className="flex items-center gap-2 text-[16px] text-[var(--color-dark)]">
               <Mail className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
               <span className="truncate">{profile.email}</span>
             </div>
-            <div className="flex items-center gap-2 text-[14px] text-[var(--color-dark)]">
+            <div className="flex items-center gap-2 text-[16px] text-[var(--color-dark)]">
               <Phone className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
               <span>{profile.phone}</span>
             </div>
@@ -139,18 +139,18 @@ function OrderDetailsModal({
                     <div className="flex items-start gap-2 sm:gap-3">
                       <ServiceIcon type={service.type} size="md" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-[14px] sm:text-[16px] font-semibold text-[var(--color-darkest)]">
+                        <p className="text-[16px] sm:text-[16px] font-semibold text-[var(--color-darkest)]">
                           {SERVICE_INFO[service.type].label}
                         </p>
-                        <p className="text-[14px] text-[var(--color-dark)]">
+                        <p className="text-[16px] text-[var(--color-dark)]">
                           {service.provider}
                         </p>
                         {plan && (
                           <>
-                            <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                            <p className="text-[16px] text-[var(--color-dark)] mt-1">
                               {plan.name} - {plan.rate}
                             </p>
-                            <p className="text-[14px] text-[var(--color-dark)]">
+                            <p className="text-[16px] text-[var(--color-dark)]">
                               {plan.contractLabel}
                             </p>
                           </>
@@ -168,7 +168,7 @@ function OrderDetailsModal({
                   {plan && plan.setupFee > 0 && (
                     <div className="mt-3 pt-3 border-t border-[var(--color-light)] flex items-center gap-2">
                       <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--color-dark)]" aria-hidden="true" />
-                      <span className="text-[14px] text-[var(--color-dark)]">
+                      <span className="text-[16px] text-[var(--color-dark)]">
                         Setup fee: ${plan.setupFee}
                       </span>
                     </div>
@@ -181,7 +181,7 @@ function OrderDetailsModal({
 
         {/* Footer note */}
         <div className="bg-[var(--color-teal-light)] rounded-xl p-3 sm:p-4">
-          <p className="text-[14px] text-[var(--color-darkest)]">
+          <p className="text-[16px] text-[var(--color-darkest)]">
             You'll receive confirmation emails from each provider within 24 hours.
             Your services will be active on your move-in date.
           </p>

@@ -109,7 +109,7 @@ function Step2Profile() {
             />
           </div>
           {/* Legal name hint - Practical UI: Explain why upfront, min 14px for contrast */}
-          <p className="text-[14px] text-[var(--color-dark)]">
+          <p className="text-[16px] text-[var(--color-dark)]">
             Use your legal name as it appears on your ID
           </p>
         </div>

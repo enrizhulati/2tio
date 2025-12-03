@@ -66,7 +66,7 @@ function FileUpload({
               {label}
             </h4>
             {requirement && (
-              <p className="text-[14px] text-[var(--color-dark)] mt-1">
+              <p className="text-[16px] text-[var(--color-dark)] mt-1">
                 {requirement}
               </p>
             )}
@@ -75,7 +75,7 @@ function FileUpload({
 
         {/* Error state */}
         {error && (
-          <div className="flex items-center gap-2 text-[var(--color-error)] text-[14px] mb-3 p-2 rounded-lg bg-[var(--color-error-light)]">
+          <div className="flex items-center gap-2 text-[var(--color-error)] text-[16px] mb-3 p-2 rounded-lg bg-[var(--color-error-light)]">
             <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
             <span>{error}</span>
           </div>
@@ -105,7 +105,7 @@ function FileUpload({
           // Uploading state
           <div className="p-4 rounded-lg bg-[var(--color-lightest)]">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[14px] text-[var(--color-darkest)] truncate flex-1 mr-4">
+              <span className="text-[16px] text-[var(--color-darkest)] truncate flex-1 mr-4">
                 {document.name}
               </span>
               <button
@@ -122,7 +122,7 @@ function FileUpload({
                 style={{ width: `${document.progress || 0}%` }}
               />
             </div>
-            <span className="text-[14px] text-[var(--color-dark)] mt-1 block">
+            <span className="text-[16px] text-[var(--color-dark)] mt-1 block">
               Uploading... {document.progress}%
             </span>
           </div>
@@ -132,10 +132,10 @@ function FileUpload({
             <div className="flex items-center gap-3">
               <Check className="w-5 h-5 text-[var(--color-success)]" aria-hidden="true" />
               <div>
-                <span className="text-[14px] text-[var(--color-darkest)] font-medium block">
+                <span className="text-[16px] text-[var(--color-darkest)] font-medium block">
                   {document.name}
                 </span>
-                <span className="text-[14px] text-[var(--color-dark)]">
+                <span className="text-[16px] text-[var(--color-dark)]">
                   {formatFileSize(document.size)} • Uploaded
                 </span>
               </div>
@@ -160,14 +160,14 @@ function FileUpload({
           <div className="p-4 rounded-lg bg-[var(--color-error-light)] flex items-center justify-between">
             <div className="flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-[var(--color-error)]" aria-hidden="true" />
-              <span className="text-[14px] text-[var(--color-error)]">
+              <span className="text-[16px] text-[var(--color-error)]">
                 {document.errorMessage || 'Upload failed'}
               </span>
             </div>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="text-[14px] text-[var(--color-teal)] font-medium underline"
+              className="text-[16px] text-[var(--color-teal)] font-medium underline"
             >
               Try again
             </button>
@@ -176,7 +176,7 @@ function FileUpload({
 
         {/* Hint */}
         {hint && !document && (
-          <p className="text-[14px] text-[var(--color-dark)] mt-3">{hint}</p>
+          <p className="text-[16px] text-[var(--color-dark)] mt-3">{hint}</p>
         )}
       </div>
 

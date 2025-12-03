@@ -51,10 +51,10 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
                          'July', 'August', 'September', 'October', 'November', 'December'];
       return (
         <div className="bg-white px-3 py-2 rounded-lg shadow-lg border border-[var(--color-light)]">
-          <p className="text-[14px] font-medium text-[var(--color-darkest)]">
+          <p className="text-[16px] font-medium text-[var(--color-darkest)]">
             {fullMonths[monthIndex]}
           </p>
-          <p className="text-[14px] text-[var(--color-dark)]">
+          <p className="text-[16px] text-[var(--color-dark)]">
             {payload[0].value.toLocaleString()} kWh
           </p>
         </div>
@@ -68,15 +68,15 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <Home className="w-4 h-4 text-[var(--color-teal)]" aria-hidden="true" />
-        <span className="text-[14px] font-semibold text-[var(--color-darkest)]">
+        <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
           Your Home's Usage Profile
         </span>
       </div>
 
-      {/* Chart - contained with overflow hidden and min-width 0 for flex shrink */}
+      {/* Chart - use 99% width to fix Recharts ResponsiveContainer bug */}
       <div className="h-[120px] w-full min-w-0 overflow-hidden">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+        <ResponsiveContainer width="99%" height="100%">
+          <BarChart data={chartData} margin={{ top: 5, right: 0, left: -25, bottom: 0 }}>
             <XAxis
               dataKey="month"
               axisLine={false}
@@ -108,7 +108,7 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
       </div>
 
       {/* Home details footer */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[14px] text-[var(--color-dark)]">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[16px] text-[var(--color-dark)]">
         <span>Est. {formattedAnnualKwh} kWh/year</span>
         {homeDetails?.squareFootage && homeDetails.squareFootage > 0 && (
           <>
@@ -125,7 +125,7 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
       </div>
 
       {/* Legend - Practical UI: Don't rely on color alone, use patterns/icons too */}
-      <div className="flex items-center gap-4 mt-2 text-[14px] text-[var(--color-darkest)]">
+      <div className="flex items-center gap-4 mt-2 text-[16px] text-[var(--color-darkest)]">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-sm bg-[var(--color-teal)]" aria-hidden="true" />
           <span>Regular</span>

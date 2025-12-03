@@ -37,7 +37,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {/* Label - always visible above field */}
         <label
           htmlFor={inputId}
-          className="block text-[14px] font-semibold text-[var(--color-darkest)] tracking-wide mb-2"
+          className="block text-[16px] font-semibold text-[var(--color-darkest)] tracking-wide mb-2"
         >
           {label}
           {props.required && !optional && (
@@ -52,12 +52,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
         {/* Hint - above field per Practical UI */}
         {hint && !error && (
-          <p id={`${inputId}-hint`} className="text-[var(--color-dark)] text-[14px] mb-2">{hint}</p>
+          <p id={`${inputId}-hint`} className="text-[var(--color-dark)] text-[16px] mb-2">{hint}</p>
         )}
 
         {/* Error message - above field per Practical UI */}
         {error && (
-          <div id={`${inputId}-error`} className="flex items-center gap-2 text-[var(--color-error)] text-[14px] mb-2" role="alert">
+          <div id={`${inputId}-error`} className="flex items-center gap-2 text-[var(--color-error)] text-[16px] mb-2" role="alert">
             <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
             <span>{error}</span>
           </div>

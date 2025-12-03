@@ -26,7 +26,7 @@ function QuestionInput({
       <div className="space-y-1.5">
         <label
           htmlFor={selectId}
-          className="block text-[14px] font-medium text-[var(--color-darkest)]"
+          className="block text-[16px] font-medium text-[var(--color-darkest)]"
         >
           {question.question}
           {question.required && <span className="text-[var(--color-error)]"> *</span>}
@@ -54,7 +54,7 @@ function QuestionInput({
           ))}
         </select>
         {error && (
-          <div id={errorId} className="flex items-center gap-2 text-[14px] text-[var(--color-error)]" role="alert">
+          <div id={errorId} className="flex items-center gap-2 text-[16px] text-[var(--color-error)]" role="alert">
             <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
             <span>{error}</span>
           </div>
@@ -98,18 +98,18 @@ function QuestionInput({
       <div className="space-y-2 max-w-[240px]">
         <label
           htmlFor={inputId}
-          className="block text-[14px] font-semibold text-[var(--color-darkest)]"
+          className="block text-[16px] font-semibold text-[var(--color-darkest)]"
         >
           {question.question}
           {question.required && <span className="text-[var(--color-error)]"> *</span>}
         </label>
         {/* Hint above input per Practical UI - Address credit score concern upfront */}
-        <p id={hintId} className="text-[14px] text-[var(--color-dark)]">
+        <p id={hintId} className="text-[16px] text-[var(--color-dark)]">
           Soft credit check only — won't affect your credit score. Required by utility providers.
         </p>
         {/* Error above input per Practical UI - Icon + color for accessibility */}
         {error && (
-          <div id={errorId} className="flex items-center gap-2 text-[14px] text-[var(--color-error)]" role="alert">
+          <div id={errorId} className="flex items-center gap-2 text-[16px] text-[var(--color-error)]" role="alert">
             <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
             <span>{error}</span>
           </div>
@@ -197,7 +197,7 @@ function VendorSection({
               {step.VendorName}
             </p>
             {step.LeadTime > 0 && (
-              <p className="text-[14px] text-[var(--color-dark)]">
+              <p className="text-[16px] text-[var(--color-dark)]">
                 Service starts in {step.LeadTime} business day{step.LeadTime > 1 ? 's' : ''}
               </p>
             )}
@@ -509,14 +509,14 @@ function Step4Verify() {
 
       {/* Privacy and credit check notice */}
       <div className="space-y-3">
-        <div className="flex items-start gap-2 p-4 rounded-xl bg-[var(--color-lightest)] text-[14px] text-[var(--color-dark)]">
+        <div className="flex items-start gap-2 p-4 rounded-xl bg-[var(--color-lightest)] text-[16px] text-[var(--color-dark)]">
           <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
           <p>
             Your information is encrypted and only shared with your selected utility providers.
             We securely store your SSN only for this transaction — it's not retained after setup.
           </p>
         </div>
-        <p className="text-[14px] text-[var(--color-dark)] px-1">
+        <p className="text-[16px] text-[var(--color-dark)] px-1">
           If a provider requires a deposit based on credit history, we'll let you know the amount before finalizing.
         </p>
       </div>

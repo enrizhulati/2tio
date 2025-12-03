@@ -150,7 +150,7 @@ function FlowLayout({ children }: FlowLayoutProps) {
         </div>
 
         {/* Footer - Practical UI: Links need sufficient touch targets */}
-        <div className="p-6 text-[14px] text-[var(--color-dark)]">
+        <div className="p-6 text-[16px] text-[var(--color-dark)]">
           <div className="flex items-center gap-1 mb-2">
             <svg className="w-4 h-4 text-[var(--color-teal)]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path
@@ -176,7 +176,7 @@ function FlowLayout({ children }: FlowLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen">
+      <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
         {/* Mobile Header */}
         <header className="lg:hidden bg-white border-b border-[var(--color-light)] px-4 py-3">
           <div className="flex items-center justify-between">
@@ -192,8 +192,8 @@ function FlowLayout({ children }: FlowLayoutProps) {
         )}
 
         {/* Content Area */}
-        <div className="flex-1 flex items-start justify-center px-6 lg:px-12 py-8 lg:py-12">
-          <div className="w-full max-w-xl animate-fade-in">
+        <div className="flex-1 flex items-start justify-center px-6 lg:px-12 py-8 lg:py-12 overflow-x-hidden">
+          <div className="w-full max-w-xl animate-fade-in min-w-0">
             {children}
           </div>
         </div>

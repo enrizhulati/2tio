@@ -146,7 +146,7 @@ function RadioOption({
 
             {/* Tooltip */}
             {showTooltip && badgeReason && (
-              <div className="absolute right-0 top-full mt-2 z-50 w-64 p-3 bg-[var(--color-darkest)] text-white text-[14px] font-normal normal-case tracking-normal rounded-lg shadow-lg">
+              <div className="absolute right-0 top-full mt-2 z-50 w-64 p-3 bg-[var(--color-darkest)] text-white text-[16px] font-normal normal-case tracking-normal rounded-lg shadow-lg">
                 <div className="absolute -top-1.5 right-4 w-3 h-3 bg-[var(--color-darkest)] rotate-45" />
                 <p className="relative z-10">{badgeReason}</p>
               </div>

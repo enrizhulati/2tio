@@ -63,21 +63,21 @@ function CartSummary() {
     <div className="p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)]">
       <div className="flex items-center gap-2 mb-3">
         <ShoppingCart className="w-4 h-4 text-[var(--color-teal)]" aria-hidden="true" />
-        <span className="text-[14px] font-semibold text-[var(--color-darkest)]">
+        <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
           Your services
         </span>
       </div>
 
       <div className="space-y-2">
         {selectedServices.water && selectedPlans.water && (
-          <div className="flex justify-between text-[14px]">
+          <div className="flex justify-between text-[16px]">
             <span className="text-[var(--color-dark)]">Water</span>
             <span className="text-[var(--color-darkest)]">~$55/mo</span>
           </div>
         )}
 
         {selectedServices.electricity && selectedPlans.electricity && (
-          <div className="flex justify-between text-[14px]">
+          <div className="flex justify-between text-[16px]">
             <span className="text-[var(--color-dark)]">
               {selectedPlans.electricity.provider}
             </span>
@@ -88,7 +88,7 @@ function CartSummary() {
         )}
 
         {selectedServices.internet && selectedPlans.internet && (
-          <div className="flex justify-between text-[14px]">
+          <div className="flex justify-between text-[16px]">
             <span className="text-[var(--color-dark)]">
               {selectedPlans.internet.provider}
             </span>
@@ -100,7 +100,7 @@ function CartSummary() {
       </div>
 
       <div className="mt-3 pt-3 border-t border-[var(--color-light)] flex justify-between">
-        <span className="text-[14px] font-medium text-[var(--color-darkest)]">
+        <span className="text-[16px] font-medium text-[var(--color-darkest)]">
           Est. monthly total
         </span>
         <span className="text-[16px] font-bold text-[var(--color-teal)]">
@@ -173,7 +173,7 @@ function ServiceCard({
                     </svg>
                   </div>
                   {/* Tooltip */}
-                  <div className="absolute left-8 top-0 hidden group-hover:block z-10 w-48 p-2 bg-[var(--color-darkest)] text-white text-[14px] rounded-lg shadow-lg">
+                  <div className="absolute left-8 top-0 hidden group-hover:block z-10 w-48 p-2 bg-[var(--color-darkest)] text-white text-[16px] rounded-lg shadow-lg">
                     Water service is required by your city when you move to a new address
                   </div>
                 </div>
@@ -227,10 +227,10 @@ function ServiceCard({
                       />
                     </div>
                   )}
-                  <p className="text-[15px] text-[var(--color-dark)]">
+                  <p className="text-[16px] text-[var(--color-dark)]">
                     {service.logo ? 'Official city water service' : service.provider}
                   </p>
-                  <div className="flex items-center gap-4 mt-2 text-[14px] text-[var(--color-dark)]">
+                  <div className="flex items-center gap-4 mt-2 text-[16px] text-[var(--color-dark)]">
                     <span>Est. ~$45-65/mo</span>
                     <span className="text-[var(--color-teal)] font-medium">$0 setup fee</span>
                   </div>
@@ -239,7 +239,7 @@ function ServiceCard({
                 // Loading state for electricity
                 <div className="mt-2 flex items-center gap-2 text-[var(--color-dark)]">
                   <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-                  <span className="text-[15px]">Loading personalized rates...</span>
+                  <span className="text-[16px]">Loading personalized rates...</span>
                 </div>
               ) : (
                 // Other services show provider count
@@ -252,13 +252,13 @@ function ServiceCard({
                   </p>
                   {/* Show home-based estimate for electricity */}
                   {type === 'electricity' && homeDetails?.foundDetails && plans.length > 0 && plans[0].monthlyEstimate && (
-                    <p className="text-[14px] text-[var(--color-teal)] font-medium mt-1">
+                    <p className="text-[16px] text-[var(--color-teal)] font-medium mt-1">
                       Est. {plans[0].monthlyEstimate}/mo based on your home
                     </p>
                   )}
                   {/* Show speed info for internet */}
                   {type === 'internet' && plans.length > 0 && plans[0].downloadSpeed && (
-                    <p className="text-[14px] text-[var(--color-teal)] font-medium mt-1">
+                    <p className="text-[16px] text-[var(--color-teal)] font-medium mt-1">
                       Up to {plans[0].downloadSpeed}
                       {plans[0].uploadSpeed ? `/${plans[0].uploadSpeed}` : ''} Mbps
                       {plans[0].dataCapGB === null || plans[0].dataCapGB === undefined || plans[0].dataCapGB === 0
@@ -271,7 +271,7 @@ function ServiceCard({
 
               {/* Upsell message for non-selected services */}
               {!isWater && !isSelected && upsellMessages[type as 'electricity' | 'internet'] && (
-                <div className="flex items-center gap-1 mt-2 text-[14px] text-[var(--color-teal)]">
+                <div className="flex items-center gap-1 mt-2 text-[16px] text-[var(--color-teal)]">
                   <Star className="w-4 h-4" aria-hidden="true" />
                   <span>{upsellMessages[type as 'electricity' | 'internet']}</span>
                 </div>
@@ -284,7 +284,7 @@ function ServiceCard({
             <button
               onClick={onToggle}
               className={`
-                flex items-center gap-1 px-3 py-1.5 rounded-lg text-[14px] font-medium
+                flex items-center gap-1 px-3 py-1.5 rounded-lg text-[16px] font-medium
                 transition-colors duration-150
                 ${isSelected
                   ? 'text-[var(--color-error)] hover:bg-[var(--color-error-light)]'
@@ -322,7 +322,7 @@ function ServiceCard({
                 {selectedPlan ? `${selectedPlan.provider} - ${selectedPlan.name}` : 'Choose your plan'}
               </span>
               {selectedPlan && (
-                <span className="text-[14px] text-[var(--color-dark)] ml-2">
+                <span className="text-[16px] text-[var(--color-dark)] ml-2">
                   {selectedPlan.rate} • {selectedPlan.contractLabel}
                 </span>
               )}
@@ -352,11 +352,11 @@ function ServiceCard({
               {/* Section header for electricity with rate explainer */}
               {type === 'electricity' && sortedPlans.length > 0 && sortedPlans[0].annualCost && (
                 <div className="mb-4">
-                  <p className="text-[14px] font-semibold text-[var(--color-darkest)]">
+                  <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
                     Best plans for your home
                   </p>
                   {/* Rate explainer - Practical UI: Explain jargon, 14px min, 4.5:1 contrast */}
-                  <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                  <p className="text-[16px] text-[var(--color-dark)] mt-1">
                     Monthly estimates based on ~1,000 kWh/month (typical home usage)
                   </p>
                 </div>
@@ -435,12 +435,12 @@ function ServiceCard({
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[14px] text-[var(--color-dark)] truncate">
+                              <p className="text-[16px] text-[var(--color-dark)] truncate">
                                 {plan.name}
                               </p>
                               {/* Short description from API */}
                               {plan.shortDescription && (
-                                <p className="text-[13px] text-[var(--color-medium)] mt-0.5 line-clamp-1">
+                                <p className="text-[16px] text-[var(--color-medium)] mt-0.5 line-clamp-1">
                                   {plan.shortDescription}
                                 </p>
                               )}
@@ -453,7 +453,7 @@ function ServiceCard({
                             </p>
                           )}
                         </div>
-                        <p className="text-[14px] text-[var(--color-dark)] mt-2">
+                        <p className="text-[16px] text-[var(--color-dark)] mt-2">
                           {plan.rate} • {plan.contractLabel}
                           {/* Show speeds for internet plans: download/upload */}
                           {isInternet && plan.downloadSpeed && (
@@ -465,7 +465,7 @@ function ServiceCard({
                         </p>
                         {/* Show data cap for internet - Unlimited or specific cap */}
                         {isInternet && (
-                          <p className="text-[14px] text-[var(--color-dark)] mt-1 flex items-center gap-1">
+                          <p className="text-[16px] text-[var(--color-dark)] mt-1 flex items-center gap-1">
                             <Wifi className="w-3.5 h-3.5" aria-hidden="true" />
                             {plan.dataCapGB === null || plan.dataCapGB === undefined || plan.dataCapGB === 0
                               ? 'Unlimited data'
@@ -474,19 +474,19 @@ function ServiceCard({
                         )}
                         {/* Show contract commitment info with actual cancellation fee from API */}
                         {isElectricity && plan.contractMonths && plan.contractMonths > 0 && plan.cancellationFee && (
-                          <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                          <p className="text-[16px] text-[var(--color-dark)] mt-1">
                             ${plan.cancellationFee} early cancellation fee
                           </p>
                         )}
                         {/* Show lead time - when service starts */}
                         {plan.leadTime !== undefined && plan.leadTime > 0 && (
-                          <p className="text-[14px] text-[var(--color-teal)] mt-1">
+                          <p className="text-[16px] text-[var(--color-teal)] mt-1">
                             Service starts in {plan.leadTime} {plan.leadTime === 1 ? 'day' : 'days'}
                           </p>
                         )}
                         {/* Show WHY this is the cheapest plan - inline text */}
                         {isCheapest && badgeReason && (
-                          <p className="text-[14px] text-[var(--color-teal)] font-medium mt-1">
+                          <p className="text-[16px] text-[var(--color-teal)] font-medium mt-1">
                             {badgeReason}
                           </p>
                         )}
@@ -521,7 +521,7 @@ function ServiceCard({
               {showAllPlans && sortedPlans.length > 3 && (
                 <button
                   onClick={() => setShowAllPlans(false)}
-                  className="text-[var(--color-dark)] text-[14px] font-medium mt-3 underline"
+                  className="text-[var(--color-dark)] text-[16px] font-medium mt-3 underline"
                 >
                   Show fewer plans
                 </button>

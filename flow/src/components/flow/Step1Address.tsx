@@ -54,7 +54,7 @@ function MapPreview({ address }: { address: string }) {
       <div className="absolute bottom-3 left-3 right-3">
         <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm flex items-center gap-2">
           <Navigation className="w-4 h-4 text-[var(--color-coral)]" aria-hidden="true" />
-          <span className="text-[14px] text-[var(--color-darkest)] truncate">
+          <span className="text-[16px] text-[var(--color-darkest)] truncate">
             {address}
           </span>
         </div>
@@ -263,7 +263,7 @@ function Step1Address() {
         <div className="p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)]">
           <div className="flex items-center gap-2">
             <Building2 className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
-            <span className="text-[15px] text-[var(--color-dark)]">
+            <span className="text-[16px] text-[var(--color-dark)]">
               {address.street}, {address.city}, {address.state} {address.zip}
             </span>
           </div>
@@ -300,10 +300,10 @@ function Step1Address() {
                       {esiid.address}
                       {esiid.address_overflow && ` ${esiid.address_overflow}`}
                     </p>
-                    <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                    <p className="text-[16px] text-[var(--color-dark)] mt-1">
                       {esiid.city}, {esiid.state} {esiid.zip_code}
                     </p>
-                    <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                    <p className="text-[16px] text-[var(--color-dark)] mt-1">
                       {esiid.premise_type}
                     </p>
                   </div>
@@ -315,10 +315,10 @@ function Step1Address() {
                     )}
                     {!isActive && (
                       <div className="text-right">
-                        <span className="text-[14px] text-[var(--color-coral)] font-medium">
+                        <span className="text-[16px] text-[var(--color-coral)] font-medium">
                           No power service
                         </span>
-                        <p className="text-[14px] text-[var(--color-dark)] mt-0.5">
+                        <p className="text-[16px] text-[var(--color-dark)] mt-0.5">
                           Contact your landlord
                         </p>
                       </div>
@@ -333,7 +333,7 @@ function Step1Address() {
         {/* None of these option */}
         <button
           onClick={handleEdit}
-          className="w-full text-center text-[14px] text-[var(--color-dark)] hover:text-[var(--color-darkest)] underline"
+          className="w-full text-center text-[16px] text-[var(--color-dark)] hover:text-[var(--color-darkest)] underline"
         >
           None of these are my address
         </button>
@@ -372,7 +372,7 @@ function Step1Address() {
         </div>
 
         <div className="p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)]">
-          <p className="text-[15px] text-[var(--color-dark)]">
+          <p className="text-[16px] text-[var(--color-dark)]">
             <strong>You entered:</strong> {address.formatted}
           </p>
         </div>
@@ -400,7 +400,7 @@ function Step1Address() {
           </Button>
 
           <div className="text-center">
-            <p className="text-[14px] text-[var(--color-dark)]">
+            <p className="text-[16px] text-[var(--color-dark)]">
               Need help? <a href="tel:1-800-555-0123" className="text-[var(--color-teal)] underline font-medium">Call us</a> or <a href="#" className="text-[var(--color-teal)] underline font-medium">start a chat</a>
             </p>
           </div>
@@ -432,10 +432,10 @@ function Step1Address() {
                 We found your home details
               </span>
             </div>
-            <p className="text-[15px] text-[var(--color-dark)]">
+            <p className="text-[16px] text-[var(--color-dark)]">
               {formatNumber(homeDetails.squareFootage)} sq ft • Built {homeDetails.yearBuilt} • Est. {formatNumber(homeDetails.annualKwh)} kWh/year
             </p>
-            <p className="text-[14px] text-[var(--color-dark)] mt-1">
+            <p className="text-[16px] text-[var(--color-dark)] mt-1">
               Your electricity costs will be personalized to your home's actual usage.
             </p>
           </div>
@@ -452,16 +452,16 @@ function Step1Address() {
                 {address.street}
                 {address.unit && `, ${address.unit}`}
               </p>
-              <p className="text-[15px] text-[var(--color-dark)]">
+              <p className="text-[16px] text-[var(--color-dark)]">
                 {address.city}, {address.state} {address.zip}
               </p>
-              <p className="text-[15px] text-[var(--color-dark)] mt-2">
+              <p className="text-[16px] text-[var(--color-dark)] mt-2">
                 Move-in: {formatDate(moveInDate!)}
               </p>
             </div>
             <button
               onClick={handleEdit}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline"
             >
               <Edit2 className="w-4 h-4" aria-hidden="true" />
               Edit
@@ -474,7 +474,7 @@ function Step1Address() {
           <h2 className="text-[20px] font-semibold text-[var(--color-darkest)] mb-2">
             Services you can set up
           </h2>
-          <p className="text-[15px] text-[var(--color-dark)] mb-4">
+          <p className="text-[16px] text-[var(--color-dark)] mb-4">
             You'll choose which ones you want in the next step.
           </p>
 
@@ -485,18 +485,18 @@ function Step1Address() {
                 <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
                   {SERVICE_INFO.water.label}
                 </p>
-                <p className="text-[14px] text-[var(--color-dark)]">
+                <p className="text-[16px] text-[var(--color-dark)]">
                   {availableServices.water.available
                     ? availableServices.water.provider
                     : 'Contact your city directly'}
                 </p>
               </div>
               {availableServices.water.available ? (
-                <span className="text-[14px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
+                <span className="text-[16px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
                   Available
                 </span>
               ) : (
-                <span className="text-[14px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
+                <span className="text-[16px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
                   Not on 2TurnItOn
                 </span>
               )}
@@ -508,18 +508,18 @@ function Step1Address() {
                 <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
                   {SERVICE_INFO.electricity.label}
                 </p>
-                <p className="text-[14px] text-[var(--color-dark)]">
+                <p className="text-[16px] text-[var(--color-dark)]">
                   {availableServices.electricity.available
                     ? `${availableServices.electricity.providerCount} providers`
                     : 'Not available in this area'}
                 </p>
               </div>
               {availableServices.electricity.available ? (
-                <span className="text-[14px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
+                <span className="text-[16px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
                   Available
                 </span>
               ) : (
-                <span className="text-[14px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
+                <span className="text-[16px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
                   Not on 2TurnItOn
                 </span>
               )}
@@ -531,18 +531,18 @@ function Step1Address() {
                 <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
                   {SERVICE_INFO.internet.label}
                 </p>
-                <p className="text-[14px] text-[var(--color-dark)]">
+                <p className="text-[16px] text-[var(--color-dark)]">
                   {availableServices.internet.available
                     ? `${availableServices.internet.providerCount} providers`
                     : 'Not available in this area'}
                 </p>
               </div>
               {availableServices.internet.available ? (
-                <span className="text-[14px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
+                <span className="text-[16px] text-[var(--color-teal)] font-medium bg-[var(--color-teal-light)] px-2 py-1 rounded">
                   Available
                 </span>
               ) : (
-                <span className="text-[14px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
+                <span className="text-[16px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
                   Not on 2TurnItOn
                 </span>
               )}
@@ -588,12 +588,12 @@ function Step1Address() {
         {/* Show selected address confirmation with detected unit */}
         {selectedAddress && (
           <div className="p-4 rounded-xl bg-[var(--color-teal-light)] border-2 border-[var(--color-teal)]">
-            <p className="text-[14px] font-medium text-[var(--color-teal)]">Address selected:</p>
+            <p className="text-[16px] font-medium text-[var(--color-teal)]">Address selected:</p>
             <p className="text-[16px] text-[var(--color-darkest)] mt-1">
               {selectedAddress.street}
               {selectedAddress.unit && `, Apt ${selectedAddress.unit}`}
             </p>
-            <p className="text-[14px] text-[var(--color-dark)] mt-0.5">
+            <p className="text-[16px] text-[var(--color-dark)] mt-0.5">
               {selectedAddress.city}, {selectedAddress.state} {selectedAddress.zip}
             </p>
           </div>

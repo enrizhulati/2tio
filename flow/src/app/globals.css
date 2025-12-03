@@ -56,7 +56,7 @@
   --text-h4: 22px;
   --text-body: 18px;
   --text-small: 16px;
-  --text-tiny: 14px;
+  --text-tiny: 16px; /* Minimum readable size per Practical UI */
 
   --line-height-tight: 1.1;
   --line-height-heading: 1.25;
