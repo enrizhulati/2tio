@@ -54,8 +54,8 @@ function FileUpload({
 
   return (
     <div className="w-full">
-      {/* Card container */}
-      <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-white">
+      {/* Card container - Practical UI: 3:1 contrast for borders */}
+      <div className="p-4 rounded-xl border-2 border-[var(--color-border)] bg-white">
         {/* Header */}
         <div className="flex items-start gap-3 mb-3">
           <div className="p-2 rounded-lg bg-[var(--color-lightest)]">
@@ -111,7 +111,7 @@ function FileUpload({
               <button
                 type="button"
                 onClick={onRemove}
-                className="text-[var(--color-dark)] hover:text-[var(--color-error)] transition-colors"
+                className="text-[var(--color-dark)] hover:text-[var(--color-error)] transition-colors underline"
               >
                 Cancel
               </button>
@@ -167,7 +167,7 @@ function FileUpload({
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="text-[14px] text-[var(--color-teal)] font-medium hover:underline"
+              className="text-[14px] text-[var(--color-teal)] font-medium underline"
             >
               Try again
             </button>

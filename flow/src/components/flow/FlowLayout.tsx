@@ -142,7 +142,7 @@ function FlowLayout({ children }: FlowLayoutProps) {
           <SidebarNav />
         </div>
 
-        {/* Footer */}
+        {/* Footer - Practical UI: Links need sufficient touch targets */}
         <div className="p-6 text-[14px] text-[var(--color-dark)]">
           <div className="flex items-center gap-1 mb-2">
             <svg className="w-4 h-4 text-[var(--color-teal)]" fill="currentColor" viewBox="0 0 20 20">
@@ -154,14 +154,14 @@ function FlowLayout({ children }: FlowLayoutProps) {
             </svg>
             <span>256-bit encryption</span>
           </div>
-          <div className="flex gap-3">
-            <a href="#" className="underline text-[var(--color-dark)] hover:text-[var(--color-teal)] transition-colors">
+          <div className="flex gap-1">
+            <a href="#" className="underline text-[var(--color-dark)] hover:text-[var(--color-teal)] transition-colors py-2 px-1">
               Help
             </a>
-            <a href="#" className="underline text-[var(--color-dark)] hover:text-[var(--color-teal)] transition-colors">
+            <a href="#" className="underline text-[var(--color-dark)] hover:text-[var(--color-teal)] transition-colors py-2 px-1">
               Privacy
             </a>
-            <a href="#" className="underline text-[var(--color-dark)] hover:text-[var(--color-teal)] transition-colors">
+            <a href="#" className="underline text-[var(--color-dark)] hover:text-[var(--color-teal)] transition-colors py-2 px-1">
               Terms
             </a>
           </div>

@@ -90,7 +90,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               ${
                 hasError
                   ? 'border-[var(--color-error)] focus:border-[var(--color-error)]'
-                  : 'border-[var(--color-light)] hover:border-[var(--color-medium)] focus:border-[var(--color-teal)]'
+                  : 'border-[var(--color-border)] hover:border-[var(--color-dark)] focus:border-[var(--color-teal)]'
               }
               ${className}
             `}

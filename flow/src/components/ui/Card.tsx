@@ -12,11 +12,12 @@ interface CardProps {
 function Card({ children, className = '', variant = 'default', onClick }: CardProps) {
   const baseStyles = 'rounded-xl border-2 transition-all duration-150';
 
+  // Practical UI: Interactive cards need focus states
   const variantStyles = {
     default: 'border-[var(--color-light)] bg-white',
     selected: 'border-[var(--color-teal)] bg-[var(--color-teal-light)]',
     interactive:
-      'border-[var(--color-light)] bg-white hover:border-[var(--color-medium)] cursor-pointer',
+      'border-[var(--color-light)] bg-white hover:border-[var(--color-medium)] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-teal)] focus:ring-offset-2',
   };
 
   const Component = onClick ? 'button' : 'div';
@@ -27,7 +28,7 @@ function Card({ children, className = '', variant = 'default', onClick }: CardPr
       className={`
         ${baseStyles}
         ${variantStyles[variant]}
-        ${onClick ? 'w-full text-left' : ''}
+        ${onClick ? 'w-full text-left focus:outline-none focus:ring-2 focus:ring-[var(--color-teal)] focus:ring-offset-2' : ''}
         ${className}
       `}
     >

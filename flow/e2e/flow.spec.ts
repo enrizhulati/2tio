@@ -280,15 +280,15 @@ test.describe('Address Flow with Apartment', () => {
     await expect(page.locator('h1:has-text("Great news")')).toBeVisible({ timeout: 15000 });
   });
 
-  test('apartment without unit shows selection screen', async ({ page }) => {
-    // Type apartment building without unit number
+  test('apartment address from autocomplete proceeds directly', async ({ page }) => {
+    // Type apartment building - autocomplete returns unit-specific addresses with ESIIDs
     const addressInput = page.locator('input[placeholder*="address" i]');
     await addressInput.fill('3031 Oliver St');
 
     // Wait for autocomplete
     await page.waitForSelector('button[role="option"]', { timeout: 5000 });
 
-    // Click suggestion (just the building, no apt)
+    // Click suggestion - ERCOT returns addresses WITH units and ESIIDs
     const suggestion = page.locator('button[role="option"]:has-text("Dallas")').first();
     await suggestion.click();
 
@@ -301,8 +301,7 @@ test.describe('Address Flow with Apartment', () => {
     // Click "Check availability"
     await page.click('button:has-text("Check availability")');
 
-    // Should show selection screen since multiple units exist
-    await expect(page.locator('h1:has-text("Confirm your address")')).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('text=Select yours to continue')).toBeVisible();
+    // Since autocomplete provides ESIID directly, should skip selection and show results
+    await expect(page.locator('h1:has-text("Great news")')).toBeVisible({ timeout: 15000 });
   });
 });

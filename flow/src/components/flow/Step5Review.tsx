@@ -133,37 +133,45 @@ function Step5Review() {
             </div>
           </div>
 
-          {/* What happens next */}
+          {/* What happens next - Practical UI: Use proper numbered list semantics */}
           <div className="text-left">
             <h2 className="text-[22px] font-semibold text-[var(--color-darkest)] mb-4">
               What happens next
             </h2>
             <ol className="space-y-3">
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-teal-light)] text-[var(--color-teal)] text-[14px] font-medium flex items-center justify-center">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[14px] font-bold flex items-center justify-center" aria-hidden="true">
                   1
                 </span>
-                <span className="text-[16px] text-[var(--color-dark)]">
+                <span className="text-[16px] text-[var(--color-darkest)]">
                   We submit your information to each provider
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-teal-light)] text-[var(--color-teal)] text-[14px] font-medium flex items-center justify-center">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[14px] font-bold flex items-center justify-center" aria-hidden="true">
                   2
                 </span>
-                <span className="text-[16px] text-[var(--color-dark)]">
-                  You'll receive confirmation emails within 24 hours
+                <span className="text-[16px] text-[var(--color-darkest)]">
+                  You&apos;ll receive confirmation emails within 24 hours
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-teal-light)] text-[var(--color-teal)] text-[14px] font-medium flex items-center justify-center">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[14px] font-bold flex items-center justify-center" aria-hidden="true">
                   3
                 </span>
-                <span className="text-[16px] text-[var(--color-dark)]">
+                <span className="text-[16px] text-[var(--color-darkest)]">
                   Utilities will be active on your move-in date
                 </span>
               </li>
             </ol>
+          </div>
+
+          {/* Important reminder - Practical UI: Front-load key info */}
+          <div className="p-4 rounded-xl bg-[var(--color-lightest)] text-left">
+            <p className="text-[14px] text-[var(--color-dark)]">
+              <strong>Check your email</strong> — You'll receive confirmation from each provider within 24 hours.
+              If you don't see it, check your spam folder or contact us.
+            </p>
           </div>
 
           {/* Support */}
@@ -216,6 +224,16 @@ function Step5Review() {
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">
           Make sure everything looks right before we submit.
+        </p>
+      </div>
+
+      {/* Payment clarity notice - Practical UI: Front-load important info */}
+      <div className="p-4 rounded-xl bg-[var(--color-teal-light)] border border-[var(--color-teal)]">
+        <p className="text-[16px] font-medium text-[var(--color-darkest)]">
+          No payment due today
+        </p>
+        <p className="text-[14px] text-[var(--color-dark)] mt-1">
+          You'll receive separate bills from each provider after service starts on {moveInDate && formatDate(moveInDate)}.
         </p>
       </div>
 
@@ -314,6 +332,12 @@ function Step5Review() {
                 <p className="text-[14px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.electricity.rate} • {selectedPlans.electricity.contractLabel}
                 </p>
+                {/* Show ETF info for contracts - Practical UI: Be upfront about commitments */}
+                {selectedPlans.electricity.contractMonths && selectedPlans.electricity.contractMonths > 0 && (
+                  <p className="text-[13px] text-[var(--color-medium)] ml-7 mt-1">
+                    Early cancellation fee: $175 per remaining year
+                  </p>
+                )}
               </div>
             )}
 
@@ -373,23 +397,25 @@ function Step5Review() {
           Terms of Service
         </h3>
 
-        {/* Expandable terms */}
+        {/* Expandable terms - Practical UI: Accessible disclosure */}
         <div className="border border-[var(--color-light)] rounded-lg overflow-hidden mb-4">
           <button
             onClick={() => setTermsExpanded(!termsExpanded)}
             className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--color-lightest)] transition-colors"
+            aria-expanded={termsExpanded}
+            aria-controls="terms-content"
           >
             <span className="text-[16px] text-[var(--color-darkest)]">
-              View full terms and conditions
+              {termsExpanded ? 'Hide terms and conditions' : 'View full terms and conditions'}
             </span>
             {termsExpanded ? (
-              <ChevronUp className="w-5 h-5 text-[var(--color-dark)]" />
+              <ChevronUp className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-[var(--color-dark)]" />
+              <ChevronDown className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
             )}
           </button>
           {termsExpanded && (
-            <div className="px-4 pb-4 max-h-64 overflow-y-auto border-t border-[var(--color-light)]">
+            <div id="terms-content" className="px-4 pb-4 max-h-64 overflow-y-auto border-t border-[var(--color-light)]">
               <p className="text-[14px] text-[var(--color-dark)] whitespace-pre-line leading-relaxed pt-4">
                 {TERMS_TEXT}
               </p>
@@ -451,13 +477,15 @@ function Step5Review() {
           loadingText="Placing order..."
           className="sm:flex-1"
           disabled={!termsAgreed}
+          aria-describedby={!termsAgreed ? "terms-required-message" : undefined}
         >
           Place order
         </Button>
       </div>
+      {/* Practical UI: Disabled button explanation with aria-describedby */}
       {!termsAgreed && (
-        <p className="text-[14px] text-[var(--color-dark)] text-center">
-          Please agree to the Terms of Service to continue
+        <p id="terms-required-message" className="text-[14px] text-[var(--color-dark)] text-center">
+          Agree to the Terms of Service to continue
         </p>
       )}
     </div>

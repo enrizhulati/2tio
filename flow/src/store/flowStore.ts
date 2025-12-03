@@ -35,28 +35,8 @@ import {
 // Default usage profile for cost estimates (when Zillow data unavailable)
 const DEFAULT_USAGE = [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900];
 
-// Mock data for water/internet (not yet from 2TIO API)
-const mockWaterService = {
-  available: true,
-  provider: 'City of Dallas Water Utilities',
-  plans: [
-    {
-      id: 'dallas-water-standard',
-      provider: 'City of Dallas Water Utilities',
-      name: 'Standard Residential',
-      rate: 'Tiered usage rates',
-      rateType: 'tiered' as const,
-      contractMonths: 0,
-      contractLabel: 'No contract',
-      setupFee: 0,
-      monthlyEstimate: '$45-65',
-      features: ['24/7 emergency service', 'Online account management'],
-    },
-  ],
-};
-
-// Internet plan response type from 2TIO API
-interface RawInternetPlan {
+// Water/Internet plan response type from 2TIO API
+interface RawServicePlan {
   id: string;
   name: string;
   vendorId: string;
@@ -66,6 +46,8 @@ interface RawInternetPlan {
   mPrice?: number;        // Monthly price (some APIs use this)
   price?: number;         // Monthly price (some APIs use this)
   term: number;
+  shortDescription?: string;
+  longDescription?: string;
   bulletPoint1?: string;
   bulletPoint2?: string;
   bulletPoint3?: string;
@@ -73,6 +55,10 @@ interface RawInternetPlan {
   bulletPoint5?: string;
   logo?: string;
 }
+
+// Alias for backwards compatibility
+type RawInternetPlan = RawServicePlan;
+type RawWaterPlan = RawServicePlan;
 
 const initialState = {
   currentStep: 1 as FlowStep,
@@ -137,10 +123,11 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     try {
       const zipCode = address?.zip || '75205';
 
-      // Fetch electricity and internet plans in parallel
-      const [rawElectricityPlans, rawInternetPlans] = await Promise.all([
+      // Fetch all service plans in parallel from 2TIO API
+      const [rawElectricityPlans, rawInternetPlans, rawWaterPlans] = await Promise.all([
         getPlans('electricity', zipCode) as Promise<TwotionPlan[]>,
         getPlans('internet', zipCode).catch(() => [] as RawInternetPlan[]) as Promise<RawInternetPlan[]>,
+        getPlans('water', zipCode).catch(() => [] as RawWaterPlan[]) as Promise<RawWaterPlan[]>,
       ]);
 
       // Enrich electricity plans with default usage cost estimates
@@ -171,7 +158,6 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       }));
 
       // Convert internet plans to ServicePlan format
-      // API may return price in different fields - check uPrice, mPrice, or price
       const internetPlans: ServicePlan[] = rawInternetPlans.map((plan, index) => {
         const monthlyPrice = plan.uPrice || plan.mPrice || plan.price || 0;
         return {
@@ -196,11 +182,42 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         };
       });
 
-      // Build available services with real data
+      // Convert water plans to ServicePlan format
+      const waterPlans: ServicePlan[] = rawWaterPlans.map((plan, index) => {
+        const monthlyPrice = plan.mPrice || plan.uPrice || plan.price || 0;
+        return {
+          id: plan.id,
+          provider: plan.vendorName,
+          name: plan.name,
+          rate: monthlyPrice > 0 ? `$${monthlyPrice.toFixed(2)}/mo base` : 'Usage-based',
+          rateType: 'tiered' as const,
+          contractMonths: plan.term || 0,
+          contractLabel: 'No contract',
+          setupFee: 0,
+          monthlyEstimate: monthlyPrice > 0 ? `$${Math.round(monthlyPrice)}+` : undefined,
+          features: [
+            plan.bulletPoint1,
+            plan.bulletPoint2,
+            plan.bulletPoint3,
+            plan.bulletPoint4,
+            plan.shortDescription,
+          ].filter(Boolean) as string[],
+          badge: index === 0 ? 'RECOMMENDED' as const : undefined,
+          badgeReason: index === 0 ? 'Your local water utility' : undefined,
+        };
+      });
+
+      // Build available services with real data from API
       const availableServices: AvailableServices = {
-        water: mockWaterService,
+        water: {
+          available: waterPlans.length > 0,
+          provider: waterPlans.length > 0 ? waterPlans[0].provider : undefined,
+          providerCount: new Set(waterPlans.map(p => p.provider)).size,
+          startingRate: waterPlans.length > 0 ? waterPlans[0].rate : undefined,
+          plans: waterPlans,
+        },
         electricity: {
-          available: true,
+          available: electricityPlans.length > 0,
           providerCount: new Set(electricityPlans.map(p => p.provider)).size,
           startingRate: electricityPlans.length > 0 ? electricityPlans[0].rate : undefined,
           plans: electricityPlans,
@@ -218,15 +235,19 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         isCheckingAvailability: false,
         availabilityChecked: true,
         selectedPlans: {
-          water: mockWaterService.plans[0],
+          water: waterPlans.length > 0 ? waterPlans[0] : undefined,
         },
       });
     } catch (error) {
       console.error('Error fetching plans:', error);
-      // Still show availability but with empty plans
+      // Still show availability but with empty plans on error
       set({
         availableServices: {
-          water: mockWaterService,
+          water: {
+            available: false,
+            providerCount: 0,
+            plans: [],
+          },
           electricity: {
             available: false,
             providerCount: 0,
@@ -240,9 +261,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         },
         isCheckingAvailability: false,
         availabilityChecked: true,
-        selectedPlans: {
-          water: mockWaterService.plans[0],
-        },
+        selectedPlans: {},
       });
     }
   },
@@ -252,8 +271,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   toggleService: async (service: ServiceType) => {
     const { selectedServices, selectedPlans, availableServices, address, cart } = get();
 
-    // Can't toggle water off (it's required since they came for water)
-    if (service === 'water') return;
+    // Water is pre-selected and required - can't be toggled off
+    if (service === 'water' && selectedServices.water) return;
 
     const isNowSelected = !selectedServices[service];
 
@@ -269,8 +288,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       const recommendedPlan = plans.find((p) => p.badge === 'RECOMMENDED') || plans[0];
       newSelectedPlans[service] = recommendedPlan;
 
-      // Add to 2TIO cart for electricity and internet
-      if ((service === 'electricity' || service === 'internet') && recommendedPlan) {
+      // Add to 2TIO cart for all services
+      if (recommendedPlan) {
         try {
           await apiAddToCart(recommendedPlan.id);
           const newItems = [...(cart?.items || [])];
@@ -289,7 +308,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     } else if (!isNowSelected) {
       // Remove from cart when deselecting
       const previousPlan = selectedPlans[service];
-      if ((service === 'electricity' || service === 'internet') && previousPlan) {
+      if (previousPlan) {
         try {
           await apiRemoveFromCart(previousPlan.id);
           const newItems = (cart?.items || []).filter(item => item.planId !== previousPlan.id);
@@ -323,8 +342,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       },
     });
 
-    // For electricity and internet, sync with 2TIO cart
-    if (service === 'electricity' || service === 'internet') {
+    // Sync all services with 2TIO cart
+    if (service === 'water' || service === 'electricity' || service === 'internet') {
       try {
         // Remove previous plan from cart if exists
         if (previousPlan && previousPlan.id !== plan.id) {
@@ -448,7 +467,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           type: 'water',
           provider: selectedPlans.water.provider,
           plan: selectedPlans.water.name,
-          status: 'processing',
+          status: 'confirmed',
         });
       }
 
@@ -487,6 +506,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
       // Fallback: create local confirmation on error (so user doesn't lose progress)
       const services: OrderConfirmation['services'] = [];
+      if (selectedServices.water && selectedPlans.water) {
+        services.push({
+          type: 'water',
+          provider: selectedPlans.water.provider,
+          plan: selectedPlans.water.name,
+          status: 'pending',
+        });
+      }
       if (selectedServices.electricity && selectedPlans.electricity) {
         services.push({
           type: 'electricity',

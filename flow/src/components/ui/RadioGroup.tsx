@@ -99,22 +99,22 @@ function RadioOption({
       />
 
       <div className="flex items-start gap-3">
-        {/* Radio circle */}
+        {/* Radio circle - Practical UI: 24px minimum for radio buttons */}
         <div
           className={`
-            flex-shrink-0 w-5 h-5 mt-0.5
+            flex-shrink-0 w-6 h-6 mt-0.5
             rounded-full border-2
             flex items-center justify-center
             transition-colors duration-150
             ${
               isSelected
                 ? 'border-[var(--color-teal)]'
-                : 'border-[var(--color-medium)]'
+                : 'border-[var(--color-dark)]'
             }
           `}
         >
           {isSelected && (
-            <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-teal)]" />
+            <div className="w-3 h-3 rounded-full bg-[var(--color-teal)]" />
           )}
         </div>
 
@@ -127,7 +127,7 @@ function RadioOption({
             <div
               className={`
                 flex items-center gap-1 px-2 py-1
-                text-[12px] font-bold uppercase tracking-wide
+                text-[12px] font-bold uppercase tracking-wider
                 rounded cursor-help
                 ${badgeStyles[badgeVariant]}
               `}

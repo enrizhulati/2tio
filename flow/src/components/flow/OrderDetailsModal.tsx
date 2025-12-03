@@ -157,10 +157,10 @@ function OrderDetailsModal({
                         )}
                       </div>
                     </div>
-                    {/* Status badge */}
+                    {/* Status badge - Practical UI: Minimum 12px for readable text */}
                     <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-[var(--color-warning-light)] self-start">
-                      <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[var(--color-warning)]" />
-                      <span className="text-[11px] sm:text-[12px] font-medium text-[var(--color-warning)] whitespace-nowrap">
+                      <Clock className="w-3.5 h-3.5 text-[var(--color-warning)]" aria-hidden="true" />
+                      <span className="text-[12px] font-bold uppercase tracking-wider text-[var(--color-warning)] whitespace-nowrap">
                         Setting up
                       </span>
                     </div>

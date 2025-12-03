@@ -212,14 +212,22 @@ export function AddressAutocomplete({
     return unit ? `${streetDisplay}, ${unit}` : streetDisplay;
   };
 
+  // Practical UI: Proper label association with input
+  const inputId = 'address-autocomplete-input';
+  const listboxId = 'address-suggestions-listbox';
+
   return (
     <div className="space-y-2">
-      <label className="block text-[14px] font-semibold text-[var(--color-darkest)] tracking-wide">
+      <label
+        htmlFor={inputId}
+        className="block text-[14px] font-semibold text-[var(--color-darkest)] tracking-wide"
+      >
         Street address
       </label>
       <div className="relative">
         <input
           ref={inputRef}
+          id={inputId}
           type="text"
           value={value}
           onChange={handleChange}
@@ -227,12 +235,13 @@ export function AddressAutocomplete({
           onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
           disabled={disabled}
           placeholder="Start typing your address..."
-          className={`w-full h-14 px-4 text-[16px] text-[var(--color-darkest)] bg-white border-2 rounded-xl transition-colors duration-150 placeholder:text-[var(--color-medium)] focus:outline-none focus:border-[var(--color-teal)] ${error ? 'border-[var(--color-error)] focus:border-[var(--color-error)]' : 'border-[var(--color-light)] hover:border-[var(--color-medium)]'} ${disabled ? 'bg-[var(--color-lightest)] text-[var(--color-medium)] cursor-not-allowed' : ''}`}
+          className={`w-full h-14 px-4 text-[16px] text-[var(--color-darkest)] bg-white border-2 rounded-xl transition-colors duration-150 placeholder:text-[var(--color-medium)] focus:outline-none focus:border-[var(--color-teal)] ${error ? 'border-[var(--color-error)] focus:border-[var(--color-error)]' : 'border-[var(--color-border)] hover:border-[var(--color-dark)]'} ${disabled ? 'bg-[var(--color-lightest)] text-[var(--color-medium)] cursor-not-allowed' : ''}`}
           autoComplete="off"
           role="combobox"
           aria-expanded={showDropdown}
           aria-haspopup="listbox"
           aria-autocomplete="list"
+          aria-controls={listboxId}
         />
 
         {/* Loading or clear button */}
@@ -252,12 +261,14 @@ export function AddressAutocomplete({
           </div>
         )}
 
-        {/* Dropdown */}
+        {/* Dropdown - Practical UI: Proper ARIA for listbox */}
         {showDropdown && suggestions.length > 0 && (
           <div
             ref={dropdownRef}
+            id={listboxId}
             className="absolute z-50 w-full mt-2 bg-white border-2 border-[var(--color-light)] rounded-xl shadow-lg overflow-hidden"
             role="listbox"
+            aria-label="Address suggestions"
           >
             {suggestions.map((address, index) => (
               <button

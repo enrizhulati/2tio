@@ -124,15 +124,19 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
         )}
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 mt-2 text-[14px] text-[var(--color-dark)]">
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-sm bg-[var(--color-teal)]" />
-          <span>Regular months</span>
+      {/* Legend - Practical UI: Don't rely on color alone, use patterns/icons too */}
+      <div className="flex items-center gap-4 mt-2 text-[14px] text-[var(--color-darkest)]">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm bg-[var(--color-teal)]" aria-hidden="true" />
+          <span>Regular</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-sm bg-[var(--color-coral)]" />
-          <span>Summer peak</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm bg-[var(--color-coral)] relative">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-1.5 h-0.5 bg-white rounded-full" aria-hidden="true" />
+            </div>
+          </div>
+          <span>Summer peak (Jun-Aug)</span>
         </div>
       </div>
     </div>

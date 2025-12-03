@@ -206,7 +206,7 @@ function ServiceCard({
                   {SERVICE_INFO[type].label}
                 </h3>
                 {isWater && (
-                  <span className="text-[12px] font-medium text-[var(--color-dark)] bg-[var(--color-lightest)] px-2 py-0.5 rounded">
+                  <span className="text-[12px] font-bold uppercase tracking-wider text-[var(--color-dark)] bg-[var(--color-lightest)] px-2 py-0.5 rounded">
                     Required
                   </span>
                 )}
@@ -295,12 +295,14 @@ function ServiceCard({
         </div>
       </div>
 
-      {/* Expandable plan selection */}
+      {/* Expandable plan selection - Practical UI: Accessible disclosure */}
       {isSelected && !isWater && (
         <div className="border-t border-[var(--color-light)]">
           <button
             onClick={onExpand}
             className="w-full p-4 flex items-center justify-between text-left hover:bg-[var(--color-lightest)] transition-colors"
+            aria-expanded={isExpanded}
+            aria-controls={`${type}-plan-section`}
           >
             <div>
               <span className="text-[16px] font-medium text-[var(--color-darkest)]">
@@ -313,14 +315,14 @@ function ServiceCard({
               )}
             </div>
             {isExpanded ? (
-              <ChevronUp className="w-5 h-5 text-[var(--color-dark)]" />
+              <ChevronUp className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-[var(--color-dark)]" />
+              <ChevronDown className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
             )}
           </button>
 
           {isExpanded && (
-            <div className="px-4 pb-4 animate-slide-up">
+            <div id={`${type}-plan-section`} className="px-4 pb-4 animate-slide-up">
               {/* Usage Chart for electricity - show with real or default usage */}
               {type === 'electricity' && sortedPlans.length > 0 && sortedPlans[0].annualCost && (
                 <UsageChart
@@ -401,6 +403,12 @@ function ServiceCard({
                         <p className="text-[14px] text-[var(--color-dark)] mt-1">
                           {plan.rate} • {plan.contractLabel}
                         </p>
+                        {/* Show contract commitment info - Practical UI: Be upfront about commitments */}
+                        {isElectricity && plan.contractMonths && plan.contractMonths > 0 && (
+                          <p className="text-[13px] text-[var(--color-medium)] mt-1">
+                            $175 early cancellation fee per remaining year
+                          </p>
+                        )}
                         {/* Show WHY this is the cheapest plan - inline text */}
                         {isCheapest && badgeReason && (
                           <p className="text-[14px] text-[var(--color-teal)] font-medium mt-1">
@@ -413,13 +421,13 @@ function ServiceCard({
                 })}
               </RadioGroup>
 
-              {/* View all plans button */}
+              {/* View all plans button - Practical UI: Arrows suggest external links, remove */}
               {!showAllPlans && sortedPlans.length > 3 && (
                 <button
                   onClick={() => setShowAllPlans(true)}
-                  className="text-[var(--color-teal)] text-[14px] font-medium mt-3 underline"
+                  className="text-[var(--color-teal)] text-[16px] font-medium mt-3 underline"
                 >
-                  View all {sortedPlans.length} plans →
+                  View all {sortedPlans.length} plans
                 </button>
               )}
               {showAllPlans && sortedPlans.length > 3 && (

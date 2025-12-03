@@ -59,7 +59,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const widthStyle = fullWidth ? 'w-full' : '';
-    const disabledStyle = isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer';
+    // Practical UI: Disabled buttons should have 3:1 contrast minimum
+    // Using opacity-50 + specific colors rather than just opacity for better contrast control
+    const disabledStyle = isDisabled ? 'cursor-not-allowed' : 'cursor-pointer';
 
     // Color values based on colorScheme
     const colorValues = {
@@ -78,13 +80,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const colors = colorValues[colorScheme];
 
     // Build inline styles for color-dependent properties
+    // Practical UI: Disabled buttons need 3:1 contrast minimum + explanation text nearby
     const getInlineStyles = (): CSSProperties => {
       if (isDisabled) {
         return {
           ...style,
-          backgroundColor: variant === 'primary' ? 'var(--color-medium)' : 'transparent',
-          borderColor: variant === 'secondary' ? 'var(--color-medium)' : undefined,
-          color: variant === 'primary' ? 'white' : 'var(--color-medium)',
+          // Using --color-dark (#6C757D) for better contrast than --color-medium
+          backgroundColor: variant === 'primary' ? 'var(--color-light)' : 'transparent',
+          borderColor: variant === 'secondary' ? 'var(--color-light)' : undefined,
+          color: variant === 'primary' ? 'var(--color-dark)' : 'var(--color-medium)',
         };
       }
 

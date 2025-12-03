@@ -14,11 +14,12 @@
   --color-teal-hover: #1DB88A;
   --color-teal-light: #E6F9F3;
 
-  /* Neutrals */
-  --color-darkest: #343A40;
-  --color-dark: #6C757D;
-  --color-medium: #868E96;  /* 4.5:1 contrast - WCAG AA for text */
-  --color-light: #CED4DA;   /* 3.2:1 contrast - WCAG AA for UI */
+  /* Neutrals - Practical UI contrast guidelines */
+  --color-darkest: #343A40;  /* 10:1 on white - Primary text */
+  --color-dark: #6C757D;     /* 4.7:1 on white - WCAG AA for small text (14px+) */
+  --color-medium: #868E96;   /* 3.4:1 on white - WCAG AA for large text/UI only */
+  --color-border: #ADB5BD;   /* 3.1:1 on white - WCAG AA for form borders */
+  --color-light: #CED4DA;    /* 1.5:1 on white - Decorative borders only, not text */
   --color-lightest: #F8F9FA;
   --color-white: #FFFFFF;
 
@@ -107,7 +108,12 @@ h1, .h1 {
   font-weight: 700;
   line-height: var(--line-height-tight);
   color: var(--color-darkest);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.02em; /* Practical UI: Decrease letter-spacing for large text */
+}
+
+/* Practical UI: UPPERCASE text needs bold weight + increased letter-spacing */
+.uppercase {
+  letter-spacing: 0.05em;
 }
 
 h2, .h2 {

@@ -134,15 +134,15 @@ function Step2Profile() {
           required
         />
 
-        {/* SMS opt-in */}
+        {/* SMS opt-in - Practical UI: Description text must meet 4.5:1 contrast */}
         <div className="space-y-1">
           <Checkbox
             label="Text me service updates and reminders"
             checked={smsOptIn}
             onChange={(e) => setSmsOptIn(e.target.checked)}
           />
-          <p className="text-[14px] text-[var(--color-medium)] ml-7">
-            You'll get setup confirmations, appointment reminders, and outage alerts. About 2-4 texts per month. You can opt out anytime.
+          <p className="text-[14px] text-[var(--color-dark)] ml-9">
+            You&apos;ll get setup confirmations, appointment reminders, and outage alerts. About 2-4 texts per month. You can opt out anytime.
           </p>
         </div>
       </div>

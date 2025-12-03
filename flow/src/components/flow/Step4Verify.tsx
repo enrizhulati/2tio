@@ -43,7 +43,7 @@ function QuestionInput({
             text-[16px] text-[var(--color-darkest)]
             transition-colors duration-150
             focus:outline-none focus:border-[var(--color-teal)]
-            ${error ? 'border-[var(--color-error)]' : 'border-[var(--color-light)]'}
+            ${error ? 'border-[var(--color-error)]' : 'border-[var(--color-border)] hover:border-[var(--color-dark)]'}
           `}
         >
           <option value="">Select...</option>
@@ -61,9 +61,12 @@ function QuestionInput({
   }
 
   if (question.type === 'date') {
+    // Add hint for DOB explaining why it's needed
+    const isDob = question.id === 'dob' || question.question.toLowerCase().includes('birth');
     return (
       <Input
         label={question.question}
+        hint={isDob ? "Used to verify your identity with providers" : undefined}
         type="date"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -86,15 +89,25 @@ function QuestionInput({
       return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
     };
 
+    // Practical UI: Hints and errors should appear ABOVE the input field
+    // Practical UI: Field width should match expected input length
     return (
-      <div className="space-y-1.5">
+      <div className="space-y-2 max-w-[240px]">
         <label
           htmlFor={inputId}
-          className="block text-[14px] font-medium text-[var(--color-darkest)]"
+          className="block text-[14px] font-semibold text-[var(--color-darkest)]"
         >
           {question.question}
           {question.required && <span className="text-[var(--color-error)]"> *</span>}
         </label>
+        {/* Hint above input per Practical UI - Address credit score concern upfront */}
+        <p id={hintId} className="text-[14px] text-[var(--color-dark)]">
+          Soft credit check only — won't affect your credit score. Required by utility providers.
+        </p>
+        {/* Error above input per Practical UI */}
+        {error && (
+          <p id={errorId} className="text-[14px] text-[var(--color-error)]" role="alert">{error}</p>
+        )}
         <input
           id={inputId}
           type="text"
@@ -108,19 +121,13 @@ function QuestionInput({
           aria-invalid={!!error}
           aria-describedby={`${hintId}${error ? ` ${errorId}` : ''}`}
           className={`
-            w-full px-4 py-3 rounded-xl border-2 bg-white
+            w-full h-14 px-4 rounded-xl border-2 bg-white
             text-[16px] text-[var(--color-darkest)]
             transition-colors duration-150
             focus:outline-none focus:border-[var(--color-teal)]
-            ${error ? 'border-[var(--color-error)]' : 'border-[var(--color-light)]'}
+            ${error ? 'border-[var(--color-error)]' : 'border-[var(--color-border)] hover:border-[var(--color-dark)]'}
           `}
         />
-        <p id={hintId} className="text-[14px] text-[var(--color-dark)]">
-          Required for credit check by utility providers
-        </p>
-        {error && (
-          <p id={errorId} className="text-[14px] text-[var(--color-error)]" role="alert">{error}</p>
-        )}
       </div>
     );
   }
@@ -368,11 +375,11 @@ function Step4Verify() {
           newErrors[q.id] = 'This field is required';
         }
 
-        // SSN validation
+        // SSN validation - Practical UI: Be direct, avoid "Please"
         if (q.type === 'ssn' && checkoutAnswers[q.id]) {
           const digits = checkoutAnswers[q.id].replace(/\D/g, '');
           if (digits.length !== 9) {
-            newErrors[q.id] = 'Please enter a valid 9-digit SSN';
+            newErrors[q.id] = 'Enter a valid 9-digit SSN';
           } else if (
             digits === '000000000' ||
             digits.startsWith('000') ||
@@ -382,20 +389,20 @@ function Step4Verify() {
             digits.startsWith('9')
           ) {
             // IRS invalid SSN patterns
-            newErrors[q.id] = 'Please enter a valid SSN';
+            newErrors[q.id] = 'Enter a valid SSN';
           }
         }
       });
 
-      // Validate required documents
+      // Validate required documents - Practical UI: Direct, concise error messages
       if (step.IsDLUpload && (!documents.dl || documents.dl.status !== 'uploaded')) {
-        newErrors['dl'] = 'Please upload your ID';
+        newErrors['dl'] = 'Upload your ID to continue';
       }
       if (step.IsLeaseUpload && (!documents.lease || documents.lease.status !== 'uploaded')) {
-        newErrors['lease'] = 'Please upload your lease agreement';
+        newErrors['lease'] = 'Upload your lease agreement to continue';
       }
       if (step.IsOwnUpload && (!documents.own || documents.own.status !== 'uploaded')) {
-        newErrors['own'] = 'Please upload proof of ownership';
+        newErrors['own'] = 'Upload proof of ownership to continue';
       }
     });
 
@@ -466,12 +473,17 @@ function Step4Verify() {
         </div>
       ))}
 
-      {/* Privacy notice */}
-      <div className="flex items-start gap-2 p-4 rounded-xl bg-[var(--color-lightest)] text-[14px] text-[var(--color-dark)]">
-        <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
-        <p>
-          Your information is encrypted and only shared with your selected utility providers.
-          We delete personal data after setup is complete.
+      {/* Privacy and credit check notice */}
+      <div className="space-y-3">
+        <div className="flex items-start gap-2 p-4 rounded-xl bg-[var(--color-lightest)] text-[14px] text-[var(--color-dark)]">
+          <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <p>
+            Your information is encrypted and only shared with your selected utility providers.
+            We delete personal data after setup is complete.
+          </p>
+        </div>
+        <p className="text-[14px] text-[var(--color-dark)] px-1">
+          If a provider requires a deposit based on credit history, we'll let you know the amount before finalizing.
         </p>
       </div>
 

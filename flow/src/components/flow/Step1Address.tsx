@@ -243,12 +243,13 @@ function Step1Address() {
     return (
       <div className="space-y-8">
         {/* Heading */}
+        {/* Practical UI: Front-load important info, be concise */}
         <div className="text-center">
           <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
-            Confirm your address
+            Which unit is yours?
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
-            We found {esiidMatches.length} units at this location. Select yours to continue.
+            We found {esiidMatches.length} units at this building.
           </p>
         </div>
 
@@ -356,7 +357,7 @@ function Step1Address() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--color-coral-light)] flex items-center justify-center">
             <AlertCircle className="w-8 h-8 text-[var(--color-coral)]" />
           </div>
-          <h1 className="text-[36px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
+          <h1 className="text-[35px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
             We couldn't verify this address
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
@@ -370,24 +371,15 @@ function Step1Address() {
           </p>
         </div>
 
-        {/* Common reasons */}
+        {/* Common reasons - Practical UI: Use proper list markup for accessibility */}
         <div className="space-y-3">
-          <p className="text-[15px] font-medium text-[var(--color-darkest)]">
+          <p className="text-[16px] font-medium text-[var(--color-darkest)]">
             This usually happens when:
           </p>
-          <ul className="space-y-2 text-[15px] text-[var(--color-dark)]">
-            <li className="flex items-start gap-2">
-              <span className="text-[var(--color-teal)] mt-0.5">•</span>
-              The property is newly built and not yet in the system
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[var(--color-teal)] mt-0.5">•</span>
-              The unit number needs to be included (e.g., Apt 4B)
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[var(--color-teal)] mt-0.5">•</span>
-              There's a slight difference in how the address is registered
-            </li>
+          <ul className="space-y-2 text-[16px] text-[var(--color-dark)] list-disc list-inside">
+            <li>The property is newly built and not yet in the system</li>
+            <li>The unit number needs to be included (e.g., Apt 4B)</li>
+            <li>There&apos;s a slight difference in how the address is registered</li>
           </ul>
         </div>
 
