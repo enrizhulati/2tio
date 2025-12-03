@@ -32,11 +32,12 @@ function RadioGroup({
     <RadioGroupContext.Provider value={{ name, value, onChange }}>
       <div role="radiogroup" aria-label={label} className={className}>
         {label && (
-          <h4 className="text-[22px] font-semibold text-[var(--color-darkest)] mb-4">
+          <h4 className="text-[22px] font-bold text-[var(--color-darkest)] mb-4">
             {label}
           </h4>
         )}
-        <div className="space-y-3">{children}</div>
+        {/* Practical UI: S=16px spacing between options */}
+        <div className="space-y-4">{children}</div>
       </div>
     </RadioGroupContext.Provider>
   );
@@ -89,12 +90,12 @@ function RadioOption({
     <label
       className={`
         block cursor-pointer
-        rounded-lg border-2
+        rounded-xl border-2
         transition-all duration-150
         has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--color-teal)] has-[:focus-visible]:ring-offset-2
         ${
           isSelected
-            ? 'border-[var(--color-teal)] bg-white'
+            ? 'border-[var(--color-teal)] bg-white shadow-sm'
             : 'border-[var(--color-light)] hover:border-[var(--color-medium)] bg-white'
         }
         ${className}
@@ -109,12 +110,12 @@ function RadioOption({
         className="sr-only peer"
       />
 
-      {/* Header banner for badge - full width with optional tooltip */}
+      {/* Header banner for badge - Practical UI: Better padding, readable text */}
       {badge && (
         <div
           className={`
-            relative w-full px-3 py-1.5 text-center rounded-t-md
-            text-[14px] font-bold
+            relative w-full px-4 py-2 text-center rounded-t-lg
+            text-[14px] font-bold tracking-wide
             ${bannerStyles[badgeVariant]}
           `}
         >
@@ -122,7 +123,7 @@ function RadioOption({
           {badgeReason && (
             <button
               type="button"
-              className="inline-flex items-center ml-1.5 align-middle"
+              className="inline-flex items-center ml-2 align-middle p-1 -m-1 min-h-[24px]"
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
               onClick={(e) => {
@@ -149,12 +150,12 @@ function RadioOption({
         </div>
       )}
 
-      {/* Main content area */}
-      <div className="p-3 flex items-start gap-3">
-        {/* Radio circle - Practical UI: 24px minimum for radio buttons */}
+      {/* Main content area - Practical UI: M=24px padding, S=16px gaps */}
+      <div className="p-4 sm:p-5 flex items-start gap-4">
+        {/* Radio circle - Practical UI: 24px for better touch target */}
         <div
           className={`
-            flex-shrink-0 w-5 h-5 mt-1
+            flex-shrink-0 w-6 h-6 mt-0.5
             rounded-full border-2
             flex items-center justify-center
             transition-colors duration-150
@@ -166,7 +167,7 @@ function RadioOption({
           `}
         >
           {isSelected && (
-            <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-teal)]" />
+            <div className="w-3 h-3 rounded-full bg-[var(--color-teal)]" />
           )}
         </div>
 

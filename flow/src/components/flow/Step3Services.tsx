@@ -438,24 +438,24 @@ function ServiceCard({
                       badgeVariant={badgeVariant}
                       badgeReason={badgeReason}
                     >
-                      {/* 3-column horizontal grid - matches reference design */}
-                      <div className="grid grid-cols-[1fr_auto] gap-3">
-                        {/* LEFT + MIDDLE: Main content */}
-                        <div className="min-w-0">
+                      {/* 2-column grid - Practical UI: S=16px gaps */}
+                      <div className="grid grid-cols-[1fr_auto] gap-4">
+                        {/* LEFT: Main content */}
+                        <div className="min-w-0 space-y-1.5">
                           {/* Row 1: Term + Green badge */}
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[18px] font-bold text-[var(--color-darkest)]">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[18px] font-bold text-[var(--color-darkest)] tracking-tight">
                               {plan.contractMonths > 0 ? `${plan.contractMonths} Mo` : 'No Contract'}
                             </span>
                             {isElectricity && renewablePct > 0 && (
-                              <span className="text-[14px] text-[var(--color-success)]">
+                              <span className="text-[14px] font-medium text-[var(--color-success)]">
                                 {renewablePct}% Green
                               </span>
                             )}
                           </div>
 
-                          {/* Row 2: Provider logo + name + plan name (horizontal) */}
-                          <div className="flex items-center gap-2 mb-2">
+                          {/* Row 2: Provider logo + plan name */}
+                          <div className="flex items-center gap-3">
                             {plan.logo && (
                               <Image
                                 src={plan.logo}
@@ -465,15 +465,13 @@ function ServiceCard({
                                 className="h-8 w-auto object-contain flex-shrink-0"
                               />
                             )}
-                            <div className="min-w-0">
-                              <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
-                                {plan.name}
-                              </span>
-                            </div>
+                            <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
+                              {plan.name}
+                            </span>
                           </div>
 
                           {/* Row 3: Monthly estimate + details */}
-                          <div className="text-[14px] text-[var(--color-dark)]">
+                          <div className="text-[16px] text-[var(--color-dark)]">
                             {isElectricity && plan.monthlyEstimate && (
                               <span className="font-semibold text-[var(--color-darkest)]">
                                 {plan.monthlyEstimate}/mo
@@ -494,9 +492,9 @@ function ServiceCard({
                             )}
                           </div>
 
-                          {/* Row 4: Secondary details (cancellation, lead time) */}
-                          {(plan.cancellationFee || plan.leadTime) && (
-                            <div className="text-[14px] text-[var(--color-dark)] mt-1">
+                          {/* Row 4: Secondary details */}
+                          {(plan.cancellationFee || plan.leadTime || isInternet) && (
+                            <div className="text-[16px] text-[var(--color-dark)]">
                               {isElectricity && plan.cancellationFee && plan.cancellationFee > 0 && (
                                 <span>${plan.cancellationFee} cancel fee</span>
                               )}
@@ -508,7 +506,7 @@ function ServiceCard({
                                 </span>
                               )}
                               {plan.leadTime !== undefined && plan.leadTime > 0 && (
-                                <span className="text-[var(--color-teal)]">
+                                <span className="text-[var(--color-teal)] font-medium">
                                   {' '}• Starts in {plan.leadTime}d
                                 </span>
                               )}
@@ -518,11 +516,11 @@ function ServiceCard({
 
                         {/* RIGHT: Rate highlight (electricity only) */}
                         {isElectricity && ratePerKwh && (
-                          <div className="flex flex-col items-center justify-center pl-3 border-l border-[var(--color-light)]">
-                            <span className="text-[24px] font-bold text-[var(--color-coral)]">
+                          <div className="flex flex-col items-center justify-center pl-4 border-l border-[var(--color-light)]">
+                            <span className="text-[28px] font-bold text-[var(--color-coral)] tracking-tight">
                               {ratePerKwh}
                             </span>
-                            <span className="text-[12px] text-[var(--color-dark)]">
+                            <span className="text-[14px] text-[var(--color-dark)]">
                               per kWh
                             </span>
                           </div>
