@@ -900,34 +900,19 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       const servicePlans: ServicePlan[] = rawPlans.map((plan, index) => {
         const rawPlan = plan as unknown as RawServicePlan;
 
-        // Use API's server-calculated costs (accounts for bill credits, tiered pricing)
-        // Fall back to client calculation if API doesn't provide totalCost
+        // Always use client-side calculation based on user's usage
+        // This ensures costs properly update when usage changes
         const clientCosts = enrichPlansWithCosts([plan], usage)[0];
-        const annualCost = plan.totalCost ?? clientCosts?.annualCost;
-        const monthlyEstimate = plan.averageCostPerMonth ?? (annualCost ? annualCost / 12 : clientCosts?.monthlyEstimate);
+        const annualCost = clientCosts?.annualCost || 0;
+        const monthlyEstimate = clientCosts?.monthlyEstimate || 0;
+        const annualUsage = usage.reduce((a, b) => a + b, 0);
 
-        // Debug: Log cost source
-        if (index < 3) {
-          console.log(`[Plan ${index}] ${plan.name}: API totalCost=${plan.totalCost}, client=${clientCosts?.annualCost}, using=${annualCost}`);
-        }
-
-        // Calculate effective rate per kWh in cents
-        // kWh1000 should be in cents (e.g., 9.0 = 9¢/kWh)
-        // If values seem too high, they might be in wrong units
-        let effectiveRate = plan.kWh1000;
-
-        // If we have totalCost and usage, calculate effective rate directly
-        if (annualCost && annualCost > 0) {
-          const annualUsage = usage.reduce((a, b) => a + b, 0);
-          if (annualUsage > 0) {
-            // annualCost is in dollars, convert to cents per kWh
-            effectiveRate = (annualCost / annualUsage) * 100;
-          }
-        }
+        // Calculate effective rate: total cost / total usage (in cents per kWh)
+        const effectiveRate = annualUsage > 0 ? (annualCost / annualUsage) * 100 : plan.kWh1000;
 
         // Debug log
         if (index < 3) {
-          console.log(`[Plan ${index}] Rate: calculated=${effectiveRate?.toFixed(2)}¢, kWh1000=${plan.kWh1000}, annualCost=$${annualCost}`);
+          console.log(`[Plan ${index}] ${plan.name}: annual=$${annualCost.toFixed(0)}, usage=${annualUsage}kWh, rate=${effectiveRate.toFixed(1)}¢`);
         }
 
         return {
