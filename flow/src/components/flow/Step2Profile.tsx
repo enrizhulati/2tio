@@ -80,7 +80,7 @@ function Step2Profile() {
           Tell us about yourself
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">
-          We need this information to set up your accounts.
+          So your utility providers can set up your accounts.
         </p>
       </div>
 

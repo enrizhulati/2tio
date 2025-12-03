@@ -364,10 +364,10 @@ function Step1Address() {
             <AlertCircle className="w-8 h-8 text-[var(--color-coral)]" aria-hidden="true" />
           </div>
           <h1 className="text-[28px] sm:text-[35px] font-bold text-[var(--color-darkest)] leading-[1.2] tracking-tight mb-3">
-            We couldn't verify this address
+            We couldn't find this address
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
-            We couldn't find an electric meter registered at this address yet.
+            No electric meter is registered here yet — but we can help.
           </p>
         </div>
 
@@ -419,7 +419,7 @@ function Step1Address() {
             Great news!
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
-            We can set up utilities for your new home.
+            We can set up utilities for your new place. Just a few more steps.
           </p>
         </div>
 
@@ -573,7 +573,7 @@ function Step1Address() {
           Where are you moving?
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">
-          Enter your new address and we'll check what services are available.
+          Enter your new address and we'll check what's available. Takes 30 seconds.
         </p>
       </div>
 

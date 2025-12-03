@@ -590,7 +590,7 @@ function Step3Services() {
           Choose your services
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">
-          Select the utilities you'd like us to set up.
+          Pick what you need — most people finish in under a minute.
         </p>
       </div>
 

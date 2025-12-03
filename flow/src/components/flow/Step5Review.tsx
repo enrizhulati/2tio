@@ -210,7 +210,7 @@ function Step5Review() {
               You're all set!
             </h1>
             <p className="text-[18px] text-[var(--color-dark)]">
-              We're setting up your utilities now.
+              Your utilities are being set up — one less thing to worry about.
             </p>
           </div>
 
@@ -329,8 +329,8 @@ function Step5Review() {
           {/* Important reminder - Practical UI: Front-load key info */}
           <div className="p-4 rounded-xl bg-[var(--color-lightest)] text-left">
             <p className="text-[16px] text-[var(--color-dark)]">
-              <strong>Check your email</strong> — You'll receive confirmation from each provider within 24 hours.
-              If you don't see it, check your spam folder or contact us.
+              <strong>Check your email</strong> — confirmation from each provider within 24 hours.
+              Not in your inbox? Check spam or reach out to us.
             </p>
           </div>
 
@@ -383,7 +383,7 @@ function Step5Review() {
           Review your order
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">
-          Make sure everything looks right before we submit.
+          Double-check everything looks right, then you're done.
         </p>
       </div>
 
@@ -665,18 +665,18 @@ function Step5Review() {
           onClick={submitOrder}
           fullWidth
           isLoading={isSubmitting}
-          loadingText="Placing order..."
+          loadingText="Setting up your utilities..."
           className="sm:flex-1"
           disabled={!termsAgreed}
           aria-describedby={!termsAgreed ? "terms-required-message" : undefined}
         >
-          Place order
+          Set up my utilities
         </Button>
       </div>
       {/* Practical UI: Disabled button explanation with aria-describedby */}
       {!termsAgreed && (
         <p id="terms-required-message" className="text-[16px] text-[var(--color-dark)] text-center">
-          Agree to the Terms of Service to continue
+          Check the box above to continue
         </p>
       )}
     </div>
