@@ -1,7 +1,7 @@
 [build]
   base = "flow"
   command = "npm run build"
-  publish = "flow/.next"
+  publish = ".next"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
