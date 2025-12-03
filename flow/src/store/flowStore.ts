@@ -339,14 +339,36 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         },
       };
 
+      // Auto-select first water plan and add to cart
+      const waterPlan = waterPlans.length > 0 ? waterPlans[0] : undefined;
+
       set({
         availableServices,
         isCheckingAvailability: false,
         availabilityChecked: true,
         selectedPlans: {
-          water: waterPlans.length > 0 ? waterPlans[0] : undefined,
+          water: waterPlan,
         },
       });
+
+      // Add water plan to 2TIO cart (water is pre-selected and required)
+      if (waterPlan) {
+        try {
+          await apiAddToCart(waterPlan.id);
+          set({
+            cart: {
+              items: [{
+                planId: waterPlan.id,
+                planName: waterPlan.name,
+                vendorName: waterPlan.provider,
+                serviceType: 'water',
+              }],
+            },
+          });
+        } catch (cartError) {
+          console.error('Error adding water to cart:', cartError);
+        }
+      }
     } catch (error) {
       console.error('Error fetching plans:', error);
       // Still show availability but with empty plans on error
@@ -874,14 +896,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
       // Convert to ServicePlan format for the store with all API fields
       // Note: API returns kWh1000 in cents (e.g., 9 = 9¢/kWh), uPrice is often 0
-      // Use API's server-calculated costs if available (includes bill credits, tiered pricing)
+      // Always use client-side cost calculation based on user's actual usage
       const servicePlans: ServicePlan[] = rawPlans.map((plan, index) => {
         const rawPlan = plan as unknown as RawServicePlan;
 
-        // Prefer server-calculated costs which include bill credits, tiered pricing, etc.
+        // Calculate costs based on user's actual usage (ensures costs update when usage changes)
         const clientCosts = enrichPlansWithCosts([plan], usage)[0];
-        const annualCost = plan.totalCost ?? clientCosts?.annualCost;
-        const monthlyEstimate = plan.averageCostPerMonth ?? (plan.totalCost ? plan.totalCost / 12 : clientCosts?.monthlyEstimate);
+        const annualCost = clientCosts?.annualCost;
+        const monthlyEstimate = clientCosts?.monthlyEstimate;
 
         return {
           id: plan.id,

@@ -258,28 +258,37 @@ function ServiceCard({
               </div>
 
               {isWater && service.provider ? (
-                // Water shows city branding from API
-                <div className="mt-4">
+                // Water shows city branding from API - logo on right
+                <div className="mt-4 flex items-start justify-between gap-4">
+                  {/* Left: Plan details */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
+                      {selectedPlan?.name || 'City Water Service'}
+                    </p>
+                    {selectedPlan?.shortDescription && (
+                      <p className="text-[14px] text-[var(--color-dark)] mt-1 line-clamp-2">
+                        {selectedPlan.shortDescription}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-4 mt-3 text-[16px]">
+                      <span className="text-[var(--color-darkest)] font-medium">
+                        {selectedPlan?.rate || service.startingRate || 'Usage-based pricing'}
+                      </span>
+                      <span className="text-[var(--color-teal)] font-semibold">$0 setup fee</span>
+                    </div>
+                  </div>
+                  {/* Right: City logo (larger) */}
                   {service.logo && (
-                    <div className="flex items-center gap-3 mb-3">
+                    <div className="flex-shrink-0">
                       <Image
                         src={service.logo}
                         alt={service.provider}
-                        width={140}
-                        height={36}
-                        className="h-9 w-auto"
+                        width={100}
+                        height={100}
+                        className="w-20 h-20 object-contain"
                       />
                     </div>
                   )}
-                  <p className="text-[16px] text-[var(--color-dark)]">
-                    {service.logo ? 'Official city water service' : service.provider}
-                  </p>
-                  <div className="flex items-center gap-4 mt-3 text-[16px]">
-                    <span className="text-[var(--color-darkest)] font-medium">
-                      {selectedPlan?.rate || service.startingRate || 'Usage-based pricing'}
-                    </span>
-                    <span className="text-[var(--color-teal)] font-semibold">$0 setup fee</span>
-                  </div>
                 </div>
               ) : isLoading && type === 'electricity' ? (
                 // Loading state for electricity
