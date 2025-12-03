@@ -319,6 +319,8 @@ export async function POST(request: NextRequest) {
         throw new Error('Failed to complete checkout');
       }
       const data = await response.json();
+      // Log the full checkout response to see all returned fields
+      console.log('Checkout complete response:', JSON.stringify(data, null, 2));
       return NextResponse.json(data);
     }
 
