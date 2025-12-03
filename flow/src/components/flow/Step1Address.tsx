@@ -488,7 +488,7 @@ function Step1Address() {
                 <p className="text-[14px] text-[var(--color-dark)]">
                   {availableServices.water.available
                     ? availableServices.water.provider
-                    : 'Temporarily unavailable'}
+                    : 'Contact your city directly'}
                 </p>
               </div>
               {availableServices.water.available ? (
@@ -496,8 +496,8 @@ function Step1Address() {
                   Available
                 </span>
               ) : (
-                <span className="text-[14px] text-[var(--color-warning)] font-medium bg-[var(--color-warning-light)] px-2 py-1 rounded">
-                  Check back
+                <span className="text-[14px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
+                  Not on 2TIO
                 </span>
               )}
             </div>
@@ -511,7 +511,7 @@ function Step1Address() {
                 <p className="text-[14px] text-[var(--color-dark)]">
                   {availableServices.electricity.available
                     ? `${availableServices.electricity.providerCount} providers`
-                    : 'Temporarily unavailable'}
+                    : 'Not available in this area'}
                 </p>
               </div>
               {availableServices.electricity.available ? (
@@ -519,8 +519,8 @@ function Step1Address() {
                   Available
                 </span>
               ) : (
-                <span className="text-[14px] text-[var(--color-warning)] font-medium bg-[var(--color-warning-light)] px-2 py-1 rounded">
-                  Check back
+                <span className="text-[14px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
+                  Not on 2TIO
                 </span>
               )}
             </div>
@@ -534,7 +534,7 @@ function Step1Address() {
                 <p className="text-[14px] text-[var(--color-dark)]">
                   {availableServices.internet.available
                     ? `${availableServices.internet.providerCount} providers`
-                    : 'Temporarily unavailable'}
+                    : 'Not available in this area'}
                 </p>
               </div>
               {availableServices.internet.available ? (
@@ -542,8 +542,8 @@ function Step1Address() {
                   Available
                 </span>
               ) : (
-                <span className="text-[14px] text-[var(--color-warning)] font-medium bg-[var(--color-warning-light)] px-2 py-1 rounded">
-                  Check back
+                <span className="text-[14px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
+                  Not on 2TIO
                 </span>
               )}
             </div>
