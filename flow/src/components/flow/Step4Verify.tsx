@@ -242,7 +242,7 @@ function VendorSection({
             <FileUpload
               label="Driver's license or state ID"
               requirement="Required for identity verification"
-              hint="JPG, PNG, or PDF (max 10MB)"
+              hint="Photo or PDF, up to 10MB"
               accept=".jpg,.jpeg,.png,.pdf"
               maxSizeMB={10}
               document={documents.dl ? {
@@ -261,8 +261,8 @@ function VendorSection({
           {step.IsLeaseUpload && (
             <FileUpload
               label="Lease agreement"
-              requirement="Proves residency at this address"
-              hint="First page with your name and address"
+              requirement="Proves you live at this address"
+              hint="First page showing your name and address"
               accept=".jpg,.jpeg,.png,.pdf"
               maxSizeMB={10}
               document={documents.lease ? {
@@ -281,8 +281,8 @@ function VendorSection({
           {step.IsOwnUpload && (
             <FileUpload
               label="Proof of ownership"
-              requirement="Deed, mortgage statement, or property tax bill"
-              hint="Document showing you own the property"
+              requirement="Deed, mortgage statement, or tax bill"
+              hint="Shows you own this property"
               accept=".jpg,.jpeg,.png,.pdf"
               maxSizeMB={10}
               document={documents.own ? {
