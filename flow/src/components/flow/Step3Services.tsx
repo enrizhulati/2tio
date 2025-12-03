@@ -310,7 +310,7 @@ function ServiceCard({
                 transition-all duration-150 min-h-[44px] shadow-sm
                 ${isSelected
                   ? 'text-[var(--color-error)] bg-[var(--color-lightest)] hover:bg-[var(--color-error-light)] border border-[var(--color-light)]'
-                  : 'text-white bg-[var(--color-teal)] hover:bg-[var(--color-teal-dark)] shadow-md'
+                  : 'text-white bg-[var(--color-teal)] hover:bg-[var(--color-teal-hover)] shadow-md'
                 }
               `}
             >
