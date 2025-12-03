@@ -9,9 +9,14 @@ interface FlowLayoutProps {
 }
 
 // Logo component matching 2TurnItOn brand
-function Logo() {
+function Logo({ onClick }: { onClick?: () => void }) {
+  const Wrapper = onClick ? 'button' : 'div';
   return (
-    <div className="flex items-center gap-3">
+    <Wrapper
+      onClick={onClick}
+      className={`flex items-center gap-3 ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+      {...(onClick && { type: 'button', 'aria-label': 'Start over' })}
+    >
       {/* House icon with smile */}
       <div className="relative w-12 h-12 bg-[var(--color-coral)] rounded-xl flex items-center justify-center">
         <Home className="w-6 h-6 text-white" strokeWidth={2.5} aria-hidden="true" />
@@ -37,7 +42,7 @@ function Logo() {
         <span className="text-[var(--color-darkest)]">2TurnIt</span>
         <span className="text-[var(--color-coral)]">On</span>
       </span>
-    </div>
+    </Wrapper>
   );
 }
 
@@ -118,6 +123,7 @@ function FlowLayout({ children }: FlowLayoutProps) {
   const orderConfirmation = useFlowStore((state) => state.orderConfirmation);
   const availabilityChecked = useFlowStore((state) => state.availabilityChecked);
   const initializeUser = useFlowStore((state) => state.initializeUser);
+  const reset = useFlowStore((state) => state.reset);
 
   // Initialize 2TIO user session on mount
   useEffect(() => {
@@ -135,7 +141,7 @@ function FlowLayout({ children }: FlowLayoutProps) {
       <aside className="hidden lg:flex flex-col w-72 bg-[var(--color-sidebar-bg)] border-r border-[var(--color-light)]">
         {/* Logo */}
         <div className="p-6 pb-8">
-          <Logo />
+          <Logo onClick={reset} />
         </div>
 
         {/* Navigation */}
@@ -174,7 +180,7 @@ function FlowLayout({ children }: FlowLayoutProps) {
         {/* Mobile Header */}
         <header className="lg:hidden bg-white border-b border-[var(--color-light)] px-4 py-3">
           <div className="flex items-center justify-between">
-            <Logo />
+            <Logo onClick={reset} />
           </div>
         </header>
 
