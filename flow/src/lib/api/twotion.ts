@@ -50,6 +50,15 @@ export interface TwotionPlan {
   bulletPoint4?: string;
   bulletPoint5?: string;
   logo?: string;
+  // Extended API fields
+  leadTime?: number;
+  vendorPhone?: string;
+  callCenterPhone?: string;
+  vendorUrl?: string;
+  shortDescription?: string;
+  longDescription?: string;
+  serviceName?: string;
+  renewablePercent?: number;
   // Calculated fields (added by client)
   annualCost?: number;
   monthlyEstimate?: number;
