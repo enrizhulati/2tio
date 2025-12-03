@@ -64,7 +64,7 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
   };
 
   return (
-    <div className={`p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)] ${className}`}>
+    <div className={`p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)] overflow-hidden ${className}`}>
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <Home className="w-4 h-4 text-[var(--color-teal)]" aria-hidden="true" />
@@ -73,8 +73,8 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
         </span>
       </div>
 
-      {/* Chart */}
-      <div className="h-[120px] w-full">
+      {/* Chart - contained with overflow hidden and min-width 0 for flex shrink */}
+      <div className="h-[120px] w-full min-w-0 overflow-hidden">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
             <XAxis

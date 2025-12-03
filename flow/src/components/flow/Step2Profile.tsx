@@ -143,7 +143,7 @@ function Step2Profile() {
         {/* SMS opt-in - reduced spacing from form fields */}
         <div className="-mt-2">
           <Checkbox
-            label="Text me service updates and reminders"
+            label="Text me service updates and reminders (optional)"
             checked={smsOptIn}
             onChange={(e) => setSmsOptIn(e.target.checked)}
           />

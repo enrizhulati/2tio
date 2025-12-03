@@ -335,7 +335,7 @@ function ServiceCard({
           </button>
 
           {isExpanded && (
-            <div id={`${type}-plan-section`} className="px-4 pb-4 animate-slide-up">
+            <div id={`${type}-plan-section`} className="px-4 pb-4 animate-slide-up overflow-hidden">
               {/* Usage Chart for electricity - show with real or default usage */}
               {type === 'electricity' && sortedPlans.length > 0 && sortedPlans[0].annualCost && (
                 <UsageChart
