@@ -169,7 +169,11 @@ export async function GET(request: NextRequest) {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Plans API error:', response.status, errorText);
-        throw new Error(`Failed to fetch plans: ${response.status}`);
+        // Pass through the actual status code (e.g., 429 for rate limiting)
+        return NextResponse.json(
+          { error: `Failed to fetch plans: ${response.status}` },
+          { status: response.status }
+        );
       }
 
       const data = await response.json();
