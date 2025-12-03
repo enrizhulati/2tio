@@ -183,7 +183,7 @@ function VendorSection({
             />
           ) : (
             <div className="w-12 h-12 rounded-lg bg-[var(--color-teal-light)] flex items-center justify-center">
-              <Building2 className="w-6 h-6 text-[var(--color-teal)]" />
+              <Building2 className="w-6 h-6 text-[var(--color-teal)]" aria-hidden="true" />
             </div>
           )}
           <div>
@@ -417,7 +417,7 @@ function Step4Verify() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-teal)] mb-4" />
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-teal)] mb-4" aria-hidden="true" />
         <p className="text-[16px] text-[var(--color-dark)]">
           Loading verification requirements...
         </p>
@@ -476,10 +476,10 @@ function Step4Verify() {
       {/* Privacy and credit check notice */}
       <div className="space-y-3">
         <div className="flex items-start gap-2 p-4 rounded-xl bg-[var(--color-lightest)] text-[14px] text-[var(--color-dark)]">
-          <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
           <p>
             Your information is encrypted and only shared with your selected utility providers.
-            We delete personal data after setup is complete.
+            We securely store your SSN only for this transaction — it's not retained after setup.
           </p>
         </div>
         <p className="text-[14px] text-[var(--color-dark)] px-1">

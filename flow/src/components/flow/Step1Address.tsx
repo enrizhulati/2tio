@@ -38,7 +38,7 @@ function MapPreview({ address }: { address: string }) {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
           <div className="relative">
             <div className="w-10 h-10 bg-[var(--color-coral)] rounded-full flex items-center justify-center shadow-lg">
-              <MapPin className="w-5 h-5 text-white" />
+              <MapPin className="w-5 h-5 text-white" aria-hidden="true" />
             </div>
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-[var(--color-coral)] rotate-45" />
           </div>
@@ -53,7 +53,7 @@ function MapPreview({ address }: { address: string }) {
       {/* Address badge */}
       <div className="absolute bottom-3 left-3 right-3">
         <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm flex items-center gap-2">
-          <Navigation className="w-4 h-4 text-[var(--color-coral)]" />
+          <Navigation className="w-4 h-4 text-[var(--color-coral)]" aria-hidden="true" />
           <span className="text-[14px] text-[var(--color-darkest)] truncate">
             {address}
           </span>
@@ -256,7 +256,7 @@ function Step1Address() {
         {/* Building info */}
         <div className="p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)]">
           <div className="flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-[var(--color-dark)]" />
+            <Building2 className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
             <span className="text-[15px] text-[var(--color-dark)]">
               {address.street}, {address.city}, {address.state} {address.zip}
             </span>
@@ -304,7 +304,7 @@ function Step1Address() {
                   <div className="flex flex-col items-end gap-2">
                     {isSelected && (
                       <div className="w-6 h-6 rounded-full bg-[var(--color-teal)] flex items-center justify-center">
-                        <Check className="w-4 h-4 text-white" />
+                        <Check className="w-4 h-4 text-white" aria-hidden="true" />
                       </div>
                     )}
                     {!isActive && (
@@ -355,7 +355,7 @@ function Step1Address() {
       <div className="space-y-8">
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--color-coral-light)] flex items-center justify-center">
-            <AlertCircle className="w-8 h-8 text-[var(--color-coral)]" />
+            <AlertCircle className="w-8 h-8 text-[var(--color-coral)]" aria-hidden="true" />
           </div>
           <h1 className="text-[35px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
             We couldn't verify this address
@@ -421,7 +421,7 @@ function Step1Address() {
         {homeDetails?.foundDetails && (
           <div className="p-5 rounded-xl bg-[var(--color-teal-light)] border-2 border-[var(--color-teal)]">
             <div className="flex items-center gap-2 mb-3">
-              <Home className="w-5 h-5 text-[var(--color-teal)]" />
+              <Home className="w-5 h-5 text-[var(--color-teal)]" aria-hidden="true" />
               <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
                 We found your home details
               </span>
@@ -457,7 +457,7 @@ function Step1Address() {
               onClick={handleEdit}
               className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
             >
-              <Edit2 className="w-4 h-4" />
+              <Edit2 className="w-4 h-4" aria-hidden="true" />
               Edit
             </button>
           </div>
@@ -557,6 +557,10 @@ function Step1Address() {
         <p className="text-[18px] text-[var(--color-dark)]">
           Enter your new address and we'll check what services are available.
         </p>
+        {/* Service area hint - Practical UI: Set expectations upfront */}
+        <p className="text-[14px] text-[var(--color-medium)] mt-2">
+          Currently serving Texas addresses only
+        </p>
       </div>
 
       {/* Form - address autocomplete with live suggestions */}
@@ -583,6 +587,7 @@ function Step1Address() {
 
         <Input
           label="Move-in date"
+          hint="Book up to 90 days ahead"
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}

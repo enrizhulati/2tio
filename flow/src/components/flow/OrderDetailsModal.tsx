@@ -63,7 +63,7 @@ function OrderDetailsModal({
         {/* Service Address */}
         <div>
           <div className="flex items-center gap-2 mb-2 sm:mb-3">
-            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-coral)]" />
+            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-coral)]" aria-hidden="true" />
             <h3 className="text-[16px] sm:text-[18px] font-semibold text-[var(--color-darkest)]">
               Service Address
             </h3>
@@ -83,7 +83,7 @@ function OrderDetailsModal({
         {/* Move-in Date */}
         <div>
           <div className="flex items-center gap-2 mb-2 sm:mb-3">
-            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-coral)]" />
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-coral)]" aria-hidden="true" />
             <h3 className="text-[16px] sm:text-[18px] font-semibold text-[var(--color-darkest)]">
               Service Start Date
             </h3>
@@ -98,7 +98,7 @@ function OrderDetailsModal({
         {/* Account Holder */}
         <div>
           <div className="flex items-center gap-2 mb-2 sm:mb-3">
-            <User className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-coral)]" />
+            <User className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-coral)]" aria-hidden="true" />
             <h3 className="text-[16px] sm:text-[18px] font-semibold text-[var(--color-darkest)]">
               Account Holder
             </h3>
@@ -108,11 +108,11 @@ function OrderDetailsModal({
               {profile.firstName} {profile.lastName}
             </p>
             <div className="flex items-center gap-2 text-[14px] text-[var(--color-dark)]">
-              <Mail className="w-4 h-4 flex-shrink-0" />
+              <Mail className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
               <span className="truncate">{profile.email}</span>
             </div>
             <div className="flex items-center gap-2 text-[14px] text-[var(--color-dark)]">
-              <Phone className="w-4 h-4 flex-shrink-0" />
+              <Phone className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
               <span>{profile.phone}</span>
             </div>
           </div>
@@ -121,7 +121,7 @@ function OrderDetailsModal({
         {/* Services */}
         <div>
           <div className="flex items-center gap-2 mb-2 sm:mb-3">
-            <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-coral)]" />
+            <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-coral)]" aria-hidden="true" />
             <h3 className="text-[16px] sm:text-[18px] font-semibold text-[var(--color-darkest)]">
               Services Ordered
             </h3>
@@ -167,7 +167,7 @@ function OrderDetailsModal({
                   </div>
                   {plan && plan.setupFee > 0 && (
                     <div className="mt-3 pt-3 border-t border-[var(--color-light)] flex items-center gap-2">
-                      <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--color-dark)]" />
+                      <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--color-dark)]" aria-hidden="true" />
                       <span className="text-[14px] text-[var(--color-dark)]">
                         Setup fee: ${plan.setupFee}
                       </span>

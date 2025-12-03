@@ -61,7 +61,7 @@ function CartSummary() {
   return (
     <div className="p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)]">
       <div className="flex items-center gap-2 mb-3">
-        <ShoppingCart className="w-4 h-4 text-[var(--color-teal)]" />
+        <ShoppingCart className="w-4 h-4 text-[var(--color-teal)]" aria-hidden="true" />
         <span className="text-[14px] font-semibold text-[var(--color-darkest)]">
           Your services
         </span>
@@ -235,7 +235,7 @@ function ServiceCard({
               ) : isLoading && type === 'electricity' ? (
                 // Loading state for electricity
                 <div className="mt-2 flex items-center gap-2 text-[var(--color-dark)]">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                   <span className="text-[15px]">Loading personalized rates...</span>
                 </div>
               ) : (
@@ -259,7 +259,7 @@ function ServiceCard({
               {/* Upsell message for non-selected services */}
               {!isWater && !isSelected && upsellMessages[type as 'electricity' | 'internet'] && (
                 <div className="flex items-center gap-1 mt-2 text-[14px] text-[var(--color-teal)]">
-                  <Star className="w-4 h-4" />
+                  <Star className="w-4 h-4" aria-hidden="true" />
                   <span>{upsellMessages[type as 'electricity' | 'internet']}</span>
                 </div>
               )}
@@ -281,12 +281,12 @@ function ServiceCard({
             >
               {isSelected ? (
                 <>
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4" aria-hidden="true" />
                   Remove
                 </>
               ) : (
                 <>
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-4 h-4" aria-hidden="true" />
                   Add
                 </>
               )}
@@ -336,11 +336,17 @@ function ServiceCard({
                 />
               )}
 
-              {/* Section header for electricity */}
+              {/* Section header for electricity with rate explainer */}
               {type === 'electricity' && sortedPlans.length > 0 && sortedPlans[0].annualCost && (
-                <p className="text-[14px] font-semibold text-[var(--color-darkest)] mb-3">
-                  Best plans for your home
-                </p>
+                <div className="mb-4">
+                  <p className="text-[14px] font-semibold text-[var(--color-darkest)]">
+                    Best plans for your home
+                  </p>
+                  {/* Rate explainer - Practical UI: Explain jargon in plain language */}
+                  <p className="text-[13px] text-[var(--color-medium)] mt-1">
+                    Monthly estimates based on ~1,000 kWh/month (typical home usage)
+                  </p>
+                </div>
               )}
 
               <RadioGroup

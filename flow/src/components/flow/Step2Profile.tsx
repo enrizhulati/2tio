@@ -86,26 +86,32 @@ function Step2Profile() {
 
       {/* Form */}
       <div className="space-y-6">
-        {/* Name row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Input
-            label="First name"
-            placeholder="Jane"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            error={errors.firstName}
-            autoComplete="given-name"
-            required
-          />
-          <Input
-            label="Last name"
-            placeholder="Smith"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            error={errors.lastName}
-            autoComplete="family-name"
-            required
-          />
+        {/* Name row - with legal name hint per Practical UI */}
+        <div className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="First name"
+              placeholder="Jane"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              error={errors.firstName}
+              autoComplete="given-name"
+              required
+            />
+            <Input
+              label="Last name"
+              placeholder="Smith"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              error={errors.lastName}
+              autoComplete="family-name"
+              required
+            />
+          </div>
+          {/* Legal name hint - Practical UI: Explain why upfront */}
+          <p className="text-[13px] text-[var(--color-medium)]">
+            Use your legal name as it appears on your ID
+          </p>
         </div>
 
         <Input

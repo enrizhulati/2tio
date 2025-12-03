@@ -66,7 +66,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {/* Input wrapper */}
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-medium)]">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-medium)]" aria-hidden="true">
               {leftIcon}
             </div>
           )}
@@ -101,7 +101,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           />
 
           {rightIcon && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-medium)]">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-medium)]" aria-hidden="true">
               {rightIcon}
             </div>
           )}

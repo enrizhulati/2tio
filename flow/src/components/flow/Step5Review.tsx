@@ -76,7 +76,7 @@ function Step5Review() {
           {/* Success icon */}
           <div className="flex justify-center">
             <div className="w-20 h-20 rounded-full bg-[var(--color-success-light)] flex items-center justify-center">
-              <CheckCircle className="w-10 h-10 text-[var(--color-success)]" />
+              <CheckCircle className="w-10 h-10 text-[var(--color-success)]" aria-hidden="true" />
             </div>
           </div>
 
@@ -125,7 +125,7 @@ function Step5Review() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-[14px] text-[var(--color-warning)]">
-                    <Clock className="w-4 h-4" />
+                    <Clock className="w-4 h-4" aria-hidden="true" />
                     <span>Setting up...</span>
                   </div>
                 </div>
@@ -194,7 +194,7 @@ function Step5Review() {
               onClick={handleDownloadPdf}
               className="w-full flex items-center justify-center gap-2 text-[var(--color-teal)] text-[16px] font-medium underline"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4" aria-hidden="true" />
               Download confirmation (PDF)
             </button>
           </div>
@@ -249,7 +249,7 @@ function Step5Review() {
               onClick={() => goToStep(1)}
               className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
             >
-              <Edit2 className="w-3 h-3" />
+              <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
             </button>
           </div>
@@ -275,7 +275,7 @@ function Step5Review() {
               onClick={() => goToStep(3)}
               className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
             >
-              <Edit2 className="w-3 h-3" />
+              <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
             </button>
           </div>
@@ -296,7 +296,7 @@ function Step5Review() {
               onClick={() => goToStep(2)}
               className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
             >
-              <Edit2 className="w-3 h-3" />
+              <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
             </button>
           </div>
@@ -370,20 +370,20 @@ function Step5Review() {
               onClick={() => goToStep(4)}
               className="flex items-center gap-1 text-[var(--color-teal)] text-[14px] font-medium underline"
             >
-              <Edit2 className="w-3 h-3" />
+              <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
             </button>
           </div>
           <div className="space-y-1">
             {documents.id?.status === 'uploaded' && (
               <div className="flex items-center gap-2 text-[16px] text-[var(--color-success)]">
-                <Check className="w-4 h-4" />
+                <Check className="w-4 h-4" aria-hidden="true" />
                 <span>Driver's license uploaded</span>
               </div>
             )}
             {documents.proofOfResidence?.status === 'uploaded' && (
               <div className="flex items-center gap-2 text-[16px] text-[var(--color-success)]">
-                <Check className="w-4 h-4" />
+                <Check className="w-4 h-4" aria-hidden="true" />
                 <span>Lease agreement uploaded</span>
               </div>
             )}
