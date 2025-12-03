@@ -365,8 +365,16 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     // Water is pre-selected and required - can't be toggled off
     if (service === 'water' && selectedServices.water) return;
 
-    // Save scroll position at the START before any state changes
+    // LOCK SCROLL: Prevent any scroll during state updates
     const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+    if (typeof document !== 'undefined') {
+      // Fix body position to prevent scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflow = 'hidden';
+    }
 
     const isNowSelected = !selectedServices[service];
 
@@ -423,17 +431,17 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       expandedService: isNowSelected ? service : null,
     });
 
-    // Restore scroll position multiple times to catch all re-renders
-    if (typeof window !== 'undefined') {
-      const restoreScroll = () => window.scrollTo(0, scrollY);
-      // Immediate
-      restoreScroll();
-      // After React re-render
-      requestAnimationFrame(restoreScroll);
-      // After any async updates
-      setTimeout(restoreScroll, 0);
-      setTimeout(restoreScroll, 50);
-      setTimeout(restoreScroll, 100);
+    // UNLOCK SCROLL: Restore scroll position after state updates
+    if (typeof document !== 'undefined') {
+      // Wait for React to finish rendering
+      requestAnimationFrame(() => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      });
     }
   },
 
