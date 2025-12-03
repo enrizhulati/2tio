@@ -429,9 +429,9 @@ function ServiceCard({
                             )}
                             {/* Green energy indicator */}
                             {isElectricity && renewablePct > 0 && (
-                              <span className="flex items-center gap-1 text-[12px] text-[var(--color-success)] bg-[var(--color-success-light)] px-2 py-0.5 rounded">
+                              <span className="flex items-center gap-1 text-[12px] font-bold uppercase tracking-wider text-[var(--color-success)] bg-[var(--color-success-light)] px-2 py-0.5 rounded">
                                 <Leaf className="w-3 h-3" aria-hidden="true" />
-                                {renewablePct}% green
+                                {renewablePct}% Green
                               </span>
                             )}
                           </div>
