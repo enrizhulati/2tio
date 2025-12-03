@@ -7,6 +7,7 @@ export interface Address {
   state: string;
   zip: string;
   formatted: string;
+  esiid?: string; // ESIID from ERCOT address search
 }
 
 // ESIID (Electric Service Identifier ID) from ERCOT

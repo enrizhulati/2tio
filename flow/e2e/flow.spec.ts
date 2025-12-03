@@ -223,7 +223,7 @@ test.describe('Address Flow with Apartment', () => {
     const addressInput = page.locator('input[placeholder*="address" i]');
     await addressInput.fill('3031 Oliver St Apt 1214');
 
-    // Wait for Radar autocomplete dropdown
+    // Wait for ERCOT address autocomplete dropdown
     await page.waitForSelector('button[role="option"]', { timeout: 5000 });
 
     // Click the first suggestion (3031 Oliver St Apt 1214, Dallas, TX 75205)

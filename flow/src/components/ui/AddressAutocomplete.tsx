@@ -10,17 +10,18 @@ export interface AddressResult {
   state: string;
   zip: string;
   formatted: string;
+  esiid?: string; // ESIID is now available from ERCOT search
 }
 
-interface RadarAddress {
-  formattedAddress: string;
-  addressLabel: string;
-  number?: string;
-  street?: string;
-  city?: string;
-  state?: string;
-  stateCode?: string;
-  postalCode?: string;
+// ERCOT address format from our API
+interface ERCOTAddress {
+  address: string;     // e.g., "3031 OLIVER ST APT 1214"
+  city: string;        // e.g., "DALLAS"
+  state: string;       // e.g., "TX"
+  zipCode: string;     // e.g., "75205"
+  esiid: string;       // ESIID for this address
+  premiseType: string; // "Residential"
+  formatted: string;   // Full formatted address
 }
 
 interface AddressAutocompleteProps {
@@ -46,21 +47,29 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-// Extract apartment/unit from formatted address string
-// Handles: "Apt 123", "Unit 4B", "#5", "Suite 100", "Ste 200"
-function extractApartment(formattedAddress: string): { cleanAddress: string; unit?: string } {
-  // Pattern to match apartment indicators followed by unit number
-  // Must appear after street address (look for it after a comma or space)
-  const aptPattern = /,?\s*(apt\.?|apartment|unit|suite|ste\.?|#)\s*([a-z0-9-]+)/i;
+// Extract apartment/unit from ERCOT address format
+// ERCOT stores apartments in the address field: "3031 OLIVER ST APT 1214"
+function parseERCOTAddress(address: string): { street: string; unit?: string } {
+  // Pattern to match apartment indicators in ERCOT format
+  const aptPattern = /\s+(APT|UNIT|STE|#)\s*([A-Z0-9-]+)$/i;
 
-  const match = formattedAddress.match(aptPattern);
+  const match = address.match(aptPattern);
   if (match) {
     const unit = match[2];
-    const cleanAddress = formattedAddress.replace(match[0], '').trim();
-    return { cleanAddress, unit };
+    const street = address.replace(match[0], '').trim();
+    return { street, unit };
   }
 
-  return { cleanAddress: formattedAddress };
+  return { street: address };
+}
+
+// Format street address to title case
+function toTitleCase(str: string): string {
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }
 
 export function AddressAutocomplete({
@@ -72,14 +81,14 @@ export function AddressAutocomplete({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState<RadarAddress[]>([]);
+  const [suggestions, setSuggestions] = useState<ERCOTAddress[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [hasSelected, setHasSelected] = useState(false);
 
   const debouncedValue = useDebounce(value, 300);
 
-  // Fetch suggestions from Radar
+  // Fetch suggestions from ERCOT via our API
   useEffect(() => {
     const fetchSuggestions = async () => {
       // Skip fetching if user just selected an address
@@ -93,28 +102,15 @@ export function AddressAutocomplete({
         return;
       }
 
-      const apiKey = process.env.NEXT_PUBLIC_RADAR_API_KEY;
-      if (!apiKey) {
-        console.warn('Radar API key not configured');
-        return;
-      }
-
       setIsLoading(true);
       try {
         const response = await fetch(
-          `https://api.radar.io/v1/search/autocomplete?query=${encodeURIComponent(
-            debouncedValue
-          )}&country=US&layers=address`,
-          {
-            headers: {
-              Authorization: apiKey,
-            },
-          }
+          `/api/twotion?action=address-search&query=${encodeURIComponent(debouncedValue)}`
         );
 
         if (response.ok) {
           const data = await response.json();
-          setSuggestions(data.addresses || []);
+          setSuggestions(data || []);
           setShowDropdown(true);
           setHighlightedIndex(-1);
         }
@@ -152,25 +148,22 @@ export function AddressAutocomplete({
   }, []);
 
   const handleSelect = useCallback(
-    (address: RadarAddress) => {
-      // Extract apartment/unit from the formatted address (e.g., "Apt 1214")
-      const { unit: detectedUnit } = extractApartment(address.formattedAddress);
-
-      const street = address.number && address.street
-        ? `${address.number} ${address.street}`
-        : address.street || address.addressLabel || '';
+    (address: ERCOTAddress) => {
+      // Parse the ERCOT address to extract street and unit
+      const { street, unit } = parseERCOTAddress(address.address);
 
       const result: AddressResult = {
-        street,
-        unit: detectedUnit, // Now captures apartment from formatted address!
-        city: address.city || '',
-        state: address.stateCode || address.state || '',
-        zip: address.postalCode || '',
-        formatted: address.formattedAddress,
+        street: toTitleCase(street),
+        unit,
+        city: toTitleCase(address.city),
+        state: address.state,
+        zip: address.zipCode,
+        formatted: address.formatted,
+        esiid: address.esiid, // Include ESIID from search
       };
 
       onSelect(result);
-      setValue(address.formattedAddress);
+      setValue(address.formatted);
       setHasSelected(true);
       setSuggestions([]);
       setShowDropdown(false);
@@ -210,6 +203,13 @@ export function AddressAutocomplete({
     setSuggestions([]);
     setShowDropdown(false);
     inputRef.current?.focus();
+  };
+
+  // Format display address (title case)
+  const formatDisplayAddress = (address: ERCOTAddress) => {
+    const { street, unit } = parseERCOTAddress(address.address);
+    const streetDisplay = toTitleCase(street);
+    return unit ? `${streetDisplay}, ${unit}` : streetDisplay;
   };
 
   return (
@@ -261,7 +261,7 @@ export function AddressAutocomplete({
           >
             {suggestions.map((address, index) => (
               <button
-                key={index}
+                key={`${address.esiid}-${index}`}
                 type="button"
                 onClick={() => handleSelect(address)}
                 onMouseEnter={() => setHighlightedIndex(index)}
@@ -279,10 +279,10 @@ export function AddressAutocomplete({
                 aria-selected={index === highlightedIndex}
               >
                 <p className="text-[15px] text-[var(--color-darkest)] font-medium">
-                  {address.addressLabel || address.street}
+                  {formatDisplayAddress(address)}
                 </p>
                 <p className="text-[14px] text-[var(--color-dark)]">
-                  {address.city}, {address.stateCode} {address.postalCode}
+                  {toTitleCase(address.city)}, {address.state} {address.zipCode}
                 </p>
               </button>
             ))}

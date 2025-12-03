@@ -29,6 +29,53 @@ export async function GET(request: NextRequest) {
   const action = searchParams.get('action');
 
   try {
+    // Address search using ERCOT - returns addresses with ESIIDs
+    if (action === 'address-search') {
+      const query = searchParams.get('query');
+
+      if (!query || query.length < 3) {
+        return NextResponse.json([]);
+      }
+
+      const response = await fetch(`${ERCOT_API}/api/esiids?address=${encodeURIComponent(query)}`);
+      if (!response.ok) throw new Error('Failed to search addresses');
+
+      const data = await response.json();
+
+      // Filter and format results for autocomplete
+      // Only return Active residential addresses, limit to 10 unique addresses
+      const seen = new Set<string>();
+      const results = data
+        .filter((item: { status: string; premise_type: string }) =>
+          item.status === 'Active' && item.premise_type === 'Residential'
+        )
+        .filter((item: { address: string; city: string; state: string; zip_code: string }) => {
+          const key = `${item.address}-${item.city}-${item.zip_code}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        })
+        .slice(0, 10)
+        .map((item: {
+          address: string;
+          city: string;
+          state: string;
+          zip_code: string;
+          esiid: string;
+          premise_type: string;
+        }) => ({
+          address: item.address,
+          city: item.city,
+          state: item.state,
+          zipCode: item.zip_code,
+          esiid: item.esiid,
+          premiseType: item.premise_type,
+          formatted: `${item.address}, ${item.city}, ${item.state} ${item.zip_code}`,
+        }));
+
+      return NextResponse.json(results);
+    }
+
     // ERCOT actions (for Zillow data)
     if (action === 'search-esiids') {
       const address = searchParams.get('address');

@@ -85,7 +85,7 @@ function Step1Address() {
     nextStep,
   } = useFlowStore();
 
-  // Local form state
+  // Local form state - includes ESIID from ERCOT search
   const [selectedAddress, setSelectedAddress] = useState<AddressResult | null>(
     address ? {
       street: address.street,
@@ -94,6 +94,7 @@ function Step1Address() {
       zip: address.zip,
       formatted: address.formatted || '',
       unit: address.unit,
+      esiid: address.esiid,
     } : null
   );
   const [date, setDate] = useState(moveInDate || '');
@@ -132,7 +133,7 @@ function Step1Address() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0 && selectedAddress) {
-      // Use detected unit from address autocomplete (extracted from formatted address)
+      // Use detected unit from address autocomplete (extracted from ERCOT address)
       const detectedUnit = selectedAddress.unit;
 
       const finalAddress = {
@@ -144,20 +145,65 @@ function Step1Address() {
         formatted: detectedUnit
           ? `${selectedAddress.street}, ${detectedUnit}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.zip}`
           : selectedAddress.formatted,
+        esiid: selectedAddress.esiid, // Include ESIID from ERCOT search
       };
 
       setAddress(finalAddress);
       setMoveInDate(date);
 
-      // If user has specified an apartment, include it in the search to get the specific unit first
-      // This ensures the API returns their apartment in the results for auto-matching
-      const searchAddress = detectedUnit
-        ? `${selectedAddress.street} APT ${detectedUnit.replace(/\D/g, '')}`
-        : selectedAddress.street;
-      await Promise.all([
-        checkAvailability(),
-        fetchESIIDs(searchAddress, selectedAddress.zip, detectedUnit),
-      ]);
+      // If we have ESIID from address search, use it directly
+      // Otherwise, fall back to searching by address
+      if (selectedAddress.esiid) {
+        // ESIID already known from ERCOT search - skip ESIID lookup
+        // Just fetch usage profile and check availability
+        await Promise.all([
+          checkAvailability(),
+          // Set the ESIID directly in the store
+          useFlowStore.setState({
+            selectedEsiid: {
+              _id: selectedAddress.esiid,
+              esiid: selectedAddress.esiid,
+              address: `${selectedAddress.street}${detectedUnit ? ` APT ${detectedUnit}` : ''}`.toUpperCase(),
+              address_overflow: '',
+              city: selectedAddress.city.toUpperCase(),
+              state: selectedAddress.state,
+              zip_code: selectedAddress.zip,
+              premise_type: 'Residential',
+              status: 'Active',
+              power_region: 'ERCOT',
+              station_name: '',
+              duns: '',
+            },
+            esiidMatches: [{
+              _id: selectedAddress.esiid,
+              esiid: selectedAddress.esiid,
+              address: `${selectedAddress.street}${detectedUnit ? ` APT ${detectedUnit}` : ''}`.toUpperCase(),
+              address_overflow: '',
+              city: selectedAddress.city.toUpperCase(),
+              state: selectedAddress.state,
+              zip_code: selectedAddress.zip,
+              premise_type: 'Residential',
+              status: 'Active',
+              power_region: 'ERCOT',
+              station_name: '',
+              duns: '',
+            }],
+            esiidSearchComplete: true,
+            esiidConfirmed: true,
+          }),
+        ]);
+        // Fetch usage profile for the ESIID
+        useFlowStore.getState().fetchUsageProfile();
+      } else {
+        // No ESIID from search - fall back to searching by address
+        const searchAddress = detectedUnit
+          ? `${selectedAddress.street} APT ${detectedUnit.replace(/\D/g, '')}`
+          : selectedAddress.street;
+        await Promise.all([
+          checkAvailability(),
+          fetchESIIDs(searchAddress, selectedAddress.zip, detectedUnit),
+        ]);
+      }
     }
   }, [selectedAddress, date, setAddress, setMoveInDate, checkAvailability, fetchESIIDs]);
 
