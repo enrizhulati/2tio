@@ -86,6 +86,9 @@ interface RawServicePlan {
   downloadSpeed?: number;
   uploadSpeed?: number;
   dataCapGB?: number;
+  // Server-calculated pricing fields (from pricing API when electricityUsage is provided)
+  low?: number;   // Lowest monthly cost
+  high?: number;  // Highest monthly cost
 }
 
 // Alias for backwards compatibility
@@ -226,6 +229,9 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           renewablePercent: rawPlan?.renewablePercent,
           // Calculated cost fields from enrichment
           annualCost: plan.annualCost,
+          // Monthly cost range from API (accounts for seasonal variation)
+          lowMonthly: rawPlan?.low,
+          highMonthly: rawPlan?.high,
         };
       });
 
@@ -903,6 +909,9 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           serviceName: rawPlan?.serviceName,
           cancellationFee: rawPlan?.cancellationFee,
           renewablePercent: rawPlan?.renewablePercent,
+          // Monthly cost range from API (accounts for seasonal variation)
+          lowMonthly: rawPlan?.low,
+          highMonthly: rawPlan?.high,
         };
       });
 

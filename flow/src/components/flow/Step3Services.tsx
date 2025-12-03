@@ -377,13 +377,13 @@ function ServiceCard({
               {type === 'electricity' && sortedPlans.length > 0 && sortedPlans[0].annualCost && (
                 <div className="mb-4">
                   <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
-                    Best plans for your home
+                    Plans ranked by best fit for this home
                   </p>
                   {/* Rate explainer - Practical UI: Explain jargon, 14px min, 4.5:1 contrast */}
                   <p className="text-[16px] text-[var(--color-dark)] mt-1">
                     {homeDetails?.foundDetails
-                      ? `Monthly estimates based on your home's ~${Math.round((usageProfile?.usage || []).reduce((a, b) => a + b, 0) / 12).toLocaleString()} kWh/month`
-                      : 'Monthly estimates based on ~1,000 kWh/month (typical home usage)'}
+                      ? `Based on this home's usage history (~${Math.round((usageProfile?.usage || []).reduce((a, b) => a + b, 0) / 12).toLocaleString()} kWh/month avg)`
+                      : 'Based on typical home usage (~1,000 kWh/month)'}
                   </p>
                 </div>
               )}
@@ -405,19 +405,18 @@ function ServiceCard({
                   const isGreen = plan.renewable || plan.badge === 'GREEN';
                   const renewablePct = plan.renewablePercent || (isGreen ? 100 : 0);
 
-                  let badge: 'CHEAPEST' | 'GREEN' | 'RECOMMENDED' | 'POPULAR' | undefined;
+                  let badge: 'BEST FIT' | 'GREEN' | 'RECOMMENDED' | 'POPULAR' | undefined;
                   let badgeVariant: 'default' | 'success' | 'cheapest' = 'default';
                   let badgeReason: string | undefined;
 
                   if (isCheapest) {
-                    badge = 'CHEAPEST';
+                    badge = 'BEST FIT';
                     badgeVariant = 'cheapest';
-                    // Calculate savings vs next cheapest
-                    if (sortedPlans.length > 1 && sortedPlans[0].annualCost && sortedPlans[1].annualCost) {
-                      const savings = Math.round(sortedPlans[1].annualCost - sortedPlans[0].annualCost);
-                      if (savings > 0) {
-                        badgeReason = `Saves $${savings}/year vs next cheapest`;
-                      }
+                    // Show value proposition
+                    if (homeDetails?.foundDetails) {
+                      badgeReason = 'Best value based on this home\'s usage';
+                    } else {
+                      badgeReason = 'Best value for typical usage';
                     }
                   } else if (isGreen) {
                     badge = 'GREEN';
@@ -474,11 +473,17 @@ function ServiceCard({
 
                           {/* Row 3: Monthly estimate + details */}
                           <div className="text-[16px] text-[var(--color-dark)]">
-                            {isElectricity && plan.monthlyEstimate && (
+                            {isElectricity && (plan.lowMonthly && plan.highMonthly ? (
+                              // Show range when API provides low/high (more honest about seasonal variation)
                               <span className="font-semibold text-[var(--color-darkest)]">
-                                {plan.monthlyEstimate}/mo
+                                ${Math.round(plan.lowMonthly)}–${Math.round(plan.highMonthly)}/mo
                               </span>
-                            )}
+                            ) : plan.monthlyEstimate ? (
+                              // Fallback to single estimate
+                              <span className="font-semibold text-[var(--color-darkest)]">
+                                ~{plan.monthlyEstimate}/mo
+                              </span>
+                            ) : null)}
                             {isInternet && plan.rate && (
                               <span className="font-semibold text-[var(--color-darkest)]">
                                 {plan.rate}
@@ -486,7 +491,7 @@ function ServiceCard({
                             )}
                             {isElectricity && (
                               <span className="text-[var(--color-dark)]">
-                                {' '}est. for {Math.round((usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900]).reduce((a, b) => a + b, 0) / 12).toLocaleString()} kWh
+                                {' '}typical range
                               </span>
                             )}
                             {isInternet && plan.downloadSpeed && (

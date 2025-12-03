@@ -69,6 +69,9 @@ export interface ServicePlan {
   // Enriched fields from usage profile calculation
   annualCost?: number;
   renewable?: boolean;
+  // Monthly cost range (from API - accounts for seasonal variation)
+  lowMonthly?: number;   // Lowest monthly cost
+  highMonthly?: number;  // Highest monthly cost
   // New fields from 2TIO API
   logo?: string;              // Base64 encoded provider logo
   leadTime?: number;          // Days until service starts
