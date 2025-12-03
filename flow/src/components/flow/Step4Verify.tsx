@@ -279,19 +279,24 @@ function Step4Verify() {
   const {
     checkoutSteps,
     checkoutAnswers,
+    documents: storeDocuments,
     fetchCheckoutSteps,
     setCheckoutAnswer,
+    uploadDocument,
+    removeDocument,
     prevStep,
     nextStep,
   } = useFlowStore();
 
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [documents, setDocuments] = useState<{
-    dl?: { name: string; status: string };
-    lease?: { name: string; status: string };
-    own?: { name: string; status: string };
-  }>({});
+
+  // Map store documents to component's expected format
+  const documents = {
+    dl: storeDocuments.id ? { name: storeDocuments.id.name, status: storeDocuments.id.status } : undefined,
+    lease: storeDocuments.proofOfResidence ? { name: storeDocuments.proofOfResidence.name, status: storeDocuments.proofOfResidence.status } : undefined,
+    own: storeDocuments.proofOfResidence ? { name: storeDocuments.proofOfResidence.name, status: storeDocuments.proofOfResidence.status } : undefined,
+  };
 
   // Mock checkout steps for fallback when API fails
   const mockCheckoutSteps: TwotionCheckoutStep[] = [
@@ -336,27 +341,22 @@ function Step4Verify() {
   const effectiveSteps = (checkoutSteps && checkoutSteps.length > 0) ? checkoutSteps : mockCheckoutSteps;
 
   const handleDocumentUpload = useCallback((type: 'dl' | 'lease' | 'own', file: File) => {
-    setDocuments((prev) => ({
-      ...prev,
-      [type]: { name: file.name, status: 'uploading' },
-    }));
-
-    // Simulate upload
-    setTimeout(() => {
-      setDocuments((prev) => ({
-        ...prev,
-        [type]: { name: file.name, status: 'uploaded' },
-      }));
-    }, 1000);
-  }, []);
+    // Map component types to store types
+    if (type === 'dl') {
+      uploadDocument('id', file);
+    } else if (type === 'lease' || type === 'own') {
+      uploadDocument('proofOfResidence', file);
+    }
+  }, [uploadDocument]);
 
   const handleDocumentRemove = useCallback((type: 'dl' | 'lease' | 'own') => {
-    setDocuments((prev) => {
-      const newDocs = { ...prev };
-      delete newDocs[type];
-      return newDocs;
-    });
-  }, []);
+    // Map component types to store types
+    if (type === 'dl') {
+      removeDocument('id');
+    } else if (type === 'lease' || type === 'own') {
+      removeDocument('proofOfResidence');
+    }
+  }, [removeDocument]);
 
   const validateAndSubmit = useCallback(() => {
     const newErrors: Record<string, string> = {};

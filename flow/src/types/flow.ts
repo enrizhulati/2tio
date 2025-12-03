@@ -107,6 +107,7 @@ export interface UploadedDocument {
   status: 'uploading' | 'uploaded' | 'error';
   progress?: number;
   errorMessage?: string;
+  file?: File; // Actual file for upload to API
 }
 
 export interface Documents {

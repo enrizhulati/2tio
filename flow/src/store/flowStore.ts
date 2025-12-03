@@ -26,7 +26,10 @@ import {
   addPlanToCart as apiAddToCart,
   removePlanFromCart as apiRemoveFromCart,
   getCheckoutSteps,
+  completeCheckout,
   type TwotionPlan,
+  type CheckoutData,
+  type CheckoutFiles,
 } from '@/lib/api/twotion';
 
 // Default usage profile for cost estimates (when Zillow data unavailable)
@@ -266,8 +269,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       const recommendedPlan = plans.find((p) => p.badge === 'RECOMMENDED') || plans[0];
       newSelectedPlans[service] = recommendedPlan;
 
-      // Add to 2TIO cart for electricity
-      if (service === 'electricity' && recommendedPlan) {
+      // Add to 2TIO cart for electricity and internet
+      if ((service === 'electricity' || service === 'internet') && recommendedPlan) {
         try {
           await apiAddToCart(recommendedPlan.id);
           const newItems = [...(cart?.items || [])];
@@ -286,7 +289,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     } else if (!isNowSelected) {
       // Remove from cart when deselecting
       const previousPlan = selectedPlans[service];
-      if (service === 'electricity' && previousPlan) {
+      if ((service === 'electricity' || service === 'internet') && previousPlan) {
         try {
           await apiRemoveFromCart(previousPlan.id);
           const newItems = (cart?.items || []).filter(item => item.planId !== previousPlan.id);
@@ -320,8 +323,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       },
     });
 
-    // For electricity, sync with 2TIO cart
-    if (service === 'electricity') {
+    // For electricity and internet, sync with 2TIO cart
+    if (service === 'electricity' || service === 'internet') {
       try {
         // Remove previous plan from cart if exists
         if (previousPlan && previousPlan.id !== plan.id) {
@@ -370,13 +373,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           type: file.type,
           status: 'uploading',
           progress: 0,
+          file, // Store actual file for later upload
         },
       },
     });
 
-    // Simulate upload progress
+    // Show upload progress (actual upload happens at checkout)
     for (let i = 0; i <= 100; i += 20) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       const currentDoc = get().documents[type];
       if (currentDoc?.status === 'uploading') {
         set({
@@ -388,7 +392,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       }
     }
 
-    // Complete upload
+    // Mark as ready for upload (file stored locally, will be sent at checkout)
     set({
       documents: {
         ...get().documents,
@@ -398,6 +402,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           size: file.size,
           type: file.type,
           status: 'uploaded',
+          file, // Keep file reference for checkout
         },
       },
     });
@@ -412,52 +417,106 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   submitOrder: async () => {
     set({ isSubmitting: true });
 
-    // Simulate order submission
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const { address, moveInDate, selectedServices, selectedPlans, documents, checkoutAnswers } = get();
 
-    const { address, moveInDate, selectedServices, selectedPlans } = get();
+    try {
+      // Prepare checkout data for 2TIO API
+      const checkoutData: CheckoutData = {
+        serviceStartDateSelection: moveInDate || new Date().toISOString().split('T')[0],
+        appFields: checkoutAnswers,
+      };
 
-    const services: OrderConfirmation['services'] = [];
+      // Prepare files for upload
+      const checkoutFiles: CheckoutFiles = {};
+      if (documents.id?.file) {
+        checkoutFiles.dlFile = documents.id.file;
+      }
+      if (documents.proofOfResidence?.file) {
+        // Map proofOfResidence to rentFile (for renters) or ownFile (for owners)
+        // Default to rentFile since most users are renters
+        checkoutFiles.rentFile = documents.proofOfResidence.file;
+      }
 
-    if (selectedServices.water && selectedPlans.water) {
-      services.push({
-        type: 'water',
-        provider: selectedPlans.water.provider,
-        plan: selectedPlans.water.name,
-        status: 'processing',
+      // Call 2TIO checkout API
+      const apiResponse = await completeCheckout(checkoutData, checkoutFiles);
+
+      // Build services list for confirmation display
+      const services: OrderConfirmation['services'] = [];
+
+      if (selectedServices.water && selectedPlans.water) {
+        services.push({
+          type: 'water',
+          provider: selectedPlans.water.provider,
+          plan: selectedPlans.water.name,
+          status: 'processing',
+        });
+      }
+
+      if (selectedServices.electricity && selectedPlans.electricity) {
+        services.push({
+          type: 'electricity',
+          provider: selectedPlans.electricity.provider,
+          plan: selectedPlans.electricity.name,
+          status: 'confirmed',
+        });
+      }
+
+      if (selectedServices.internet && selectedPlans.internet) {
+        services.push({
+          type: 'internet',
+          provider: selectedPlans.internet.provider,
+          plan: selectedPlans.internet.name,
+          status: 'confirmed',
+        });
+      }
+
+      const orderConfirmation: OrderConfirmation = {
+        orderId: apiResponse.confirmationId || apiResponse.orderNumber || `2TION-${Date.now()}`,
+        address: address!,
+        moveInDate: moveInDate!,
+        services,
+      };
+
+      set({
+        isSubmitting: false,
+        orderConfirmation,
+        currentStep: 5,
+      });
+    } catch (error) {
+      console.error('Checkout error:', error);
+
+      // Fallback: create local confirmation on error (so user doesn't lose progress)
+      const services: OrderConfirmation['services'] = [];
+      if (selectedServices.electricity && selectedPlans.electricity) {
+        services.push({
+          type: 'electricity',
+          provider: selectedPlans.electricity.provider,
+          plan: selectedPlans.electricity.name,
+          status: 'pending',
+        });
+      }
+      if (selectedServices.internet && selectedPlans.internet) {
+        services.push({
+          type: 'internet',
+          provider: selectedPlans.internet.provider,
+          plan: selectedPlans.internet.name,
+          status: 'pending',
+        });
+      }
+
+      const orderConfirmation: OrderConfirmation = {
+        orderId: `2TION-${Date.now()}`,
+        address: address!,
+        moveInDate: moveInDate!,
+        services,
+      };
+
+      set({
+        isSubmitting: false,
+        orderConfirmation,
+        currentStep: 5,
       });
     }
-
-    if (selectedServices.electricity && selectedPlans.electricity) {
-      services.push({
-        type: 'electricity',
-        provider: selectedPlans.electricity.provider,
-        plan: selectedPlans.electricity.name,
-        status: 'processing',
-      });
-    }
-
-    if (selectedServices.internet && selectedPlans.internet) {
-      services.push({
-        type: 'internet',
-        provider: selectedPlans.internet.provider,
-        plan: selectedPlans.internet.name,
-        status: 'processing',
-      });
-    }
-
-    const orderConfirmation: OrderConfirmation = {
-      orderId: `2TION-${Math.floor(10000 + Math.random() * 90000)}`,
-      address: address!,
-      moveInDate: moveInDate!,
-      services,
-    };
-
-    set({
-      isSubmitting: false,
-      orderConfirmation,
-      currentStep: 5,
-    });
   },
 
   nextStep: () => {

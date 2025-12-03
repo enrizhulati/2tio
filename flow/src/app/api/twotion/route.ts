@@ -266,6 +266,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User ID required' }, { status: 401 });
     }
 
+    // Handle checkout separately since it uses formData, not JSON
+    if (action === 'checkout') {
+      const formData = await request.formData();
+
+      const response = await fetch(`${TWOTION_API}/checkout/complete`, {
+        method: 'POST',
+        headers: getTwotionHeaders(userId),
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Checkout error:', response.status, errorText);
+        throw new Error('Failed to complete checkout');
+      }
+      const data = await response.json();
+      return NextResponse.json(data);
+    }
+
+    // Other POST actions use JSON body
     const body = await request.json();
 
     if (action === 'get-started') {
@@ -294,21 +314,6 @@ export async function POST(request: NextRequest) {
       });
 
       if (!response.ok) throw new Error('Failed to add to cart');
-      const data = await response.json();
-      return NextResponse.json(data);
-    }
-
-    if (action === 'checkout') {
-      // Handle multipart form data for checkout
-      const formData = await request.formData();
-
-      const response = await fetch(`${TWOTION_API}/checkout/complete`, {
-        method: 'POST',
-        headers: getTwotionHeaders(userId),
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error('Failed to complete checkout');
       const data = await response.json();
       return NextResponse.json(data);
     }
