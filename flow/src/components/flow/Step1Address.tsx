@@ -497,7 +497,7 @@ function Step1Address() {
                 </span>
               ) : (
                 <span className="text-[14px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
-                  Not on 2TIO
+                  Not on 2TurnItOn
                 </span>
               )}
             </div>
@@ -520,7 +520,7 @@ function Step1Address() {
                 </span>
               ) : (
                 <span className="text-[14px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
-                  Not on 2TIO
+                  Not on 2TurnItOn
                 </span>
               )}
             </div>
@@ -543,7 +543,7 @@ function Step1Address() {
                 </span>
               ) : (
                 <span className="text-[14px] text-[var(--color-medium)] font-medium bg-[var(--color-lightest)] px-2 py-1 rounded">
-                  Not on 2TIO
+                  Not on 2TurnItOn
                 </span>
               )}
             </div>
