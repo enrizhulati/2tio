@@ -417,7 +417,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         [service]: isNowSelected,
       },
       selectedPlans: newSelectedPlans,
-      expandedService: isNowSelected ? service : null,
+      // Don't auto-expand when adding - let user click "View plans" if they want to change
+      expandedService: null,
     });
   },
 
