@@ -67,7 +67,7 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
     <div className={`p-4 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)] ${className}`}>
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <Home className="w-4 h-4 text-[var(--color-teal)]" />
+        <Home className="w-4 h-4 text-[var(--color-teal)]" aria-hidden="true" />
         <span className="text-[14px] font-semibold text-[var(--color-darkest)]">
           Your Home's Usage Profile
         </span>

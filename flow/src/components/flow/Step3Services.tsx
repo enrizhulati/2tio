@@ -213,19 +213,21 @@ function ServiceCard({
               </div>
 
               {isWater && service.provider ? (
-                // Water shows City of Dallas branding
+                // Water shows city branding from API
                 <div className="mt-3">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Image
-                      src="/city-of-dallas-logo.png"
-                      alt="City of Dallas"
-                      width={140}
-                      height={36}
-                      className="h-8 w-auto"
-                    />
-                  </div>
+                  {service.logo && (
+                    <div className="flex items-center gap-3 mb-2">
+                      <Image
+                        src={service.logo}
+                        alt={service.provider}
+                        width={140}
+                        height={36}
+                        className="h-8 w-auto"
+                      />
+                    </div>
+                  )}
                   <p className="text-[15px] text-[var(--color-dark)]">
-                    Official city water service
+                    {service.logo ? 'Official city water service' : service.provider}
                   </p>
                   <div className="flex items-center gap-4 mt-2 text-[14px] text-[var(--color-dark)]">
                     <span>Est. ~$45-65/mo</span>
@@ -342,8 +344,8 @@ function ServiceCard({
                   <p className="text-[14px] font-semibold text-[var(--color-darkest)]">
                     Best plans for your home
                   </p>
-                  {/* Rate explainer - Practical UI: Explain jargon in plain language */}
-                  <p className="text-[13px] text-[var(--color-medium)] mt-1">
+                  {/* Rate explainer - Practical UI: Explain jargon, 14px min, 4.5:1 contrast */}
+                  <p className="text-[14px] text-[var(--color-dark)] mt-1">
                     Monthly estimates based on ~1,000 kWh/month (typical home usage)
                   </p>
                 </div>
@@ -409,9 +411,9 @@ function ServiceCard({
                         <p className="text-[14px] text-[var(--color-dark)] mt-1">
                           {plan.rate} • {plan.contractLabel}
                         </p>
-                        {/* Show contract commitment info - Practical UI: Be upfront about commitments */}
+                        {/* Show contract commitment info - Practical UI: Be upfront, 14px min, 4.5:1 contrast */}
                         {isElectricity && plan.contractMonths && plan.contractMonths > 0 && (
-                          <p className="text-[13px] text-[var(--color-medium)] mt-1">
+                          <p className="text-[14px] text-[var(--color-dark)] mt-1">
                             $175 early cancellation fee per remaining year
                           </p>
                         )}
@@ -479,7 +481,7 @@ function Step3Services() {
     <div className="space-y-8">
       {/* Heading */}
       <div>
-        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
+        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
           Choose your services
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">
@@ -543,7 +545,7 @@ function Step3Services() {
             onClick={handleAddAll}
             className="w-full text-center text-[var(--color-teal)] text-[16px] font-medium underline"
           >
-            or Set up all three services
+            or Set up all 3 services
           </button>
         )}
       </div>

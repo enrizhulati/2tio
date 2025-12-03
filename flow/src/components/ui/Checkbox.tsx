@@ -45,7 +45,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
               }
             `}
           >
-            {checked && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
+            {checked && <Check className="w-4 h-4 text-white" strokeWidth={3} aria-hidden="true" />}
           </div>
         </div>
 

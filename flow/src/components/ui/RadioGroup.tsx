@@ -140,7 +140,7 @@ function RadioOption({
               }}
             >
               {badge}
-              {badgeReason && <Info className="w-3 h-3" />}
+              {badgeReason && <Info className="w-3 h-3" aria-hidden="true" />}
             </div>
 
             {/* Tooltip */}

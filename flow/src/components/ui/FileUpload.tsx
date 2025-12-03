@@ -59,7 +59,7 @@ function FileUpload({
         {/* Header */}
         <div className="flex items-start gap-3 mb-3">
           <div className="p-2 rounded-lg bg-[var(--color-lightest)]">
-            <FileText className="w-5 h-5 text-[var(--color-dark)]" />
+            <FileText className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
           </div>
           <div className="flex-1">
             <h4 className="text-[18px] font-semibold text-[var(--color-darkest)]">
@@ -76,7 +76,7 @@ function FileUpload({
         {/* Error state */}
         {error && (
           <div className="flex items-center gap-2 text-[var(--color-error)] text-[14px] mb-3 p-2 rounded-lg bg-[var(--color-error-light)]">
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
             <span>{error}</span>
           </div>
         )}
@@ -98,7 +98,7 @@ function FileUpload({
               cursor-pointer
             "
           >
-            <Upload className="w-6 h-6" />
+            <Upload className="w-6 h-6" aria-hidden="true" />
             <span className="text-[16px] font-medium">Take photo or upload file</span>
           </button>
         ) : document.status === 'uploading' ? (
@@ -130,7 +130,7 @@ function FileUpload({
           // Uploaded state
           <div className="p-4 rounded-lg bg-[var(--color-success-light)] flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-[var(--color-success)]" />
+              <Check className="w-5 h-5 text-[var(--color-success)]" aria-hidden="true" />
               <div>
                 <span className="text-[14px] text-[var(--color-darkest)] font-medium block">
                   {document.name}
@@ -152,14 +152,14 @@ function FileUpload({
               "
               aria-label="Remove file"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
         ) : (
           // Error state for upload
           <div className="p-4 rounded-lg bg-[var(--color-error-light)] flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-[var(--color-error)]" />
+              <AlertCircle className="w-5 h-5 text-[var(--color-error)]" aria-hidden="true" />
               <span className="text-[14px] text-[var(--color-error)]">
                 {document.errorMessage || 'Upload failed'}
               </span>

@@ -14,7 +14,7 @@ function Logo() {
     <div className="flex items-center gap-3">
       {/* House icon with smile */}
       <div className="relative w-12 h-12 bg-[var(--color-coral)] rounded-xl flex items-center justify-center">
-        <Home className="w-6 h-6 text-white" strokeWidth={2.5} />
+        <Home className="w-6 h-6 text-white" strokeWidth={2.5} aria-hidden="true" />
         {/* Smile curve */}
         <svg
           className="absolute bottom-2.5 left-1/2 -translate-x-1/2"
@@ -22,6 +22,7 @@ function Logo() {
           height="7"
           viewBox="0 0 14 6"
           fill="none"
+          aria-hidden="true"
         >
           <path
             d="M1 1C3 4 5 5 7 5C9 5 11 4 13 1"
@@ -145,7 +146,7 @@ function FlowLayout({ children }: FlowLayoutProps) {
         {/* Footer - Practical UI: Links need sufficient touch targets */}
         <div className="p-6 text-[14px] text-[var(--color-dark)]">
           <div className="flex items-center gap-1 mb-2">
-            <svg className="w-4 h-4 text-[var(--color-teal)]" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 text-[var(--color-teal)]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path
                 fillRule="evenodd"
                 d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"

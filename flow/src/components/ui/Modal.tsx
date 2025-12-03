@@ -68,7 +68,7 @@ function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
             className="w-12 h-12 -mr-2 flex items-center justify-center rounded-lg hover:bg-[var(--color-lightest)] transition-colors"
             aria-label="Close modal"
           >
-            <X className="w-5 h-5 text-[var(--color-dark)]" />
+            <X className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
           </button>
         </div>
 

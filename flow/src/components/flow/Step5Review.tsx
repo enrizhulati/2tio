@@ -219,7 +219,7 @@ function Step5Review() {
     <div className="space-y-8">
       {/* Heading */}
       <div>
-        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
+        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
           Review your order
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">
@@ -332,9 +332,9 @@ function Step5Review() {
                 <p className="text-[14px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.electricity.rate} • {selectedPlans.electricity.contractLabel}
                 </p>
-                {/* Show ETF info for contracts - Practical UI: Be upfront about commitments */}
+                {/* Show ETF info for contracts - Practical UI: Be upfront, 14px min, 4.5:1 contrast */}
                 {selectedPlans.electricity.contractMonths && selectedPlans.electricity.contractMonths > 0 && (
-                  <p className="text-[13px] text-[var(--color-medium)] ml-7 mt-1">
+                  <p className="text-[14px] text-[var(--color-dark)] ml-7 mt-1">
                     Early cancellation fee: $175 per remaining year
                   </p>
                 )}

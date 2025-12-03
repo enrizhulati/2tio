@@ -433,7 +433,7 @@ function Step4Verify() {
     <div className="space-y-8">
       {/* Heading */}
       <div>
-        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
+        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
           Complete your application
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">

@@ -245,7 +245,7 @@ function Step1Address() {
         {/* Heading */}
         {/* Practical UI: Front-load important info, be concise */}
         <div className="text-center">
-          <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
+          <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
             Which unit is yours?
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
@@ -297,7 +297,7 @@ function Step1Address() {
                     <p className="text-[14px] text-[var(--color-dark)] mt-1">
                       {esiid.city}, {esiid.state} {esiid.zip_code}
                     </p>
-                    <p className="text-[14px] text-[var(--color-medium)] mt-1">
+                    <p className="text-[14px] text-[var(--color-dark)] mt-1">
                       {esiid.premise_type}
                     </p>
                   </div>
@@ -312,7 +312,7 @@ function Step1Address() {
                         <span className="text-[14px] text-[var(--color-coral)] font-medium">
                           No power service
                         </span>
-                        <p className="text-[14px] text-[var(--color-medium)] mt-0.5">
+                        <p className="text-[14px] text-[var(--color-dark)] mt-0.5">
                           Contact your landlord
                         </p>
                       </div>
@@ -357,7 +357,7 @@ function Step1Address() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--color-coral-light)] flex items-center justify-center">
             <AlertCircle className="w-8 h-8 text-[var(--color-coral)]" aria-hidden="true" />
           </div>
-          <h1 className="text-[35px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
+          <h1 className="text-[35px] font-bold text-[var(--color-darkest)] leading-[1.2] tracking-tight mb-3">
             We couldn't verify this address
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
@@ -409,7 +409,7 @@ function Step1Address() {
       <div className="space-y-8">
         {/* Success heading */}
         <div className="text-center">
-          <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
+          <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
             Great news!
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
@@ -563,14 +563,14 @@ function Step1Address() {
     <div className="space-y-8">
       {/* Heading - centered */}
       <div className="text-center">
-        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
+        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
           Where are you moving?
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">
           Enter your new address and we'll check what services are available.
         </p>
-        {/* Service area hint - Practical UI: Set expectations upfront */}
-        <p className="text-[14px] text-[var(--color-medium)] mt-2">
+        {/* Service area hint - Practical UI: Set expectations upfront, 14px needs 4.5:1 contrast */}
+        <p className="text-[14px] text-[var(--color-dark)] mt-2">
           Currently serving Texas addresses only
         </p>
       </div>

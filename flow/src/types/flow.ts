@@ -76,6 +76,7 @@ export interface ServiceAvailability {
   provider?: string;
   providerCount?: number;
   startingRate?: string;
+  logo?: string;
   plans: ServicePlan[];
 }
 

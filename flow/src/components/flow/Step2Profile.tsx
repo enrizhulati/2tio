@@ -76,7 +76,7 @@ function Step2Profile() {
     <div className="space-y-8">
       {/* Heading */}
       <div>
-        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-tight mb-3">
+        <h1 className="text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
           Tell us about yourself
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">
@@ -108,15 +108,15 @@ function Step2Profile() {
               required
             />
           </div>
-          {/* Legal name hint - Practical UI: Explain why upfront */}
-          <p className="text-[13px] text-[var(--color-medium)]">
+          {/* Legal name hint - Practical UI: Explain why upfront, min 14px for contrast */}
+          <p className="text-[14px] text-[var(--color-dark)]">
             Use your legal name as it appears on your ID
           </p>
         </div>
 
         <Input
           label="Email"
-          hint="We'll send your confirmation and account details here."
+          hint="We'll send your confirmation and account details here"
           type="email"
           placeholder="jane@example.com"
           value={email}
@@ -129,7 +129,7 @@ function Step2Profile() {
 
         <Input
           label="Phone"
-          hint="For account setup and service notifications."
+          hint="For account setup and service notifications"
           type="tel"
           placeholder="(555) 123-4567"
           value={phone}

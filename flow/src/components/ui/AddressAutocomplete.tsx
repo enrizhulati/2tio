@@ -248,14 +248,15 @@ export function AddressAutocomplete({
         {(isLoading || value) && !disabled && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2">
             {isLoading ? (
-              <Loader2 className="w-5 h-5 text-[var(--color-medium)] animate-spin" />
+              <Loader2 className="w-5 h-5 text-[var(--color-medium)] animate-spin" aria-hidden="true" />
             ) : value ? (
               <button
                 type="button"
                 onClick={handleClear}
                 className="text-[var(--color-medium)] hover:text-[var(--color-dark)] transition-colors"
+                aria-label="Clear address"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             ) : null}
           </div>

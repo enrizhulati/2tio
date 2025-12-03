@@ -214,18 +214,21 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           provider: waterPlans.length > 0 ? waterPlans[0].provider : undefined,
           providerCount: new Set(waterPlans.map(p => p.provider)).size,
           startingRate: waterPlans.length > 0 ? waterPlans[0].rate : undefined,
+          logo: rawWaterPlans.length > 0 ? rawWaterPlans[0].logo : undefined,
           plans: waterPlans,
         },
         electricity: {
           available: electricityPlans.length > 0,
           providerCount: new Set(electricityPlans.map(p => p.provider)).size,
           startingRate: electricityPlans.length > 0 ? electricityPlans[0].rate : undefined,
+          logo: rawElectricityPlans.length > 0 ? rawElectricityPlans[0].logo : undefined,
           plans: electricityPlans,
         },
         internet: {
           available: internetPlans.length > 0,
           providerCount: new Set(internetPlans.map(p => p.provider)).size,
           startingRate: internetPlans.length > 0 ? internetPlans[0].rate : undefined,
+          logo: rawInternetPlans.length > 0 ? rawInternetPlans[0].logo : undefined,
           plans: internetPlans,
         },
       };
