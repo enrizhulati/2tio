@@ -473,25 +473,22 @@ function ServiceCard({
 
                           {/* Row 3: Monthly estimate + details */}
                           <div className="text-[16px] text-[var(--color-dark)]">
-                            {isElectricity && (plan.lowMonthly && plan.highMonthly ? (
-                              // Show range when API provides low/high (more honest about seasonal variation)
-                              <span className="font-semibold text-[var(--color-darkest)]">
-                                ${Math.round(plan.lowMonthly)}–${Math.round(plan.highMonthly)}/mo
-                              </span>
-                            ) : plan.monthlyEstimate ? (
-                              // Fallback to single estimate
-                              <span className="font-semibold text-[var(--color-darkest)]">
-                                ~{plan.monthlyEstimate}/mo
-                              </span>
-                            ) : null)}
+                            {isElectricity && plan.monthlyEstimate && (
+                              // Show average prominently, range as secondary hedge
+                              <>
+                                <span className="font-semibold text-[var(--color-darkest)]">
+                                  ~{plan.monthlyEstimate}/mo
+                                </span>
+                                {plan.lowMonthly && plan.highMonthly && (
+                                  <span className="text-[var(--color-medium)]">
+                                    {' '}(${Math.round(plan.lowMonthly)}–${Math.round(plan.highMonthly)} range)
+                                  </span>
+                                )}
+                              </>
+                            )}
                             {isInternet && plan.rate && (
                               <span className="font-semibold text-[var(--color-darkest)]">
                                 {plan.rate}
-                              </span>
-                            )}
-                            {isElectricity && (
-                              <span className="text-[var(--color-dark)]">
-                                {' '}typical range
                               </span>
                             )}
                             {isInternet && plan.downloadSpeed && (
