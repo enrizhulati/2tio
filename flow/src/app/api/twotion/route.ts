@@ -187,6 +187,32 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(data);
     }
 
+    // Get single plan details with options (needed for water plan options)
+    if (action === 'plan-details') {
+      const serviceName = searchParams.get('service');
+      const planId = searchParams.get('planId');
+
+      if (!serviceName || !planId) {
+        return NextResponse.json({ error: 'Service name and plan ID required' }, { status: 400 });
+      }
+
+      const response = await fetch(`${TWOTION_API}/services/${serviceName}/plans/${planId}`, {
+        headers: getTwotionHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Plan details API error:', response.status, errorText);
+        return NextResponse.json(
+          { error: `Failed to fetch plan details: ${response.status}` },
+          { status: response.status }
+        );
+      }
+
+      const data = await response.json();
+      return NextResponse.json(data);
+    }
+
     if (action === 'cart') {
       const userId = getUserId(request);
       if (!userId) {
