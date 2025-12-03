@@ -97,7 +97,13 @@ function Step1Address() {
       esiid: address.esiid,
     } : null
   );
-  const [date, setDate] = useState(moveInDate || '');
+  // Default to 2 weeks from now - helps iOS Safari show a visible date
+  const getDefaultDate = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 14);
+    return d.toISOString().split('T')[0];
+  };
+  const [date, setDate] = useState(moveInDate || getDefaultDate());
   const [errors, setErrors] = useState<{ address?: string; date?: string }>({});
 
   const handleAddressSelect = useCallback((addr: AddressResult) => {
@@ -210,7 +216,7 @@ function Step1Address() {
   const handleEdit = () => {
     // Reset local form state to allow fresh input
     setSelectedAddress(null);
-    setDate('');
+    setDate(getDefaultDate());
     setErrors({});
 
     // Reset store state including electricity data
@@ -568,10 +574,6 @@ function Step1Address() {
         </h1>
         <p className="text-[18px] text-[var(--color-dark)]">
           Enter your new address and we'll check what services are available.
-        </p>
-        {/* Service area hint - Practical UI: Set expectations upfront, 14px needs 4.5:1 contrast */}
-        <p className="text-[14px] text-[var(--color-dark)] mt-2">
-          Currently serving Texas addresses only
         </p>
       </div>
 

@@ -53,7 +53,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         <div className="flex-1">
           <span className="text-[var(--color-darkest)] text-[18px] leading-snug">{label}</span>
           {description && (
-            <p className="text-[var(--color-dark)] text-[16px] mt-1">{description}</p>
+            <p className="text-[var(--color-dark)] text-[14px] mt-0.5">{description}</p>
           )}
         </div>
       </label>

@@ -141,16 +141,12 @@ function Step2Profile() {
         />
 
         {/* SMS opt-in - Practical UI: Description text must meet 4.5:1 contrast */}
-        <div className="space-y-1">
-          <Checkbox
-            label="Text me service updates and reminders"
-            checked={smsOptIn}
-            onChange={(e) => setSmsOptIn(e.target.checked)}
-          />
-          <p className="text-[14px] text-[var(--color-dark)] ml-9">
-            Order confirmations and reminders. You can opt out anytime.
-          </p>
-        </div>
+        <Checkbox
+          label="Text me service updates and reminders"
+          description="Order confirmations and reminders. You can opt out anytime."
+          checked={smsOptIn}
+          onChange={(e) => setSmsOptIn(e.target.checked)}
+        />
       </div>
 
       {/* Navigation buttons - Back always left */}
