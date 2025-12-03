@@ -61,9 +61,13 @@ function CartSummary() {
   const getMonthlyTotal = () => {
     let total = 0;
 
-    // Water estimate
-    if (selectedServices.water) {
-      total += 55; // Midpoint of $45-65 estimate
+    // Water estimate from selected plan
+    if (selectedServices.water && selectedPlans.water) {
+      const waterRate = selectedPlans.water.rate;
+      if (waterRate) {
+        const match = waterRate.match(/\$?([\d.]+)/);
+        if (match) total += parseFloat(match[1]);
+      }
     }
 
     // Electricity from cart or selected plan
@@ -104,7 +108,9 @@ function CartSummary() {
         {selectedServices.water && selectedPlans.water && (
           <div className="flex justify-between text-[16px]">
             <span className="text-[var(--color-dark)]">Water</span>
-            <span className="text-[var(--color-darkest)] font-medium">~$55/mo</span>
+            <span className="text-[var(--color-darkest)] font-medium">
+              {selectedPlans.water.rate || '~$36/mo base'}
+            </span>
           </div>
         )}
 
@@ -260,7 +266,9 @@ function ServiceCard({
                     {service.logo ? 'Official city water service' : service.provider}
                   </p>
                   <div className="flex items-center gap-4 mt-3 text-[16px]">
-                    <span className="text-[var(--color-darkest)] font-medium">Est. ~$45-65/mo</span>
+                    <span className="text-[var(--color-darkest)] font-medium">
+                      {selectedPlan?.rate || service.startingRate || 'Usage-based pricing'}
+                    </span>
                     <span className="text-[var(--color-teal)] font-semibold">$0 setup fee</span>
                   </div>
                 </div>
@@ -353,12 +361,12 @@ function ServiceCard({
                     {selectedPlan.provider}
                   </span>
                   <span className="text-[16px] text-[var(--color-teal)] ml-2">
-                    {isExpanded ? 'Change plan' : 'Tap to change'}
+                    {isExpanded ? 'Change plan' : `Choose your ${type} plan`}
                   </span>
                 </>
               ) : (
                 <span className="text-[16px] font-semibold text-[var(--color-teal)]">
-                  Choose your plan
+                  Choose your {type} plan
                 </span>
               )}
             </div>

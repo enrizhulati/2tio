@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Home, Building2, Castle } from 'lucide-react';
+import { Home, Building2, Castle, Info } from 'lucide-react';
 
 interface UsageSliderProps {
   /** Current monthly kWh value */
@@ -102,13 +102,24 @@ export function UsageSlider({
       {/* Header with current value */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
-            Adjust your usage estimate
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
+              Does this look right?
+            </p>
+            <div className="relative group">
+              <Info className="w-4 h-4 text-[var(--color-medium)] cursor-help" />
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-2.5 bg-[var(--color-darkest)] text-white text-[13px] rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 shadow-lg pointer-events-none">
+                {hasHomeData
+                  ? 'We estimated your usage based on your home\'s size, age, and similar properties in your area.'
+                  : 'We\'ll use this estimate to find plans that best match your needs.'}
+                <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[var(--color-darkest)]" />
+              </div>
+            </div>
+          </div>
           <p className="text-[14px] text-[var(--color-dark)] mt-0.5">
             {hasHomeData
-              ? 'Based on similar properties. Adjust if needed.'
-              : 'We\'ll use this to rank plans for you.'}
+              ? 'We estimated this for you. Only adjust if it seems off.'
+              : 'Select your typical monthly usage to rank plans.'}
           </p>
         </div>
         <div className="text-right">
