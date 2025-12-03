@@ -25,3 +25,6 @@ export { UsageChart } from './UsageChart';
 export type { UsageChartProps } from './UsageChart';
 
 export { Skeleton, SkeletonCard, SkeletonForm } from './Skeleton';
+
+export { UsageSlider } from './UsageSlider';
+export type { UsageSliderProps } from './UsageSlider';

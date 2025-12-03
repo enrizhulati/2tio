@@ -265,6 +265,7 @@ export interface FlowState {
   confirmEsiid: () => Promise<void>;
   fetchUsageProfile: () => Promise<void>;
   fetchElectricityPlans: (zipCode: string) => Promise<void>;
+  updateMonthlyUsage: (monthlyKwh: number) => Promise<void>;
 
   // 2TIO Cart actions
   addToCart: (planId: string, plan: ServicePlan, serviceType: ServiceType) => Promise<void>;
