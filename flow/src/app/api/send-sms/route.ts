@@ -54,39 +54,39 @@ function formatPhoneNumber(phone: string): string {
   return `+${digits}`;
 }
 
-// Generate message based on type
+// Generate message based on type - Practical UI: concise, front-load key info
 function generateMessage(type: MessageType, data: SMSRequest['data']): string {
   const firstName = data.customerName?.split(' ')[0] || 'there';
 
   switch (type) {
     case 'confirmation':
       const serviceList = data.services?.join(', ') || 'your utilities';
-      return `Hi ${firstName}! ✅ Your utility setup is confirmed.
+      return `${firstName}, you're all set!
 
 Order #${data.orderId}
-📍 ${data.serviceAddress}
-📅 Starting ${formatDateShort(data.moveInDate)}
-⚡ ${serviceList}
+${data.serviceAddress}
+Starting ${formatDateShort(data.moveInDate)}
+${serviceList}
 
-You'll get confirmation emails from each provider within 24 hours.
+Confirmation emails coming within 24 hours.
 
-- 2TurnItOn`;
+– 2TurnItOn`;
 
     case 'failure':
-      return `Hi ${firstName}, we hit a snag with your utility setup. ⚠️
+      return `${firstName}, we hit a snag with your utility setup.
 
-Don't worry - your info is saved. Please try again at 2turniton.com or reply to this message for help.
+Your info is saved. Try again at 2turniton.com or reply for help.
 
-- 2TurnItOn`;
+– 2TurnItOn`;
 
     case 'landlord_reminder':
-      return `Hi ${firstName}! 🔑 Reminder: In Texas, you need your electricity account number to get your keys.
+      return `${firstName}, get your keys!
 
-Your account #: ${data.orderId}
+Your electricity account #: ${data.orderId}
 
-You can email this to your leasing office from your confirmation page, or just forward this text!
+In Texas, your leasing office needs this before you can move in. Email it from your confirmation page or forward this text.
 
-- 2TurnItOn`;
+– 2TurnItOn`;
 
     default:
       return '';
