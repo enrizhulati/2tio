@@ -902,11 +902,11 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       const servicePlans: ServicePlan[] = rawPlans.map((plan, index) => {
         const rawPlan = plan as unknown as RawServicePlan;
 
-        // Always use client-side calculation based on user's usage
-        // This ensures costs properly update when usage changes
+        // Prefer API's totalCost (includes bill credits, tiered pricing) when available
+        // Fall back to client-side calculation only when API doesn't provide totalCost
         const clientCosts = enrichPlansWithCosts([plan], usage)[0];
-        const annualCost = clientCosts?.annualCost || 0;
-        const monthlyEstimate = clientCosts?.monthlyEstimate || 0;
+        const annualCost = plan.totalCost ?? clientCosts?.annualCost ?? 0;
+        const monthlyEstimate = plan.totalCost ? plan.totalCost / 12 : (clientCosts?.monthlyEstimate ?? 0);
         const annualUsage = usage.reduce((a, b) => a + b, 0);
 
         // Calculate effective rate: total cost / total usage (in cents per kWh)
