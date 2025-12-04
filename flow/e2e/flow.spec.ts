@@ -248,8 +248,8 @@ test.describe('Address Flow with Apartment', () => {
     await page.click('button:has-text("Check availability")');
 
     // Wait for API calls and verify we skip selection screen
-    // Should go directly to "Great news!" (auto-matched APT 1214)
-    await expect(page.locator('h1:has-text("Great news")')).toBeVisible({ timeout: 15000 });
+    // Should go directly to "We found your home!" modal (auto-matched APT 1214)
+    await expect(page.locator('h2:has-text("We found your home")')).toBeVisible({ timeout: 15000 });
 
     // Verify we're NOT on the "Confirm your address" selection screen
     await expect(page.locator('h1:has-text("Confirm your address")')).not.toBeVisible();
@@ -276,8 +276,8 @@ test.describe('Address Flow with Apartment', () => {
     // Click "Check availability"
     await page.click('button:has-text("Check availability")');
 
-    // Single-family home should go directly to "Great news!"
-    await expect(page.locator('h1:has-text("Great news")')).toBeVisible({ timeout: 15000 });
+    // Single-family home should go directly to "We found your home!" modal
+    await expect(page.locator('h2:has-text("We found your home")')).toBeVisible({ timeout: 15000 });
   });
 
   test('apartment address from autocomplete proceeds directly', async ({ page }) => {
@@ -301,7 +301,7 @@ test.describe('Address Flow with Apartment', () => {
     // Click "Check availability"
     await page.click('button:has-text("Check availability")');
 
-    // Since autocomplete provides ESIID directly, should skip selection and show results
-    await expect(page.locator('h1:has-text("Great news")')).toBeVisible({ timeout: 15000 });
+    // Since autocomplete provides ESIID directly, should skip selection and show "We found your home!"
+    await expect(page.locator('h2:has-text("We found your home")')).toBeVisible({ timeout: 15000 });
   });
 });

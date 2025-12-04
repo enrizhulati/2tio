@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, type ChangeEvent, useRef } from 'react';
+import { useCallback, useState, type ChangeEvent, useRef } from 'react';
 import { Upload, X, FileText, AlertCircle, Check } from 'lucide-react';
 import type { UploadedDocument } from '@/types/flow';
 
@@ -10,6 +10,7 @@ interface FileUploadProps {
   requirement?: string;
   accept?: string;
   maxSizeMB?: number;
+  minSizeKB?: number;
   document?: UploadedDocument;
   onUpload: (file: File) => void;
   onRemove: () => void;
@@ -22,20 +23,39 @@ function FileUpload({
   requirement,
   accept = '.jpg,.jpeg,.png,.pdf',
   maxSizeMB = 10,
+  minSizeKB = 1,
   document,
   onUpload,
   onRemove,
   error,
 }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleFileChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
-        // Validate file size
+        // Clear previous validation error
+        setValidationError(null);
+
+        // Validate file is not empty or too small
+        const minSizeBytes = minSizeKB * 1024;
+        if (file.size === 0) {
+          setValidationError('File is empty. Please upload a valid document.');
+          e.target.value = '';
+          return;
+        }
+        if (file.size < minSizeBytes) {
+          setValidationError(`File is too small (${file.size} bytes). Please upload a valid document.`);
+          e.target.value = '';
+          return;
+        }
+
+        // Validate file is not too large
         if (file.size > maxSizeMB * 1024 * 1024) {
-          // Error handling would go here
+          setValidationError(`File is too large. Maximum size is ${maxSizeMB}MB.`);
+          e.target.value = '';
           return;
         }
         onUpload(file);
@@ -43,7 +63,7 @@ function FileUpload({
       // Reset input so same file can be selected again
       e.target.value = '';
     },
-    [onUpload, maxSizeMB]
+    [onUpload, maxSizeMB, minSizeKB]
   );
 
   const formatFileSize = (bytes: number) => {
