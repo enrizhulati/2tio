@@ -917,11 +917,15 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           console.log(`[Plan ${index}] ${plan.name}: annual=$${annualCost.toFixed(0)}, usage=${annualUsage}kWh, rate=${effectiveRate.toFixed(1)}¢`);
         }
 
+        // Convert effectiveRate from cents to dollars for the rate field
+        // Component expects format "$0.090/kWh" and converts to cents for display
+        const rateInDollars = effectiveRate / 100;
+
         return {
           id: plan.id,
           provider: plan.vendorName,
           name: plan.name,
-          rate: `${effectiveRate.toFixed(1)}¢`,
+          rate: `$${rateInDollars.toFixed(3)}/kWh`,
           rateType: 'flat' as const,
           contractMonths: plan.term,
           contractLabel: plan.term > 0 ? `${plan.term} month contract` : 'No contract',
