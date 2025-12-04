@@ -1154,9 +1154,10 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       return;
     }
 
-    // Apply Texas seasonal pattern to monthly average
+    // Apply Texas seasonal pattern to monthly average (normalized to sum to 12.0)
     // Summer months (Jun-Sep) are ~40% higher, winter/spring are ~20% lower
-    const seasonalMultipliers = [0.85, 0.80, 0.85, 0.95, 1.10, 1.30, 1.40, 1.40, 1.20, 1.00, 0.90, 0.85];
+    // Normalized multipliers ensure average stays at monthlyKwh
+    const seasonalMultipliers = [0.81, 0.76, 0.81, 0.90, 1.05, 1.24, 1.33, 1.33, 1.14, 0.95, 0.86, 0.81];
     const usage = seasonalMultipliers.map(m => Math.round(monthlyKwh * m));
     const annualKwh = usage.reduce((sum, val) => sum + val, 0);
 

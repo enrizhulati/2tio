@@ -23,7 +23,7 @@ function QuestionInput({
     const selectId = `select-${question.id}`;
     const errorId = `error-${question.id}`;
     return (
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <label
           htmlFor={selectId}
           className="block text-[16px] font-semibold text-[var(--color-darkest)] tracking-wide"

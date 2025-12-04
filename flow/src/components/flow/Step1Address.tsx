@@ -240,7 +240,7 @@ function Step1Address() {
                   }
                 `}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
                       {esiid.address}

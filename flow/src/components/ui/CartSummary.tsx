@@ -47,14 +47,14 @@ export function CartSummary() {
 
   return (
     <div className="p-5 sm:p-6 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)]">
-      <div className="flex items-center gap-2.5 mb-4">
+      <div className="flex items-center gap-2 mb-4">
         <ShoppingCart className="w-5 h-5 text-[var(--color-teal)]" aria-hidden="true" />
         <span className="text-[18px] font-bold text-[var(--color-darkest)]">
           Your services
         </span>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {selectedServices.water && selectedPlans.water && (
           <div className="flex justify-between text-[16px]">
             <span className="text-[var(--color-dark)]">Water</span>

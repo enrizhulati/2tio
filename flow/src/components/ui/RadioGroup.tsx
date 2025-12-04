@@ -126,7 +126,7 @@ function RadioOption({
           {badgeReason && (
             <button
               type="button"
-              className="inline-flex items-center ml-2 align-middle p-1 -m-1 min-h-[24px]"
+              className="inline-flex items-center ml-2 align-middle p-3 -m-3 min-h-[44px]"
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
               onClick={(e) => {

@@ -293,10 +293,10 @@ function Step3Services() {
                 </p>
               )}
 
-              {/* Home details if available */}
+              {/* Home details if available - Practical UI: 14px minimum */}
               {homeDetails?.foundDetails && (
-                <div className="flex items-center gap-1.5 mt-2 text-[13px] text-[var(--color-teal)]">
-                  <Home className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
+                <div className="flex items-center gap-2 mt-2 text-[14px] text-[var(--color-teal)]">
+                  <Home className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
                   <span className="font-medium">
                     {formatNumber(homeDetails.squareFootage || 0)} sq ft
                     {homeDetails.yearBuilt ? ` • ${homeDetails.yearBuilt}` : ''}

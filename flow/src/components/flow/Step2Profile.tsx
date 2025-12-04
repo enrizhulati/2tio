@@ -151,7 +151,7 @@ function Step2Profile() {
       </div>
 
       {/* Navigation buttons - Back always left */}
-      <div className="pt-4 flex flex-col-reverse sm:flex-row gap-3">
+      <div className="pt-4 flex flex-col-reverse sm:flex-row gap-4">
         <Button
           variant="secondary"
           onClick={prevStep}

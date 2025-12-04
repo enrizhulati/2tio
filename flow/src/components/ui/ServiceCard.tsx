@@ -92,23 +92,27 @@ export function ServiceCard({
                 // Water is always selected - show locked checkmark with tooltip
                 <WaterTooltip />
               ) : (
-                // Toggle for other services
+                // Toggle for other services - Practical UI: 48px touch target
                 <button
                   onClick={onToggle}
-                  className={`
-                    w-7 h-7 rounded-md border-2 flex items-center justify-center
-                    transition-colors duration-150 min-h-[28px]
-                    ${isSelected
-                      ? 'bg-[var(--color-teal)] border-[var(--color-teal)]'
-                      : 'bg-white border-[var(--color-medium)] hover:border-[var(--color-dark)]'
-                    }
-                  `}
+                  className="relative p-2.5 -m-2.5"
                 >
-                  {isSelected && (
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
+                  <div
+                    className={`
+                      w-7 h-7 rounded-md border-2 flex items-center justify-center
+                      transition-colors duration-150
+                      ${isSelected
+                        ? 'bg-[var(--color-teal)] border-[var(--color-teal)]'
+                        : 'bg-white border-[var(--color-medium)] hover:border-[var(--color-dark)]'
+                      }
+                    `}
+                  >
+                    {isSelected && (
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
                 </button>
               )}
             </div>
