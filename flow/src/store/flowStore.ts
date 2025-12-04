@@ -890,6 +890,10 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   },
 
   submitOrder: async () => {
+    // Prevent double submission
+    const { isSubmitting } = get();
+    if (isSubmitting) return;
+
     set({ isSubmitting: true });
 
     const { address, moveInDate, selectedServices, selectedPlans, documents, checkoutAnswers, profile, dwellingType, ownershipStatus } = get();

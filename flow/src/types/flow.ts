@@ -107,6 +107,7 @@ export interface ServicePlan {
   serviceName?: string;       // Service type from API (Water, Electricity, etc.)
   cancellationFee?: number;   // Early termination fee
   renewablePercent?: number;  // Percentage of renewable energy
+  cpOrderUrl?: string;        // ComparePower enrollment URL (electricity only)
   // Internet-specific fields
   downloadSpeed?: number;     // Mbps download speed
   uploadSpeed?: number;       // Mbps upload speed
