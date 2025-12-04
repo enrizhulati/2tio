@@ -241,30 +241,30 @@ export function UsageSlider({
         />
       </div>
 
-      {/* Min/Max labels */}
-      <div className="flex justify-between mt-2 text-[12px] text-[var(--color-medium)]">
+      {/* Min/Max labels - Practical UI: 14px minimum for legibility */}
+      <div className="flex justify-between mt-2 text-[14px] text-[var(--color-medium)]">
         <span>{minUsage.toLocaleString()} kWh</span>
         <span>{maxUsage.toLocaleString()} kWh</span>
       </div>
 
-      {/* Reset link - shows when user has deviated from estimate/default */}
+      {/* Reset link - Practical UI: Tertiary button (underlined text), 16px minimum */}
       {showResetOption && (
         <button
           type="button"
           onClick={handleReset}
           disabled={isLoading}
-          className="mt-3 flex items-center gap-1.5 text-[14px] text-[var(--color-teal)] hover:text-[var(--color-teal-hover)] transition-colors disabled:opacity-50"
+          className="mt-4 flex items-center gap-2 text-[16px] text-[var(--color-teal)] hover:text-[var(--color-teal-hover)] transition-colors disabled:opacity-50"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
           </svg>
-          <span>{resetLabel}</span>
+          <span className="underline">{resetLabel}</span>
         </button>
       )}
 
       {/* Loading indicator */}
       {isLoading && (
-        <div className="mt-3 flex items-center justify-center gap-2 text-[14px] text-[var(--color-teal)]">
+        <div className="mt-4 flex items-center justify-center gap-2 text-[16px] text-[var(--color-teal)]">
           <div className="w-4 h-4 border-2 border-[var(--color-teal)] border-t-transparent rounded-full animate-spin" />
           <span>Updating plan estimates...</span>
         </div>
