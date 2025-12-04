@@ -40,3 +40,5 @@ export { CompactAddressCard } from './CompactAddressCard';
 export { HomeConfirmationModal } from './HomeConfirmationModal';
 
 export { Modal } from './Modal';
+
+export { DwellingTypeSelector, OwnershipQuestion } from './DwellingTypeSelector';

@@ -7,6 +7,9 @@ const TWOTION_API_KEY = process.env.TWOTION_API_KEY || '';
 // ERCOT API (for Zillow usage data only)
 const ERCOT_API = 'https://ercot.api.comparepower.com';
 
+// ComparePower Pricing API (for accurate pricing by usage and TDSP)
+const COMPAREPOWER_PRICING_API = 'https://pricing.api.comparepower.com';
+
 // Helper to get user ID from request headers or cookies
 function getUserId(request: NextRequest): string | null {
   return request.headers.get('x-user-id') || request.cookies.get('twotion-user-id')?.value || null;
@@ -275,6 +278,37 @@ export async function GET(request: NextRequest) {
 
       if (!response.ok) throw new Error('Failed to fetch order status');
       const data = await response.json();
+      return NextResponse.json(data);
+    }
+
+    // ComparePower Pricing API - returns accurate pricing by usage and TDSP
+    // API: https://pricing.api.comparepower.com/api/plans/current?display_usage=XXX&tdsp_duns=YYY
+    if (action === 'pricing') {
+      const displayUsage = searchParams.get('display_usage');
+      const tdspDuns = searchParams.get('tdsp_duns');
+
+      if (!displayUsage || !tdspDuns) {
+        return NextResponse.json(
+          { error: 'display_usage and tdsp_duns are required' },
+          { status: 400 }
+        );
+      }
+
+      const url = `${COMPAREPOWER_PRICING_API}/api/plans/current?display_usage=${displayUsage}&group=default&tdsp_duns=${tdspDuns}`;
+      console.log('[Pricing API] Fetching:', url);
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Pricing API error:', response.status, errorText);
+        return NextResponse.json(
+          { error: `Failed to fetch pricing: ${response.status}` },
+          { status: response.status }
+        );
+      }
+
+      const data = await response.json();
+      console.log(`[Pricing API] Returned ${data.length} plans for usage=${displayUsage}, tdsp=${tdspDuns}`);
       return NextResponse.json(data);
     }
 

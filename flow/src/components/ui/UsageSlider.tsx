@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Home, Building2, Castle, Info } from 'lucide-react';
+import { Home, Building2, Building, Castle, Info } from 'lucide-react';
+import type { DwellingType } from '@/types/flow';
+import { DWELLING_ENERGY_DEFAULTS } from '@/types/flow';
 
 interface UsageSliderProps {
   /** Current monthly kWh value */
@@ -12,7 +14,9 @@ interface UsageSliderProps {
   originalEstimate?: number;
   /** Whether we have real home data (vs default) */
   hasHomeData?: boolean;
-  /** Whether this is an apartment (for smart defaults) */
+  /** Dwelling type for smart defaults (replaces isApartment) */
+  dwellingType?: DwellingType;
+  /** @deprecated Use dwellingType instead */
   isApartment?: boolean;
   /** Loading state while recalculating */
   isLoading?: boolean;
@@ -20,17 +24,28 @@ interface UsageSliderProps {
   className?: string;
 }
 
-// Usage presets with icons and descriptions
+// Usage presets with icons and descriptions - aligned with dwelling types
 const PRESETS = [
-  { value: 750, label: 'Small', description: 'Apartment', icon: Building2 },
-  { value: 1500, label: 'Medium', description: 'Avg home', icon: Home },
-  { value: 3500, label: 'Large', description: 'Large home', icon: Castle },
+  { value: 750, label: 'Apartment', description: '~750 kWh', icon: Building2, dwellingTypes: ['apartment'] as DwellingType[] },
+  { value: 1200, label: 'Mid-size', description: '~1,200 kWh', icon: Building, dwellingTypes: ['townhouse', 'multi_unit'] as DwellingType[] },
+  { value: 2000, label: 'House', description: '~2,000 kWh', icon: Home, dwellingTypes: ['single_family'] as DwellingType[] },
 ];
 
 const BASE_MIN = 400;
 const BASE_MAX = 5000;
 const STEP = 100;
-const DEFAULT_USAGE = 1000; // Default for apartments/unknown homes
+const DEFAULT_USAGE = 1200; // Default when dwelling unknown
+
+// Helper to get human-readable dwelling label
+function getDwellingLabel(dwelling: Exclude<DwellingType, null>): string {
+  switch (dwelling) {
+    case 'apartment': return 'apartment';
+    case 'townhouse': return 'townhouse';
+    case 'multi_unit': return 'duplex';
+    case 'single_family': return 'house';
+    default: return 'home';
+  }
+}
 
 export type { UsageSliderProps };
 
@@ -39,10 +54,14 @@ export function UsageSlider({
   onChange,
   originalEstimate,
   hasHomeData = false,
-  isApartment = false,
+  dwellingType,
+  isApartment = false, // Deprecated - use dwellingType
   isLoading = false,
   className = '',
 }: UsageSliderProps) {
+  // Normalize dwelling type (support legacy isApartment prop)
+  const effectiveDwellingType: DwellingType = dwellingType ?? (isApartment ? 'apartment' : null);
+
   // Dynamic range - extends to accommodate any incoming value
   const { minUsage, maxUsage } = useMemo(() => {
     const min = BASE_MIN;
@@ -58,16 +77,16 @@ export function UsageSlider({
     setLocalValue(value);
   }, [value]);
 
-  // Auto-select Small preset for apartments on first render (when no real home data)
+  // Auto-select dwelling-based default on first render (when no real home data)
   const [hasAutoSelected, setHasAutoSelected] = useState(false);
   useEffect(() => {
-    if (isApartment && !hasAutoSelected && !hasHomeData) {
-      const apartmentPreset = 750; // Small preset value
-      setLocalValue(apartmentPreset);
-      onChange(apartmentPreset);
+    if (effectiveDwellingType && !hasAutoSelected && !hasHomeData) {
+      const dwellingDefault = DWELLING_ENERGY_DEFAULTS[effectiveDwellingType];
+      setLocalValue(dwellingDefault);
+      onChange(dwellingDefault);
       setHasAutoSelected(true);
     }
-  }, [isApartment, hasAutoSelected, hasHomeData, onChange]);
+  }, [effectiveDwellingType, hasAutoSelected, hasHomeData, onChange]);
 
   // Handle preset button click
   const handlePresetClick = useCallback((presetValue: number) => {
@@ -118,16 +137,16 @@ export function UsageSlider({
 
   return (
     <div className={`bg-[var(--color-lightest)] rounded-xl p-4 sm:p-5 ${className}`}>
-      {/* Header with current value */}
+      {/* Header with current value - Practical UI: 18px+ headings, 16px body */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <div className="flex items-center gap-1.5">
-            <p className="text-[16px] font-semibold text-[var(--color-darkest)]">
+          <div className="flex items-center gap-2">
+            <p className="text-[18px] font-semibold text-[var(--color-darkest)]">
               Does this look right?
             </p>
             <div className="relative group">
               <Info className="w-4 h-4 text-[var(--color-medium)] cursor-help" />
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-2.5 bg-[var(--color-darkest)] text-white text-[13px] rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 shadow-lg pointer-events-none">
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-3 bg-[var(--color-darkest)] text-white text-[14px] rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 shadow-lg pointer-events-none leading-relaxed">
                 {hasHomeData
                   ? 'We estimated your usage based on your home\'s size, age, and similar properties in your area.'
                   : 'We\'ll use this estimate to find plans that best match your needs.'}
@@ -135,9 +154,9 @@ export function UsageSlider({
               </div>
             </div>
           </div>
-          <p className="text-[14px] text-[var(--color-dark)] mt-0.5">
-            {isApartment && !hasHomeData
-              ? 'Apartments typically use less electricity. Adjust if needed.'
+          <p className="text-[16px] text-[var(--color-dark)] mt-1">
+            {effectiveDwellingType && !hasHomeData
+              ? `Based on typical ${getDwellingLabel(effectiveDwellingType)} usage. Adjust if needed.`
               : hasHomeData
                 ? 'We estimated this for you. Only adjust if it seems off.'
                 : 'Select your typical monthly usage to rank plans.'}
@@ -147,11 +166,11 @@ export function UsageSlider({
           <p className="text-[28px] font-bold text-[var(--color-coral)] tabular-nums">
             {localValue.toLocaleString()}
           </p>
-          <p className="text-[14px] text-[var(--color-dark)]">kWh/month</p>
+          <p className="text-[16px] text-[var(--color-dark)]">kWh/month</p>
         </div>
       </div>
 
-      {/* Preset buttons */}
+      {/* Preset buttons - Practical UI: 8px gap (XS), 48px+ touch targets */}
       <div className="grid grid-cols-3 gap-2 mb-4">
         {PRESETS.map((preset) => {
           const Icon = preset.icon;
@@ -176,9 +195,9 @@ export function UsageSlider({
               aria-pressed={isActive}
             >
               <Icon className={`w-5 h-5 mb-1 ${isActive ? 'text-white' : 'text-[var(--color-teal)]'}`} aria-hidden="true" />
-              <span className="text-[14px] font-semibold">{preset.label}</span>
-              <span className={`text-[12px] ${isActive ? 'text-white/80' : 'text-[var(--color-dark)]'}`}>
-                ~{preset.value.toLocaleString()} kWh
+              <span className="text-[16px] font-semibold">{preset.label}</span>
+              <span className={`text-[14px] ${isActive ? 'text-white/80' : 'text-[var(--color-dark)]'}`}>
+                {preset.description}
               </span>
             </button>
           );

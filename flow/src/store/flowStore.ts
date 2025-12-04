@@ -18,7 +18,10 @@ import type {
   TwotionCheckoutStep,
   WaterAnswer,
   OwnershipAnswer,
+  DwellingType,
+  WaterEligibility,
 } from '@/types/flow';
+import { DWELLING_ENERGY_DEFAULTS } from '@/types/flow';
 import {
   getUserId,
   setUserId,
@@ -36,6 +39,51 @@ import {
 
 // Default usage profile for cost estimates (when Zillow data unavailable)
 const DEFAULT_USAGE = [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900];
+
+// Determine water eligibility based on dwelling type and ownership
+function determineWaterEligibility(
+  dwellingType: DwellingType,
+  ownershipStatus: 'owner' | 'renter' | null
+): WaterEligibility {
+  if (!dwellingType) return 'required'; // Fallback for houses
+
+  switch (dwellingType) {
+    case 'single_family':
+      return 'required';  // Houses always need water
+    case 'townhouse':
+      return ownershipStatus === 'renter' ? 'optional' : 'required';
+    case 'multi_unit':
+      if (!ownershipStatus) return 'optional';  // Need to ask first
+      return ownershipStatus === 'owner' ? 'required' : 'not_applicable';
+    case 'apartment':
+      return 'not_applicable';  // Property handles water
+    default:
+      return 'required';
+  }
+}
+
+// Auto-detect dwelling type from address
+function detectDwellingType(address: Address): DwellingType {
+  const unit = address.unit?.trim() || '';
+  const street = address.street || '';
+
+  // 3+ digit unit number = almost certainly apartment building
+  if (unit.match(/^\d{3,}$/) || unit.match(/^[A-Z]?\d{3,}$/i)) {
+    return 'apartment';
+  }
+  // APT with 3+ digit number in street
+  if (street.match(/\bAPT\s+\d{3,}/i)) {
+    return 'apartment';
+  }
+
+  // No unit at all = likely single family
+  if (!unit && !street.match(/\b(APT|UNIT|STE|SUITE|#)\s*\w/i)) {
+    return 'single_family';
+  }
+
+  // Has unit but short (1-2 digits or letter) = ambiguous, need user input
+  return null;
+}
 
 // Full 2TIO API plan response type
 interface RawServicePlan {
@@ -122,12 +170,20 @@ const initialState = {
   esiidConfirmed: false, // True after user confirms their address/ESIID
   usageProfile: null as UsageProfile | null,
   homeDetails: null as HomeDetails | null,
+  originalMonthlyUsage: null as number | null, // Original estimate for reset (never overwritten by slider)
   isLoadingElectricity: false,
 
-  // Apartment water billing detection
+  // Apartment water billing detection (legacy)
   isApartment: false,
   waterAnswer: null as WaterAnswer,
   ownershipAnswer: null as OwnershipAnswer,
+
+  // Dwelling type detection (new system)
+  dwellingType: null as DwellingType,
+  dwellingTypeConfirmed: false,
+  ownershipStatus: null as 'owner' | 'renter' | null,
+  waterEligibility: 'required' as WaterEligibility,  // Default to required, will be calculated
+  waterOverride: false,
 
   // Step 2
   profile: null,
@@ -159,15 +215,26 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   ...initialState,
 
   setAddress: (address: Address) => {
-    // Detect if this is an apartment by checking for unit or apartment patterns
+    // Detect dwelling type from address
+    const dwellingType = detectDwellingType(address);
+    const waterEligibility = determineWaterEligibility(dwellingType, null);
+
+    // Legacy isApartment detection (for backward compat)
     const isApartment = !!(
       address.unit ||
       address.street.match(/\b(APT|UNIT|STE|SUITE|#)\s*\w/i)
     );
+
     set({
       address,
+      // New dwelling system
+      dwellingType,
+      dwellingTypeConfirmed: dwellingType !== null,  // Auto-confirmed if detected with high confidence
+      ownershipStatus: null,  // Reset when address changes
+      waterEligibility,
+      waterOverride: false,
+      // Legacy (keep for backward compat during migration)
       isApartment,
-      // Reset water answers when address changes
       waterAnswer: null,
       ownershipAnswer: null,
     });
@@ -178,6 +245,30 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   setWaterAnswer: (answer: WaterAnswer) => set({ waterAnswer: answer }),
 
   setOwnershipAnswer: (answer: OwnershipAnswer) => set({ ownershipAnswer: answer }),
+
+  // New dwelling type actions
+  setDwellingType: (type: Exclude<DwellingType, null>) => {
+    const { ownershipStatus } = get();
+    const waterEligibility = determineWaterEligibility(type, ownershipStatus);
+    set({
+      dwellingType: type,
+      dwellingTypeConfirmed: true,
+      waterEligibility,
+      // Also set legacy isApartment for backward compat
+      isApartment: type === 'apartment',
+    });
+  },
+
+  setOwnershipStatus: (status: 'owner' | 'renter') => {
+    const { dwellingType } = get();
+    const waterEligibility = determineWaterEligibility(dwellingType, status);
+    set({
+      ownershipStatus: status,
+      waterEligibility,
+    });
+  },
+
+  setWaterOverride: (override: boolean) => set({ waterOverride: override }),
 
   checkAvailability: async () => {
     const { address, usageProfile } = get();
@@ -903,15 +994,23 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         foundDetails: profile.found_home_details,
       };
 
+      // Calculate monthly average for reset functionality (only set once)
+      const monthlyAvg = Math.round(profile.usage.reduce((a, b) => a + b, 0) / 12);
+      const currentOriginal = get().originalMonthlyUsage;
+
       set({
         usageProfile: profile,
         homeDetails,
+        originalMonthlyUsage: currentOriginal ?? monthlyAvg, // Only set if not already set
         isLoadingElectricity: false,
       });
     } catch (error) {
       console.error('Error fetching usage profile:', error);
       // Set default profile on error
       const defaultUsage = [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900];
+      const defaultMonthlyAvg = Math.round(defaultUsage.reduce((a, b) => a + b, 0) / 12);
+      const currentOriginal = get().originalMonthlyUsage;
+
       set({
         usageProfile: {
           usage: defaultUsage,
@@ -926,6 +1025,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           annualKwh: calculateAnnualKwh(defaultUsage),
           foundDetails: false,
         },
+        originalMonthlyUsage: currentOriginal ?? defaultMonthlyAvg, // Only set if not already set
         isLoadingElectricity: false,
       });
     }
@@ -1043,8 +1143,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     }
   },
 
-  // Update monthly usage estimate and re-fetch plans from API
-  // API calculates accurate pricing with tiered rates, bill credits, etc.
+  // Update monthly usage estimate and re-fetch plans from 2TIO API
+  // 2TIO API accepts electricityUsage param and returns accurate pricing
   updateMonthlyUsage: async (monthlyKwh: number) => {
     console.log('[updateMonthlyUsage] Called with monthlyKwh:', monthlyKwh);
 
@@ -1083,13 +1183,13 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     }
 
     // Debounce API call to avoid rate limiting during rapid slider movement
-    // API calculates accurate pricing including tiered rates, bill credits, etc.
+    // Use 2TIO API directly - it accepts usage and returns accurate pricing
     usageUpdateDebounceTimer = setTimeout(async () => {
-      console.log('[updateMonthlyUsage] Fetching plans from API with new usage...');
+      console.log('[updateMonthlyUsage] Fetching plans from 2TIO API with new usage');
       const currentAddress = get().address;
       if (currentAddress?.zip) {
         await get().fetchElectricityPlans(currentAddress.zip);
-        console.log('[updateMonthlyUsage] API fetch complete - plans updated with accurate pricing');
+        console.log('[updateMonthlyUsage] API fetch complete - plans updated');
       }
     }, 500); // Wait 500ms after slider stops moving
   },

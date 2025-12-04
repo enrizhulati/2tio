@@ -108,9 +108,31 @@ export interface AvailableServices {
 
 export type ServiceType = 'water' | 'electricity' | 'internet';
 
-// Water billing question for apartments
+// Water billing question for apartments (legacy - being replaced by DwellingType)
 export type WaterAnswer = 'yes_separate' | 'no_included' | 'not_sure' | null;
 export type OwnershipAnswer = 'renting' | 'own' | null;
+
+// Dwelling type - determines water eligibility and energy defaults
+export type DwellingType =
+  | 'single_family'    // House - always needs water
+  | 'townhouse'        // Attached home - usually needs water
+  | 'multi_unit'       // Duplex/triplex/fourplex - depends on owner/renter
+  | 'apartment'        // Large building - never needs city water
+  | null;
+
+// Water eligibility derived from dwelling type
+export type WaterEligibility =
+  | 'required'         // Auto-include water (house, owner-occupied)
+  | 'optional'         // Show water, may need (townhouse rental)
+  | 'not_applicable';  // Hide water, property handles (apartment)
+
+// Energy defaults by dwelling type (monthly kWh)
+export const DWELLING_ENERGY_DEFAULTS: Record<Exclude<DwellingType, null>, number> = {
+  single_family: 1500,  // Medium-Large house
+  townhouse: 900,       // Small-Medium attached
+  multi_unit: 1200,     // Medium duplex/fourplex
+  apartment: 750,       // Small apartment unit
+};
 
 export interface SelectedServices {
   water: boolean;
@@ -224,12 +246,20 @@ export interface FlowState {
   esiidConfirmed: boolean;
   usageProfile: UsageProfile | null;
   homeDetails: HomeDetails | null;
+  originalMonthlyUsage: number | null; // Original estimate for reset (never overwritten by slider)
   isLoadingElectricity: boolean;
 
-  // Apartment water billing detection
+  // Apartment water billing detection (legacy - being replaced)
   isApartment: boolean;
   waterAnswer: WaterAnswer;
   ownershipAnswer: OwnershipAnswer;
+
+  // Dwelling type detection (new system)
+  dwellingType: DwellingType;
+  dwellingTypeConfirmed: boolean;  // User explicitly selected (vs auto-detected)
+  ownershipStatus: 'owner' | 'renter' | null;  // Only asked for multi_unit
+  waterEligibility: WaterEligibility;
+  waterOverride: boolean;  // User clicked "I need water anyway"
 
   // Step 2: Profile
   profile: UserProfile | null;
@@ -257,6 +287,10 @@ export interface FlowState {
   setMoveInDate: (date: string) => void;
   setWaterAnswer: (answer: WaterAnswer) => void;
   setOwnershipAnswer: (answer: OwnershipAnswer) => void;
+  // New dwelling type actions
+  setDwellingType: (type: Exclude<DwellingType, null>) => void;
+  setOwnershipStatus: (status: 'owner' | 'renter') => void;
+  setWaterOverride: (override: boolean) => void;
   checkAvailability: () => Promise<void>;
   setProfile: (profile: UserProfile) => void;
   toggleService: (service: ServiceType) => Promise<void>;

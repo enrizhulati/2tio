@@ -31,14 +31,13 @@ export function ServiceCard({
   onExpand: () => void;
   isLoading?: boolean;
 }) {
-  const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile, updateMonthlyUsage, isLoadingElectricity, isApartment } = useFlowStore();
+  const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile, updateMonthlyUsage, isLoadingElectricity, dwellingType, isApartment, originalMonthlyUsage } = useFlowStore();
   const [showAllPlans, setShowAllPlans] = useState(false);
 
-  // Track original estimate for reset functionality (captured on first render)
-  const [originalEstimate] = useState(() => {
-    const usage = usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900];
-    return Math.round(usage.reduce((a, b) => a + b, 0) / 12);
-  });
+  // Original estimate from store (stable across slider adjustments)
+  const originalEstimate = originalMonthlyUsage ?? Math.round(
+    (usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900]).reduce((a, b) => a + b, 0) / 12
+  );
 
   const service = availableServices?.[type];
   const selectedPlan = selectedPlans[type];
@@ -323,6 +322,7 @@ export function ServiceCard({
                   onChange={(monthlyKwh) => updateMonthlyUsage(monthlyKwh)}
                   originalEstimate={originalEstimate}
                   hasHomeData={homeDetails?.foundDetails || false}
+                  dwellingType={dwellingType}
                   isApartment={isApartment}
                   isLoading={isLoadingElectricity}
                   className="mb-4"
@@ -337,9 +337,12 @@ export function ServiceCard({
                   </p>
                   {/* Rate explainer - Practical UI: Explain jargon, 14px min, 4.5:1 contrast */}
                   <p className="text-[16px] text-[var(--color-dark)] mt-1">
-                    {homeDetails?.foundDetails
-                      ? `Similar properties typically use ~${Math.round((usageProfile?.usage || []).reduce((a, b) => a + b, 0) / 12).toLocaleString()} kWh/month. Plans ranked assuming this usage.`
-                      : 'Plans ranked assuming ~1,000 kWh/month (typical home usage).'}
+                    {(() => {
+                      const currentUsage = Math.round((usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900]).reduce((a, b) => a + b, 0) / 12);
+                      return homeDetails?.foundDetails
+                        ? `Similar properties typically use ~${currentUsage.toLocaleString()} kWh/month. Plans ranked assuming this usage.`
+                        : `Plans ranked assuming ~${currentUsage.toLocaleString()} kWh/month.`;
+                    })()}
                   </p>
                 </div>
               )}
