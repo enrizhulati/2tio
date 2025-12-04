@@ -89,7 +89,7 @@ function WaterAnswerSummary({
         </div>
         <button
           onClick={onChangeAnswer}
-          className="text-[16px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors flex-shrink-0"
+          className="text-[16px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors flex-shrink-0 py-1 px-2 -my-1 -mx-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
         >
           Change
         </button>
@@ -308,7 +308,7 @@ function Step3Services() {
             {/* Change link */}
             <button
               onClick={prevStep}
-              className="text-[16px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors"
+              className="text-[16px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors py-1 px-2 -my-1 -mx-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
             >
               Change
             </button>
@@ -362,7 +362,7 @@ function Step3Services() {
               </p>
               <button
                 onClick={() => setWaterOverride(true)}
-                className="text-[16px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors"
+                className="text-[16px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors py-1 px-2 -my-1 -mx-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
               >
                 I need water set up anyway
               </button>
@@ -383,7 +383,7 @@ function Step3Services() {
             </div>
             <button
               onClick={() => setWaterOverride(false)}
-              className="text-[16px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors flex-shrink-0"
+              className="text-[16px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors flex-shrink-0 py-1 px-2 -my-1 -mx-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
             >
               Undo
             </button>
@@ -466,7 +466,7 @@ function Step3Services() {
         {selectedCount < availableServiceCount && !needsWaterAnswer && (
           <button
             onClick={handleAddAll}
-            className="w-full text-center text-[var(--color-teal)] text-[16px] font-medium underline"
+            className="w-full text-center text-[var(--color-teal)] text-[16px] font-medium underline py-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
           >
             or Set up all {availableServiceCount} services
           </button>

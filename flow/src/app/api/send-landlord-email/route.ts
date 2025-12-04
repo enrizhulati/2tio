@@ -21,6 +21,22 @@ interface LandlordEmailRequest {
   serviceStartDate: string;
 }
 
+// Practical UI Design Tokens
+const colors = {
+  coral: '#FF6F61',
+  coralLight: '#FFF0EE',
+  teal: '#20C997',
+  tealLight: '#E6F9F3',
+  darkest: '#343A40',
+  dark: '#6C757D',
+  medium: '#ADB5BD',
+  light: '#DEE2E6',
+  lightest: '#F8F9FA',
+  white: '#FFFFFF',
+  success: '#2F9E44',
+  warning: '#E67700',
+};
+
 export async function POST(request: NextRequest) {
   try {
     const body: LandlordEmailRequest = await request.json();
@@ -56,12 +72,12 @@ export async function POST(request: NextRequest) {
     // Format the date nicely
     const formattedDate = new Date(serviceStartDate).toLocaleDateString('en-US', {
       weekday: 'long',
-      year: 'numeric',
       month: 'long',
       day: 'numeric',
+      year: 'numeric',
     });
 
-    // Create the email HTML
+    // Create the email HTML - Practical UI compliant
     const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -70,89 +86,133 @@ export async function POST(request: NextRequest) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Electricity Account Confirmation</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 20px;">
+<body style="margin: 0; padding: 0; background-color: ${colors.lightest}; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
 
-  <div style="background: linear-gradient(135deg, #20C997 0%, #1db88a 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
-    <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 700;">
-      Electricity Account Confirmation
-    </h1>
-  </div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${colors.lightest};">
+    <tr>
+      <td align="center" style="padding: 48px 16px;">
 
-  <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 16px 16px; border: 1px solid #e9ecef; border-top: none;">
+        <!-- Main Container -->
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width: 600px; width: 100%; background: ${colors.white}; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(52, 58, 64, 0.07);">
 
-    <p style="font-size: 16px; margin-bottom: 24px;">
-      Hi,
-    </p>
+          <!-- Header -->
+          <tr>
+            <td style="background: ${colors.teal}; padding: 48px 32px; text-align: center;">
+              <div style="width: 64px; height: 64px; background: ${colors.white}; border-radius: 50%; margin: 0 auto 24px; line-height: 64px; text-align: center;">
+                <span style="font-size: 32px; color: ${colors.teal};">⚡</span>
+              </div>
+              <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: ${colors.white}; letter-spacing: -0.02em;">
+                Electricity Account Confirmation
+              </h1>
+            </td>
+          </tr>
 
-    <p style="font-size: 16px; margin-bottom: 24px;">
-      I've set up my electricity service for my upcoming move-in. Below are my account details for your records.
-    </p>
+          <!-- Content -->
+          <tr>
+            <td style="padding: 32px;">
 
-    <div style="background: white; border: 2px solid #20C997; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-      <h2 style="color: #20C997; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 16px 0; font-weight: 700;">
-        Electricity Account Details
-      </h2>
+              <p style="margin: 0 0 24px 0; font-size: 18px; line-height: 1.5; color: ${colors.darkest};">
+                Hi,
+              </p>
 
-      <table style="width: 100%; border-collapse: collapse;">
-        <tr>
-          <td style="padding: 8px 0; color: #666; font-size: 14px; width: 140px;">Account Number</td>
-          <td style="padding: 8px 0; font-size: 16px; font-weight: 600; color: #1a1a1a;">${accountNumber}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #666; font-size: 14px;">Provider</td>
-          <td style="padding: 8px 0; font-size: 16px; color: #1a1a1a;">${providerName}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #666; font-size: 14px;">Service Address</td>
-          <td style="padding: 8px 0; font-size: 16px; color: #1a1a1a;">${serviceAddress}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #666; font-size: 14px;">Service Start Date</td>
-          <td style="padding: 8px 0; font-size: 16px; color: #1a1a1a;">${formattedDate}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; color: #666; font-size: 14px;">Account Holder</td>
-          <td style="padding: 8px 0; font-size: 16px; color: #1a1a1a;">${customerName}</td>
-        </tr>
-      </table>
-    </div>
+              <p style="margin: 0 0 32px 0; font-size: 18px; line-height: 1.5; color: ${colors.dark};">
+                I've set up my electricity service for my upcoming move-in. Below are my account details for your records.
+              </p>
 
-    <p style="font-size: 16px; margin-bottom: 8px;">
-      Please let me know if you need any additional information.
-    </p>
+              <!-- Account Details Card - Practical UI: teal accent for key info -->
+              <div style="background: ${colors.tealLight}; border-left: 4px solid ${colors.teal}; border-radius: 0 8px 8px 0; padding: 24px; margin-bottom: 32px;">
+                <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 700; color: ${colors.dark}; text-transform: uppercase; letter-spacing: 0.05em;">
+                  Electricity Account Number
+                </p>
+                <p style="margin: 0; font-size: 28px; font-weight: 700; color: ${colors.darkest}; letter-spacing: -0.02em;">
+                  ${accountNumber}
+                </p>
+              </div>
 
-    <p style="font-size: 16px; margin-bottom: 24px;">
-      Thanks,<br>
-      <strong>${customerName}</strong><br>
-      <span style="color: #666;">${customerPhone}${customerEmail ? ` | ${customerEmail}` : ''}</span>
-    </p>
+              <!-- Details Table -->
+              <div style="background: ${colors.lightest}; border-radius: 8px; padding: 24px; margin-bottom: 32px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="padding: 12px 0; border-bottom: 1px solid ${colors.light};">
+                      <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: ${colors.dark}; text-transform: uppercase; letter-spacing: 0.05em;">Provider</p>
+                      <p style="margin: 0; font-size: 18px; color: ${colors.darkest};">${providerName}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0; border-bottom: 1px solid ${colors.light};">
+                      <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: ${colors.dark}; text-transform: uppercase; letter-spacing: 0.05em;">Service address</p>
+                      <p style="margin: 0; font-size: 18px; color: ${colors.darkest};">${serviceAddress}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0; border-bottom: 1px solid ${colors.light};">
+                      <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: ${colors.dark}; text-transform: uppercase; letter-spacing: 0.05em;">Service start date</p>
+                      <p style="margin: 0; font-size: 18px; color: ${colors.darkest};">${formattedDate}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0;">
+                      <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: ${colors.dark}; text-transform: uppercase; letter-spacing: 0.05em;">Account holder</p>
+                      <p style="margin: 0; font-size: 18px; color: ${colors.darkest};">${customerName}</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
 
-    <div style="border-top: 1px solid #e9ecef; padding-top: 16px; margin-top: 24px;">
-      <p style="font-size: 12px; color: #999; margin: 0; text-align: center;">
-        This email was sent via <a href="https://2turniton.com" style="color: #20C997; text-decoration: none;">2TurnItOn</a> — the easiest way to set up utilities when moving.
-      </p>
-    </div>
-  </div>
+              <p style="margin: 0 0 8px 0; font-size: 18px; line-height: 1.5; color: ${colors.dark};">
+                Please let me know if you need any additional information.
+              </p>
+
+              <p style="margin: 0 0 32px 0; font-size: 18px; line-height: 1.5; color: ${colors.darkest};">
+                Thanks,<br>
+                <strong>${customerName}</strong><br>
+                <span style="font-size: 16px; color: ${colors.dark};">${customerPhone}${customerEmail ? ` | ${customerEmail}` : ''}</span>
+              </p>
+
+              <!-- Footer note -->
+              <div style="padding-top: 24px; border-top: 1px solid ${colors.light}; text-align: center;">
+                <p style="margin: 0; font-size: 14px; color: ${colors.dark};">
+                  This email was sent via <a href="https://2turniton.com" style="color: ${colors.teal}; text-decoration: none; font-weight: 600;">2TurnItOn</a>
+                </p>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background: ${colors.lightest}; padding: 24px 32px; text-align: center; border-top: 1px solid ${colors.light};">
+              <p style="margin: 0; font-size: 14px; color: ${colors.dark};">
+                © ${new Date().getFullYear()} 2TurnItOn
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
 
 </body>
 </html>
 `;
 
-    // Plain text version for email clients that don't support HTML
-    const emailText = `
-Electricity Account Confirmation
+    // Plain text version - Practical UI: front-load important info
+    const emailText = `Electricity Account Confirmation
 
 Hi,
 
 I've set up my electricity service for my upcoming move-in. Below are my account details for your records.
 
-ELECTRICITY ACCOUNT DETAILS
----------------------------
-Account Number: ${accountNumber}
+ELECTRICITY ACCOUNT NUMBER
+${accountNumber}
+
+DETAILS
 Provider: ${providerName}
-Service Address: ${serviceAddress}
-Service Start Date: ${formattedDate}
-Account Holder: ${customerName}
+Service address: ${serviceAddress}
+Service start date: ${formattedDate}
+Account holder: ${customerName}
 
 Please let me know if you need any additional information.
 
@@ -162,13 +222,10 @@ ${customerPhone}${customerEmail ? ` | ${customerEmail}` : ''}
 
 ---
 This email was sent via 2TurnItOn (https://2turniton.com)
+© ${new Date().getFullYear()} 2TurnItOn
 `;
 
     // Send the email using Resend
-    // Using Resend's test sender for now. To use your own domain:
-    // 1. Go to resend.com/domains and add your domain
-    // 2. Add the DNS records they provide
-    // 3. Change 'from' to your verified domain (e.g., notifications@2turniton.com)
     const { data, error } = await getResend().emails.send({
       from: '2TurnItOn <onboarding@resend.dev>',
       to: landlordEmail,

@@ -287,7 +287,7 @@ function LandlordEmailModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-[16px] text-[var(--color-dark)] underline hover:text-[var(--color-darkest)] transition-colors py-2"
+            className="text-[16px] text-[var(--color-dark)] underline hover:text-[var(--color-darkest)] transition-colors py-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
           >
             I'll do this later
           </button>

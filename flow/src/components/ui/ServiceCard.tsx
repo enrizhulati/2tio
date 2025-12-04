@@ -260,7 +260,7 @@ export function ServiceCard({
               <span className="text-[16px] font-medium text-[var(--color-darkest)]">
                 Included services & fees
               </span>
-              <span className="text-[14px] text-[var(--color-dark)] bg-[var(--color-lightest)] px-2 py-0.5 rounded">
+              <span className="text-[16px] text-[var(--color-dark)] bg-[var(--color-lightest)] px-2 py-0.5 rounded">
                 {waterPlanOptions.length} items
               </span>
             </div>

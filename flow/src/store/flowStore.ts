@@ -877,6 +877,44 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
     const { address, moveInDate, selectedServices, selectedPlans, documents, checkoutAnswers, profile, dwellingType, ownershipStatus } = get();
 
+    // Helper to send SMS (fire-and-forget, respects opt-in)
+    const sendSMS = async (type: 'confirmation' | 'failure' | 'landlord_reminder', orderData?: OrderConfirmation) => {
+      // Only send if user opted in to SMS
+      if (!profile?.smsOptIn || !profile?.phone) return;
+
+      const serviceNames = orderData?.services.map(s => {
+        const labels: Record<string, string> = { water: 'Water', electricity: 'Electricity', internet: 'Internet' };
+        return labels[s.type] || s.type;
+      }) || [];
+
+      const fullAddress = orderData?.address
+        ? `${orderData.address.street}${orderData.address.unit ? ` ${orderData.address.unit}` : ''}, ${orderData.address.city}`
+        : address
+        ? `${address.street}${address.unit ? ` ${address.unit}` : ''}, ${address.city}`
+        : '';
+
+      try {
+        await fetch('/api/send-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: profile.phone,
+            type,
+            data: {
+              customerName: `${profile.firstName} ${profile.lastName}`,
+              orderId: orderData?.orderId,
+              serviceAddress: fullAddress,
+              moveInDate: orderData?.moveInDate || moveInDate,
+              services: serviceNames,
+            },
+          }),
+        });
+        console.log(`SMS (${type}) sent`);
+      } catch (smsError) {
+        console.error('Failed to send SMS:', smsError);
+      }
+    };
+
     // Helper to send failure email (fire-and-forget)
     const sendFailureEmail = async (errorMsg?: string) => {
       if (!profile?.email || !address) return;
@@ -1045,14 +1083,26 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         currentStep: 4,
       });
 
-      // Send confirmation email (fire-and-forget)
+      // Send confirmation email and SMS (fire-and-forget)
       sendConfirmationEmail(orderConfirmation);
+      sendSMS('confirmation', orderConfirmation);
+
+      // For apartment renters, also send landlord reminder SMS
+      const isApartmentRenter =
+        dwellingType === 'apartment' ||
+        ownershipStatus === 'renter' ||
+        (selectedServices.electricity && !selectedServices.water);
+      if (isApartmentRenter && selectedServices.electricity) {
+        // Delay landlord reminder by 30 seconds so it doesn't overlap with confirmation
+        setTimeout(() => sendSMS('landlord_reminder', orderConfirmation), 30000);
+      }
     } catch (error) {
       console.error('Checkout error:', error);
 
-      // Send failure notification email
+      // Send failure notification email and SMS
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       sendFailureEmail(errorMsg);
+      sendSMS('failure');
 
       // Fallback: create local confirmation on error (so user doesn't lose progress)
       const services: OrderConfirmation['services'] = [];

@@ -348,7 +348,7 @@ function Step5Review() {
                   </p>
                   <button
                     onClick={() => setIsLandlordEmailModalOpen(true)}
-                    className="inline-flex items-center gap-2 mt-3 px-5 py-3 bg-[var(--color-coral)] text-white text-[16px] font-semibold rounded-lg hover:bg-[var(--color-coral-hover)] transition-colors"
+                    className="inline-flex items-center gap-2 mt-3 px-5 py-3 bg-[var(--color-coral)] text-white text-[16px] font-semibold rounded-lg hover:bg-[var(--color-coral-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-coral)] focus-visible:ring-offset-2"
                   >
                     <Mail className="w-4 h-4" aria-hidden="true" />
                     Email to my leasing office
@@ -417,7 +417,7 @@ function Step5Review() {
             </Button>
             <button
               onClick={handleDownloadPdf}
-              className="w-full flex items-center justify-center gap-2 text-[var(--color-teal)] text-[16px] font-medium underline"
+              className="w-full flex items-center justify-center gap-2 text-[var(--color-teal)] text-[16px] font-medium underline py-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
             >
               <Download className="w-4 h-4" aria-hidden="true" />
               Download confirmation (PDF)
@@ -486,7 +486,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(1)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline py-1 px-2 -my-1 -mx-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
             >
               <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
@@ -512,7 +512,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(3)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline py-1 px-2 -my-1 -mx-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
             >
               <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
@@ -533,7 +533,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(2)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline py-1 px-2 -my-1 -mx-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
             >
               <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
@@ -637,7 +637,7 @@ function Step5Review() {
             </h3>
             <button
               onClick={() => goToStep(4)}
-              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline"
+              className="flex items-center gap-1 text-[var(--color-teal)] text-[16px] font-medium underline py-1 px-2 -my-1 -mx-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
             >
               <Edit2 className="w-3 h-3" aria-hidden="true" />
               Edit
