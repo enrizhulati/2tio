@@ -329,11 +329,19 @@ export const useFlowStore = create<FlowState>((set, get) => ({
               } as WaterPlanOption;
             });
 
+            // Update water plan with vendor phone from plan details if available
+            const updatedWaterPlan = {
+              ...waterPlan,
+              vendorPhone: (planDetails as { vendorPhone?: string; callCenterPhone?: string }).vendorPhone ||
+                          (planDetails as { vendorPhone?: string; callCenterPhone?: string }).callCenterPhone ||
+                          waterPlan.vendorPhone,
+            };
+
             set({
               waterPlanOptions: options,
               waterPlanInfo: planDetails.longDescription || planDetails.shortDescription || null,
-              // Also select the water plan
-              selectedPlans: { ...get().selectedPlans, water: waterPlan },
+              // Also select the water plan with updated vendor phone
+              selectedPlans: { ...get().selectedPlans, water: updatedWaterPlan },
               selectedServices: { ...get().selectedServices, water: true },
             });
           }
@@ -547,6 +555,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       // Fetch water plan details to get options (sewer, garbage, fees, etc.)
       let waterPlanOptions: WaterPlanOption[] | null = null;
       let waterPlanInfo: string | null = null;
+      let updatedWaterPlan = waterPlan;
       if (waterPlan) {
         try {
           const planDetails = await getPlanDetails('water', waterPlan.id);
@@ -601,6 +610,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           }
           // Extract info text from plan description
           waterPlanInfo = planDetails.longDescription || planDetails.shortDescription || null;
+          // Update water plan with vendor phone from plan details if available
+          const detailsWithPhone = planDetails as { vendorPhone?: string; callCenterPhone?: string };
+          if (detailsWithPhone.vendorPhone || detailsWithPhone.callCenterPhone) {
+            updatedWaterPlan = {
+              ...waterPlan,
+              vendorPhone: detailsWithPhone.vendorPhone || detailsWithPhone.callCenterPhone || waterPlan.vendorPhone,
+            };
+          }
         } catch (detailsError) {
           console.error('Error fetching water plan details:', detailsError);
         }
@@ -610,12 +627,12 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         availableServices,
         isCheckingAvailability: false,
         availabilityChecked: true,
-        selectedPlans: waterPlan ? { water: waterPlan } : {},
+        selectedPlans: updatedWaterPlan ? { water: updatedWaterPlan } : {},
         waterPlanOptions,
         waterPlanInfo,
         // Update selectedServices.water based on whether water should be included
         selectedServices: {
-          water: !!waterPlan,
+          water: !!updatedWaterPlan,
           electricity: false,
           internet: false,
         },
