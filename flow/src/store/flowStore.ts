@@ -142,6 +142,8 @@ interface RawServicePlan {
   // Server-calculated pricing fields (from pricing API when electricityUsage is provided)
   low?: number;   // Lowest monthly cost
   high?: number;  // Highest monthly cost
+  // ComparePower order URL (electricity only)
+  cpOrderUrl?: string;
 }
 
 // Alias for backwards compatibility
@@ -433,6 +435,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           // Monthly cost range from API (accounts for seasonal variation)
           lowMonthly: rawPlan?.low,
           highMonthly: rawPlan?.high,
+          // ComparePower enrollment URL (electricity only)
+          cpOrderUrl: rawPlan?.cpOrderUrl,
         };
       });
 
@@ -1454,6 +1458,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           // Monthly cost range from API (accounts for seasonal variation)
           lowMonthly: rawPlan?.low,
           highMonthly: rawPlan?.high,
+          // ComparePower enrollment URL (electricity only)
+          cpOrderUrl: rawPlan?.cpOrderUrl,
         };
       });
 
