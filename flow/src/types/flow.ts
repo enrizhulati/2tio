@@ -69,6 +69,9 @@ export interface ServicePlan {
   // Enriched fields from usage profile calculation
   annualCost?: number;
   renewable?: boolean;
+  // Raw pricing fields for recalculation (electricity only)
+  kWh1000?: number;  // Rate per kWh in cents (at 1000 kWh usage)
+  mPrice?: number;   // Monthly base fee in dollars
   // Monthly cost range (from API - accounts for seasonal variation)
   lowMonthly?: number;   // Lowest monthly cost
   highMonthly?: number;  // Highest monthly cost
