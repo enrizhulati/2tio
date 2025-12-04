@@ -156,7 +156,7 @@ function FileUpload({
                   {document.name}
                 </span>
                 <span className="text-[16px] text-[var(--color-dark)]">
-                  {formatFileSize(document.size)} • Uploaded
+                  {document.size > 0 ? `${formatFileSize(document.size)} • ` : ''}Uploaded
                 </span>
               </div>
             </div>
