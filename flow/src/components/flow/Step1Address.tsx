@@ -16,7 +16,7 @@ const LOADING_MESSAGES = [
 ];
 
 // Minimum display time for loading state (milliseconds)
-const MIN_LOADING_TIME = 2500;
+const MIN_LOADING_TIME = 3000;
 
 // Message rotation interval (milliseconds)
 const MESSAGE_ROTATION_INTERVAL = 800;
