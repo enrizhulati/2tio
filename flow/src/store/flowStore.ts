@@ -729,7 +729,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
   nextStep: () => {
     const { currentStep } = get();
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       set({ currentStep: (currentStep + 1) as FlowStep });
     }
   },
