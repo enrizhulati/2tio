@@ -1050,9 +1050,11 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       const apiResponse = await completeCheckout(checkoutData, checkoutFiles);
 
       // Debug: Log API response to identify cpOrderUrl field name
-      console.log('[submitOrder] API response fields:', Object.keys(apiResponse));
+      // Cast to Record to check for alternative field names the API might use
+      const rawResponse = apiResponse as unknown as Record<string, unknown>;
+      console.log('[submitOrder] API response fields:', Object.keys(rawResponse));
       console.log('[submitOrder] Looking for cpOrderUrl - found:',
-        apiResponse.cpOrderUrl || apiResponse.CPOrderUrl || apiResponse.CPOrderURL || apiResponse.orderUrl || 'none');
+        rawResponse.cpOrderUrl || rawResponse.CPOrderUrl || rawResponse.CPOrderURL || rawResponse.orderUrl || 'none');
 
       // Build services list for confirmation display
       const services: OrderConfirmation['services'] = [];
@@ -1097,7 +1099,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         depositVendorName: apiResponse.depositVendorName,
         // CP order URL for completing electric enrollment (redirects to ComparePower.com)
         // Check multiple possible field names (API may use PascalCase or different casing)
-        cpOrderUrl: apiResponse.cpOrderUrl || apiResponse.CPOrderUrl || apiResponse.CPOrderURL || apiResponse.orderUrl,
+        cpOrderUrl: (rawResponse.cpOrderUrl || rawResponse.CPOrderUrl || rawResponse.CPOrderURL || rawResponse.orderUrl) as string | undefined,
       };
 
       set({
