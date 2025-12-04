@@ -57,6 +57,7 @@ export function UsageSlider({
 
   // Handle preset button click
   const handlePresetClick = useCallback((presetValue: number) => {
+    console.log('[UsageSlider] Preset clicked:', presetValue);
     setLocalValue(presetValue);
     onChange(presetValue);
   }, [onChange]);
@@ -84,8 +85,12 @@ export function UsageSlider({
 
   // Commit value on mouse/touch up
   const handleCommit = useCallback(() => {
+    console.log('[UsageSlider] handleCommit called, localValue:', localValue, 'value:', value);
     if (localValue !== value) {
+      console.log('[UsageSlider] Values differ, calling onChange with:', localValue);
       onChange(localValue);
+    } else {
+      console.log('[UsageSlider] Values are equal, skipping onChange');
     }
   }, [localValue, value, onChange]);
 

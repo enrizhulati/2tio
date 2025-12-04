@@ -987,9 +987,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   // This avoids API rate limiting by not fetching new plans - just recalculating costs
   updateMonthlyUsage: async (monthlyKwh: number) => {
     console.log('[updateMonthlyUsage] Called with monthlyKwh:', monthlyKwh);
+
+    // Set loading state immediately for UI feedback
+    set({ isLoadingElectricity: true });
+
     const { address, usageProfile, availableServices } = get();
     if (!address?.zip) {
-      console.log('[updateMonthlyUsage] No zip code, aborting');
+      console.warn('[updateMonthlyUsage] No zip code available');
+      set({ isLoadingElectricity: false });
       return;
     }
 
@@ -1019,7 +1024,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     // Recalculate plan costs client-side using existing plans (avoids API rate limiting)
     const existingPlans = availableServices?.electricity?.plans;
     if (!existingPlans?.length) {
-      console.log('[updateMonthlyUsage] No existing plans to recalculate');
+      console.warn('[updateMonthlyUsage] No existing plans to recalculate');
+      set({ isLoadingElectricity: false });
       return;
     }
 
@@ -1056,7 +1062,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       },
     };
 
-    set({ availableServices: updatedServices });
+    set({ availableServices: updatedServices, isLoadingElectricity: false });
     console.log('[updateMonthlyUsage] Recalculation complete');
   },
 
