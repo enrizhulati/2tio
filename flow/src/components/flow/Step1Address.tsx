@@ -1,25 +1,171 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useFlowStore } from '@/store/flowStore';
-import { Button, Input, HomeConfirmationModal } from '@/components/ui';
+import { Button, Input } from '@/components/ui';
 import { AddressAutocomplete, type AddressResult } from '@/components/ui/AddressAutocomplete';
-import { ChevronRight, Building2, AlertCircle, Check } from 'lucide-react';
-import type { ESIID } from '@/types/flow';
+import { ChevronRight, Building2, AlertCircle, Check, Home, Droplets, Lightbulb, MapPin } from 'lucide-react';
+import type { ESIID, WaterAnswer, OwnershipAnswer } from '@/types/flow';
 
-// Loading messages that rotate during API calls
-const LOADING_MESSAGES = [
-  'Finding your address...',
-  'Looking up your meter ID...',
-  'Getting home details...',
-  'Calculating available plans...',
-];
+// Format date for display
+const formatDate = (dateStr: string) => {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
 
-// Minimum display time for loading state (milliseconds)
-const MIN_LOADING_TIME = 3500;
+// Format number with commas
+const formatNumber = (num: number): string => num.toLocaleString();
 
-// Message rotation interval (milliseconds)
-const MESSAGE_ROTATION_INTERVAL = 800;
+// Compact map preview for address confirmation
+function CompactMapPreview() {
+  return (
+    <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-[var(--color-lightest)] flex-shrink-0">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#E8F4F8] to-[#D4E8ED]">
+        {/* Grid pattern */}
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `
+              linear-gradient(var(--color-medium) 1px, transparent 1px),
+              linear-gradient(90deg, var(--color-medium) 1px, transparent 1px)
+            `,
+            backgroundSize: '20px 20px'
+          }}
+        />
+        {/* Roads */}
+        <div className="absolute top-1/2 left-0 right-0 h-1.5 bg-white opacity-60" />
+        <div className="absolute top-0 bottom-0 left-1/3 w-1 bg-white opacity-40" />
+        {/* Location marker */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
+          <div className="relative">
+            <div className="w-6 h-6 bg-[var(--color-coral)] rounded-full flex items-center justify-center shadow-md">
+              <MapPin className="w-3.5 h-3.5 text-white" aria-hidden="true" />
+            </div>
+            <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-2 h-2 bg-[var(--color-coral)] rotate-45" />
+          </div>
+        </div>
+        {/* Pulse animation */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="w-8 h-8 rounded-full bg-[var(--color-coral)] opacity-20 animate-ping" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Inline water question component for apartments
+function WaterQuestion({
+  waterAnswer,
+  ownershipAnswer,
+  onWaterAnswerChange,
+  onOwnershipAnswerChange,
+}: {
+  waterAnswer: WaterAnswer;
+  ownershipAnswer: OwnershipAnswer;
+  onWaterAnswerChange: (answer: WaterAnswer) => void;
+  onOwnershipAnswerChange: (answer: OwnershipAnswer) => void;
+}) {
+  return (
+    <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-[#F0F9FF]">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <Droplets className="w-5 h-5 text-[#0EA5E9]" aria-hidden="true" />
+        <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
+          One quick question about water
+        </span>
+      </div>
+
+      {/* Question */}
+      <p className="text-[15px] text-[var(--color-dark)] mb-4">
+        Do you pay for water separately at this address?
+      </p>
+
+      {/* Options */}
+      <div className="space-y-2">
+        {([
+          { value: 'yes_separate', label: 'Yes, I have my own meter' },
+          { value: 'no_included', label: "No, it's included in my rent" },
+          { value: 'not_sure', label: "I'm not sure" },
+        ] as const).map((option) => (
+          <label
+            key={option.value}
+            className="flex items-center gap-3 p-3 rounded-lg border-2 border-[var(--color-light)] bg-white cursor-pointer hover:border-[var(--color-medium)] transition-colors has-[:checked]:border-[var(--color-teal)] has-[:checked]:bg-[var(--color-teal)]/5"
+          >
+            <input
+              type="radio"
+              name="water-answer"
+              value={option.value}
+              checked={waterAnswer === option.value}
+              onChange={() => onWaterAnswerChange(option.value)}
+              className="w-5 h-5 accent-[var(--color-teal)]"
+            />
+            <span className="text-[16px] text-[var(--color-darkest)]">{option.label}</span>
+          </label>
+        ))}
+      </div>
+
+      {/* Follow-up for "I'm not sure" */}
+      {waterAnswer === 'not_sure' && (
+        <div className="mt-4 pt-4 border-t border-[var(--color-light)] animate-fade-in">
+          <p className="text-[15px] text-[var(--color-dark)] mb-3">
+            Are you renting or do you own?
+          </p>
+          <div className="space-y-2">
+            {([
+              { value: 'renting', label: "I'm renting" },
+              { value: 'own', label: 'I own this home' },
+            ] as const).map((option) => (
+              <label
+                key={option.value}
+                className="flex items-center gap-3 p-3 rounded-lg border-2 border-[var(--color-light)] bg-white cursor-pointer hover:border-[var(--color-medium)] transition-colors has-[:checked]:border-[var(--color-teal)] has-[:checked]:bg-[var(--color-teal)]/5"
+              >
+                <input
+                  type="radio"
+                  name="ownership-answer"
+                  value={option.value}
+                  checked={ownershipAnswer === option.value}
+                  onChange={() => onOwnershipAnswerChange(option.value)}
+                  className="w-5 h-5 accent-[var(--color-teal)]"
+                />
+                <span className="text-[16px] text-[var(--color-darkest)]">{option.label}</span>
+              </label>
+            ))}
+          </div>
+
+          {/* Guidance message based on selection */}
+          {ownershipAnswer === 'renting' && (
+            <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200 animate-fade-in">
+              <div className="flex gap-2">
+                <Lightbulb className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <div className="text-[14px] text-amber-900">
+                  <p className="font-medium mb-1">Check with your landlord or leasing office</p>
+                  <p>They&apos;ll know if water is included in your rent. We won&apos;t include water setup for now — you can always add it later if needed.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {ownershipAnswer === 'own' && (
+            <div className="mt-4 p-3 rounded-lg bg-teal-50 border border-teal-200 animate-fade-in">
+              <div className="flex gap-2">
+                <Lightbulb className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <div className="text-[14px] text-teal-900">
+                  <p className="font-medium mb-1">You&apos;ll most likely need water service</p>
+                  <p>As a homeowner, you&apos;ll need water in your name. We&apos;ll include water setup to make sure you&apos;re covered.</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Step1Address() {
   const {
@@ -33,8 +179,14 @@ function Step1Address() {
     esiidSearchComplete,
     esiidConfirmed,
     isLoadingElectricity,
+    isApartment,
+    waterAnswer,
+    ownershipAnswer,
+    isCheckingAvailability,
     setAddress,
     setMoveInDate,
+    setWaterAnswer,
+    setOwnershipAnswer,
     checkAvailability,
     fetchESIIDs,
     selectESIID,
@@ -42,7 +194,7 @@ function Step1Address() {
     nextStep,
   } = useFlowStore();
 
-  // Local form state - includes ESIID from ERCOT search
+  // Local form state
   const [selectedAddress, setSelectedAddress] = useState<AddressResult | null>(
     address ? {
       street: address.street,
@@ -55,7 +207,7 @@ function Step1Address() {
     } : null
   );
 
-  // Default to 2 weeks from now - helps iOS Safari show a visible date
+  // Default to 2 weeks from now
   const getDefaultDate = () => {
     const d = new Date();
     d.setDate(d.getDate() + 14);
@@ -63,45 +215,12 @@ function Step1Address() {
   };
   const [date, setDate] = useState(moveInDate || getDefaultDate());
   const [errors, setErrors] = useState<{ address?: string; date?: string }>({});
-
-  // Loading modal state
-  const [isLoadingModal, setIsLoadingModal] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
-  const loadingStartTime = useRef<number | null>(null);
-
-  // Message rotation effect
-  useEffect(() => {
-    if (!isLoadingModal) {
-      setLoadingMessage(LOADING_MESSAGES[0]);
-      return;
-    }
-
-    let messageIndex = 0;
-    const interval = setInterval(() => {
-      messageIndex = (messageIndex + 1) % LOADING_MESSAGES.length;
-      setLoadingMessage(LOADING_MESSAGES[messageIndex]);
-    }, MESSAGE_ROTATION_INTERVAL);
-
-    return () => clearInterval(interval);
-  }, [isLoadingModal]);
-
-  // Modal state - show when loading OR when address is confirmed
-  const showConfirmationModal = isLoadingModal || !!(availabilityChecked && availableServices && address && (esiidConfirmed || esiidMatches.length === 1));
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleAddressSelect = useCallback((addr: AddressResult) => {
     setSelectedAddress(addr);
     setErrors((prev) => ({ ...prev, address: undefined }));
   }, []);
-
-  // Helper to ensure minimum loading time
-  const ensureMinLoadingTime = async () => {
-    if (loadingStartTime.current) {
-      const elapsed = Date.now() - loadingStartTime.current;
-      if (elapsed < MIN_LOADING_TIME) {
-        await new Promise(r => setTimeout(r, MIN_LOADING_TIME - elapsed));
-      }
-    }
-  };
 
   const validateAndCheck = useCallback(async () => {
     const newErrors: { address?: string; date?: string } = {};
@@ -131,12 +250,9 @@ function Step1Address() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0 && selectedAddress) {
-      // Show loading modal IMMEDIATELY
-      loadingStartTime.current = Date.now();
-      setIsLoadingModal(true);
+      setIsLoading(true);
 
       try {
-        // Use detected unit from address autocomplete (extracted from ERCOT address)
         const detectedUnit = selectedAddress.unit;
 
         const finalAddress = {
@@ -154,7 +270,6 @@ function Step1Address() {
         setAddress(finalAddress);
         setMoveInDate(date);
 
-        // If we have ESIID from address search, use it directly
         if (selectedAddress.esiid) {
           useFlowStore.setState({
             selectedEsiid: {
@@ -192,7 +307,6 @@ function Step1Address() {
           await useFlowStore.getState().fetchUsageProfile();
           await checkAvailability();
         } else {
-          // No ESIID from search - fall back to searching by address
           const searchAddress = detectedUnit
             ? `${selectedAddress.street} APT ${detectedUnit.replace(/\D/g, '')}`
             : selectedAddress.street;
@@ -201,14 +315,10 @@ function Step1Address() {
             fetchESIIDs(searchAddress, selectedAddress.zip, detectedUnit),
           ]);
         }
-
-        // Ensure minimum loading time for smooth UX
-        await ensureMinLoadingTime();
       } catch (error) {
         console.error('Error checking availability:', error);
       } finally {
-        setIsLoadingModal(false);
-        loadingStartTime.current = null;
+        setIsLoading(false);
       }
     }
   }, [selectedAddress, date, setAddress, setMoveInDate, checkAvailability, fetchESIIDs]);
@@ -217,7 +327,6 @@ function Step1Address() {
     setSelectedAddress(null);
     setDate(getDefaultDate());
     setErrors({});
-    setIsLoadingModal(false);
 
     useFlowStore.setState({
       availabilityChecked: false,
@@ -230,31 +339,26 @@ function Step1Address() {
       esiidConfirmed: false,
       usageProfile: null,
       homeDetails: null,
+      waterAnswer: null,
+      ownershipAnswer: null,
     });
   };
 
-  const handleModalConfirm = async () => {
-    // Just proceed to next step - services page
+  const handleConfirm = async () => {
     nextStep();
   };
 
-  // Handle ESIID confirmation with loading modal
   const handleEsiidConfirm = async () => {
-    loadingStartTime.current = Date.now();
-    setIsLoadingModal(true);
-    setLoadingMessage('Verifying your address...');
-
+    setIsLoading(true);
     try {
       await confirmEsiid();
-      await ensureMinLoadingTime();
     } finally {
-      setIsLoadingModal(false);
-      loadingStartTime.current = null;
+      setIsLoading(false);
     }
   };
 
-  // Show ESIID selection when multiple addresses found (and not currently loading)
-  if (esiidSearchComplete && !esiidConfirmed && address && esiidMatches.length > 1 && !isLoadingModal) {
+  // Show ESIID selection when multiple addresses found
+  if (esiidSearchComplete && !esiidConfirmed && address && esiidMatches.length > 1 && !isLoading) {
     return (
       <div className="space-y-8">
         <div className="text-center">
@@ -344,7 +448,9 @@ function Step1Address() {
 
         <Button
           onClick={handleEsiidConfirm}
-          disabled={!selectedEsiid || isLoadingElectricity}
+          disabled={!selectedEsiid || isLoadingElectricity || isLoading}
+          isLoading={isLoading}
+          loadingText="Checking..."
           fullWidth
           size="large"
           colorScheme="coral"
@@ -352,26 +458,12 @@ function Step1Address() {
         >
           Confirm this address
         </Button>
-
-        {/* Loading modal for ESIID confirmation */}
-        {address && moveInDate && (
-          <HomeConfirmationModal
-            isOpen={isLoadingModal}
-            isLoading={isLoadingModal}
-            loadingMessage={loadingMessage}
-            onConfirm={handleModalConfirm}
-            onChangeAddress={handleEdit}
-            address={address}
-            moveInDate={moveInDate}
-            homeDetails={homeDetails || undefined}
-          />
-        )}
       </div>
     );
   }
 
   // Show error if no ESIIDs found
-  if (esiidSearchComplete && esiidMatches.length === 0 && address && !isLoadingModal) {
+  if (esiidSearchComplete && esiidMatches.length === 0 && address && !isLoading) {
     return (
       <div className="space-y-8">
         <div className="text-center">
@@ -379,7 +471,7 @@ function Step1Address() {
             <AlertCircle className="w-8 h-8 text-[var(--color-coral)]" aria-hidden="true" />
           </div>
           <h1 className="text-[28px] sm:text-[35px] font-bold text-[var(--color-darkest)] leading-[1.2] tracking-tight mb-3">
-            We couldn't find this address
+            We couldn&apos;t find this address
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
             No electric meter is registered here yet — but we can help.
@@ -423,83 +515,147 @@ function Step1Address() {
     );
   }
 
-  // Show address form (always visible, with modal overlay when loading/confirmed)
-  return (
-    <>
+  // Show confirmation screen after availability is checked
+  if (availabilityChecked && availableServices && address && moveInDate && (esiidConfirmed || esiidMatches.length === 1)) {
+    return (
       <div className="space-y-8">
+        {/* Success header */}
         <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--color-coral-light)] flex items-center justify-center">
+            <Home className="w-8 h-8 text-[var(--color-coral)]" aria-hidden="true" />
+          </div>
           <h1 className="text-[32px] sm:text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
-            Where are you moving?
+            We found your home!
           </h1>
           <p className="text-[18px] text-[var(--color-dark)]">
-            Enter your new address and we'll check what's available. Takes 30 seconds.
+            Confirm this is the right address and we&apos;ll show you available services.
           </p>
         </div>
 
-        <div className="space-y-6">
-          <AddressAutocomplete
-            onSelect={handleAddressSelect}
-            error={errors.address}
-            disabled={isLoadingModal}
-          />
+        {/* Address card */}
+        <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-[var(--color-lightest)]">
+          <div className="flex items-start gap-4">
+            {/* Address info */}
+            <div className="flex-1 min-w-0">
+              <p className="text-[18px] font-semibold text-[var(--color-darkest)] leading-snug">
+                {address.street}
+                {address.unit && `, ${address.unit}`}
+              </p>
+              <p className="text-[16px] text-[var(--color-dark)]">
+                {address.city}, {address.state} {address.zip}
+              </p>
+              <p className="text-[16px] text-[var(--color-dark)] mt-2">
+                Move-in: {formatDate(moveInDate)}
+              </p>
 
-          {selectedAddress && (
-            <div className="p-4 rounded-xl bg-[var(--color-teal-light)] border-2 border-[var(--color-teal)]">
-              <p className="text-[16px] font-medium text-[var(--color-teal)]">Address selected:</p>
-              <p className="text-[16px] text-[var(--color-darkest)] mt-1">
-                {selectedAddress.street}
-                {selectedAddress.unit && `, Apt ${selectedAddress.unit}`}
-              </p>
-              <p className="text-[16px] text-[var(--color-dark)] mt-0.5">
-                {selectedAddress.city}, {selectedAddress.state} {selectedAddress.zip}
-              </p>
+              {/* Home details if available */}
+              {homeDetails?.foundDetails && (
+                <div className="flex items-center gap-1.5 mt-3 text-[16px] text-[var(--color-teal)]">
+                  <Home className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                  <span className="font-medium">
+                    {formatNumber(homeDetails.squareFootage || 0)} sq ft
+                    {homeDetails.yearBuilt ? ` • Built ${homeDetails.yearBuilt}` : ''}
+                    {homeDetails.annualKwh ? ` • ~${formatNumber(homeDetails.annualKwh)} kWh/yr` : ''}
+                  </span>
+                </div>
+              )}
             </div>
-          )}
 
-          <Input
-            label="Move-in date"
-            hint="Book up to 90 days ahead"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            error={errors.date}
-            disabled={isLoadingModal}
-            min={new Date().toISOString().split('T')[0]}
-            max={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-          />
+            {/* Compact map */}
+            <CompactMapPreview />
+          </div>
         </div>
 
-        <Button
-          onClick={validateAndCheck}
-          disabled={isLoadingModal}
-          fullWidth
-          size="large"
-          colorScheme="coral"
-        >
-          Check availability
-        </Button>
+        {/* Water question for apartments */}
+        {isApartment && (
+          <WaterQuestion
+            waterAnswer={waterAnswer}
+            ownershipAnswer={ownershipAnswer}
+            onWaterAnswerChange={setWaterAnswer}
+            onOwnershipAnswerChange={setOwnershipAnswer}
+          />
+        )}
+
+        {/* Actions */}
+        <div className="space-y-4">
+          <Button
+            onClick={handleConfirm}
+            fullWidth
+            size="large"
+            colorScheme="coral"
+            rightIcon={<ChevronRight className="w-5 h-5" />}
+          >
+            Yes, this is my home
+          </Button>
+
+          <button
+            onClick={handleEdit}
+            className="w-full text-center text-[var(--color-teal)] text-[16px] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors py-2"
+          >
+            No, change address
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show address form (initial state)
+  return (
+    <div className="space-y-8">
+      <div className="text-center">
+        <h1 className="text-[32px] sm:text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
+          Where are you moving?
+        </h1>
+        <p className="text-[18px] text-[var(--color-dark)]">
+          Enter your new address and we&apos;ll check what&apos;s available. Takes 30 seconds.
+        </p>
       </div>
 
-      {/* Home confirmation modal - shows during loading AND after confirmation */}
-      {(selectedAddress || address) && (date || moveInDate) && (
-        <HomeConfirmationModal
-          isOpen={showConfirmationModal}
-          isLoading={isLoadingModal}
-          loadingMessage={loadingMessage}
-          onConfirm={handleModalConfirm}
-          onChangeAddress={handleEdit}
-          address={address || {
-            street: selectedAddress!.street,
-            unit: selectedAddress!.unit,
-            city: selectedAddress!.city,
-            state: selectedAddress!.state,
-            zip: selectedAddress!.zip,
-          }}
-          moveInDate={moveInDate || date}
-          homeDetails={homeDetails || undefined}
+      <div className="space-y-6">
+        <AddressAutocomplete
+          onSelect={handleAddressSelect}
+          error={errors.address}
+          disabled={isLoading || isCheckingAvailability}
         />
-      )}
-    </>
+
+        {selectedAddress && (
+          <div className="p-4 rounded-xl bg-[var(--color-teal-light)] border-2 border-[var(--color-teal)]">
+            <p className="text-[16px] font-medium text-[var(--color-teal)]">Address selected:</p>
+            <p className="text-[16px] text-[var(--color-darkest)] mt-1">
+              {selectedAddress.street}
+              {selectedAddress.unit && `, Apt ${selectedAddress.unit}`}
+            </p>
+            <p className="text-[16px] text-[var(--color-dark)] mt-0.5">
+              {selectedAddress.city}, {selectedAddress.state} {selectedAddress.zip}
+            </p>
+          </div>
+        )}
+
+        <Input
+          label="Move-in date"
+          hint="Book up to 90 days ahead"
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          error={errors.date}
+          disabled={isLoading || isCheckingAvailability}
+          min={new Date().toISOString().split('T')[0]}
+          max={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+        />
+      </div>
+
+      <Button
+        onClick={validateAndCheck}
+        disabled={isLoading || isCheckingAvailability}
+        isLoading={isLoading || isCheckingAvailability}
+        loadingText="Checking availability..."
+        fullWidth
+        size="large"
+        colorScheme="coral"
+      >
+        Check availability
+      </Button>
+    </div>
   );
 }
 

@@ -1,47 +1,40 @@
 'use client';
 
 import { useFlowStore } from '@/store/flowStore';
-import { Button, ServiceCard, CartSummary, CompactAddressCard } from '@/components/ui';
+import { Button, ServiceCard, CartSummary } from '@/components/ui';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 function Step3Services() {
   const {
-    address,
-    moveInDate,
-    homeDetails,
     selectedServices,
     expandedService,
+    isApartment,
+    waterAnswer,
+    ownershipAnswer,
     toggleService,
     setExpandedService,
     prevStep,
     nextStep,
-    reset,
   } = useFlowStore();
 
+  // Determine if water should be shown based on apartment status and answers
+  // Show water if: not apartment OR user confirmed separate meter OR (unsure + owns)
+  const shouldShowWater =
+    !isApartment ||
+    waterAnswer === 'yes_separate' ||
+    (waterAnswer === 'not_sure' && ownershipAnswer === 'own');
+
   const selectedCount = Object.values(selectedServices).filter(Boolean).length;
+  const availableServiceCount = shouldShowWater ? 3 : 2;
 
   const handleAddAll = () => {
+    if (shouldShowWater && !selectedServices.water) toggleService('water');
     if (!selectedServices.electricity) toggleService('electricity');
     if (!selectedServices.internet) toggleService('internet');
   };
 
-  const handleEditAddress = () => {
-    // Reset to step 1 and clear address data
-    reset();
-  };
-
   return (
     <div className="space-y-8">
-      {/* Address context card */}
-      {address && moveInDate && (
-        <CompactAddressCard
-          address={address}
-          moveInDate={moveInDate}
-          homeDetails={homeDetails || undefined}
-          onEdit={handleEditAddress}
-        />
-      )}
-
       {/* Heading */}
       <div>
         <h1 className="text-[32px] sm:text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
@@ -54,13 +47,15 @@ function Step3Services() {
 
       {/* Service cards */}
       <div className="space-y-4">
-        <ServiceCard
-          type="water"
-          isSelected={selectedServices.water}
-          isExpanded={expandedService === 'water'}
-          onToggle={() => {}}
-          onExpand={() => setExpandedService(expandedService === 'water' ? null : 'water')}
-        />
+        {shouldShowWater && (
+          <ServiceCard
+            type="water"
+            isSelected={selectedServices.water}
+            isExpanded={expandedService === 'water'}
+            onToggle={() => {}}
+            onExpand={() => setExpandedService(expandedService === 'water' ? null : 'water')}
+          />
+        )}
 
         <ServiceCard
           type="electricity"
@@ -103,12 +98,12 @@ function Step3Services() {
         </div>
 
         {/* Add all services link */}
-        {selectedCount < 3 && (
+        {selectedCount < availableServiceCount && (
           <button
             onClick={handleAddAll}
             className="w-full text-center text-[var(--color-teal)] text-[16px] font-medium underline"
           >
-            or Set up all 3 services
+            or Set up all {availableServiceCount} services
           </button>
         )}
       </div>

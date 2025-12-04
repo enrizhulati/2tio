@@ -108,6 +108,10 @@ export interface AvailableServices {
 
 export type ServiceType = 'water' | 'electricity' | 'internet';
 
+// Water billing question for apartments
+export type WaterAnswer = 'yes_separate' | 'no_included' | 'not_sure' | null;
+export type OwnershipAnswer = 'renting' | 'own' | null;
+
 export interface SelectedServices {
   water: boolean;
   electricity: boolean;
@@ -222,6 +226,11 @@ export interface FlowState {
   homeDetails: HomeDetails | null;
   isLoadingElectricity: boolean;
 
+  // Apartment water billing detection
+  isApartment: boolean;
+  waterAnswer: WaterAnswer;
+  ownershipAnswer: OwnershipAnswer;
+
   // Step 2: Profile
   profile: UserProfile | null;
 
@@ -246,6 +255,8 @@ export interface FlowState {
   // Actions
   setAddress: (address: Address) => void;
   setMoveInDate: (date: string) => void;
+  setWaterAnswer: (answer: WaterAnswer) => void;
+  setOwnershipAnswer: (answer: OwnershipAnswer) => void;
   checkAvailability: () => Promise<void>;
   setProfile: (profile: UserProfile) => void;
   toggleService: (service: ServiceType) => Promise<void>;

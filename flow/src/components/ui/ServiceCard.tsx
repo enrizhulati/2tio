@@ -248,8 +248,17 @@ export function ServiceCard({
                   </span>
                   <button
                     onClick={() => {
-                      const heading = document.getElementById(`${type}-plan-heading`);
-                      heading?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      if (!isExpanded) {
+                        // Expand first, then scroll after DOM updates
+                        onExpand();
+                        setTimeout(() => {
+                          const heading = document.getElementById(`${type}-plan-heading`);
+                          heading?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                      } else {
+                        const heading = document.getElementById(`${type}-plan-heading`);
+                        heading?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
                     }}
                     className="text-[16px] text-[var(--color-teal)] ml-2 hover:underline"
                   >
@@ -259,8 +268,17 @@ export function ServiceCard({
               ) : (
                 <button
                   onClick={() => {
-                    const heading = document.getElementById(`${type}-plan-heading`);
-                    heading?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    if (!isExpanded) {
+                      // Expand first, then scroll after DOM updates
+                      onExpand();
+                      setTimeout(() => {
+                        const heading = document.getElementById(`${type}-plan-heading`);
+                        heading?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 100);
+                    } else {
+                      const heading = document.getElementById(`${type}-plan-heading`);
+                      heading?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
                   }}
                   className="text-[16px] font-semibold text-[var(--color-teal)] hover:underline"
                 >

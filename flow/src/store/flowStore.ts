@@ -16,6 +16,8 @@ import type {
   HomeDetails,
   TwotionCart,
   TwotionCheckoutStep,
+  WaterAnswer,
+  OwnershipAnswer,
 } from '@/types/flow';
 import {
   getUserId,
@@ -122,6 +124,11 @@ const initialState = {
   homeDetails: null as HomeDetails | null,
   isLoadingElectricity: false,
 
+  // Apartment water billing detection
+  isApartment: false,
+  waterAnswer: null as WaterAnswer,
+  ownershipAnswer: null as OwnershipAnswer,
+
   // Step 2
   profile: null,
 
@@ -151,9 +158,26 @@ const initialState = {
 export const useFlowStore = create<FlowState>((set, get) => ({
   ...initialState,
 
-  setAddress: (address: Address) => set({ address }),
+  setAddress: (address: Address) => {
+    // Detect if this is an apartment by checking for unit or apartment patterns
+    const isApartment = !!(
+      address.unit ||
+      address.street.match(/\b(APT|UNIT|STE|SUITE|#)\s*\w/i)
+    );
+    set({
+      address,
+      isApartment,
+      // Reset water answers when address changes
+      waterAnswer: null,
+      ownershipAnswer: null,
+    });
+  },
 
   setMoveInDate: (date: string) => set({ moveInDate: date }),
+
+  setWaterAnswer: (answer: WaterAnswer) => set({ waterAnswer: answer }),
+
+  setOwnershipAnswer: (answer: OwnershipAnswer) => set({ ownershipAnswer: answer }),
 
   checkAvailability: async () => {
     const { address, usageProfile } = get();
@@ -343,19 +367,32 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         },
       };
 
-      // Auto-select first water plan and add to cart
-      const waterPlan = waterPlans.length > 0 ? waterPlans[0] : undefined;
+      // Determine if water should be included based on apartment status and water answers
+      // For apartments: only include water if user confirmed they have separate meter
+      // or if they're unsure but own the property
+      const { isApartment, waterAnswer, ownershipAnswer } = get();
+      const shouldIncludeWater =
+        !isApartment ||
+        waterAnswer === 'yes_separate' ||
+        (waterAnswer === 'not_sure' && ownershipAnswer === 'own');
+
+      // Auto-select first water plan if water should be included
+      const waterPlan = (shouldIncludeWater && waterPlans.length > 0) ? waterPlans[0] : undefined;
 
       set({
         availableServices,
         isCheckingAvailability: false,
         availabilityChecked: true,
-        selectedPlans: {
-          water: waterPlan,
+        selectedPlans: waterPlan ? { water: waterPlan } : {},
+        // Update selectedServices.water based on whether water should be included
+        selectedServices: {
+          water: !!waterPlan,
+          electricity: false,
+          internet: false,
         },
       });
 
-      // Add water plan to 2TIO cart (water is pre-selected and required)
+      // Add water plan to 2TIO cart (only if water should be included)
       if (waterPlan) {
         try {
           await apiAddToCart(waterPlan.id);
