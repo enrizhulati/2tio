@@ -93,11 +93,11 @@ function FileUpload({
           </div>
         </div>
 
-        {/* Error state */}
-        {error && (
+        {/* Error state - shows validation errors or external errors */}
+        {(error || validationError) && (
           <div className="flex items-center gap-2 text-[var(--color-error)] text-[16px] mb-3 p-2 rounded-lg bg-[var(--color-error-light)]">
             <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-            <span>{error}</span>
+            <span>{validationError || error}</span>
           </div>
         )}
 

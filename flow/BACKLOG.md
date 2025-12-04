@@ -4,17 +4,6 @@
 
 ### Backlog (To Investigate)
 
-#### Document Upload Validation
-- **Issue**: 0-byte files accepted as valid identity documents
-- **Details**: User uploaded "TEC-Co-ops-Map.pdf" (0 B) and it was accepted
-- **Suggested Fix**:
-  - Validate file size > 0
-  - Validate file type (PDF, JPG, PNG only)
-  - Consider minimum file size threshold (e.g., 10KB)
-  - Add image/document preview
-- **Priority**: Medium
-- **Date Reported**: Dec 4, 2025
-
 #### Email Confirmation Not Received
 - **Issue**: User did not receive confirmation email after order submission
 - **Details**: Order confirmation page says "You'll receive confirmation emails within 24 hours" but no email was received
@@ -59,7 +48,13 @@
 
 ### Completed
 
-(None yet)
+#### Document Upload Validation ✅
+- **Issue**: 0-byte files accepted as valid identity documents
+- **Fix**: Added file size validation to FileUpload component
+  - Rejects empty (0-byte) files with "File is empty" error
+  - Validates minimum file size (default 1KB)
+  - Shows clear error messages for invalid files
+- **Date Fixed**: Dec 4, 2025
 
 ---
 
