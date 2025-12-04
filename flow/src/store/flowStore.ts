@@ -477,15 +477,29 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
     // UNLOCK SCROLL: Restore scroll position after state updates
     if (typeof document !== 'undefined') {
-      // Wait for React to finish rendering
-      requestAnimationFrame(() => {
+      // Wait for React to finish rendering (longer delay for DOM paint)
+      setTimeout(() => {
         document.body.style.position = '';
         document.body.style.top = '';
         document.body.style.left = '';
         document.body.style.right = '';
         document.body.style.overflow = '';
-        window.scrollTo(0, scrollY);
-      });
+
+        // If selecting a service, scroll to that service card so user sees the expanded section
+        if (isNowSelected) {
+          // Find the service card element by data attribute
+          const targetCard = document.querySelector(`[data-service-card="${service}"]`) as HTMLElement;
+          if (targetCard) {
+            // Scroll to show the card near the top with some padding
+            const targetY = targetCard.getBoundingClientRect().top + window.scrollY - 100;
+            window.scrollTo({ top: targetY, behavior: 'instant' });
+          } else {
+            window.scrollTo(0, scrollY);
+          }
+        } else {
+          window.scrollTo(0, scrollY);
+        }
+      }, 50);
     }
   },
 

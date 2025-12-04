@@ -210,6 +210,7 @@ function ServiceCard({
 
   return (
     <div
+      data-service-card={type}
       className={`
         rounded-xl border-2 overflow-hidden transition-all duration-200
         ${isSelected ? 'border-[var(--color-teal)] bg-white' : 'border-[var(--color-light)] bg-white'}
