@@ -95,6 +95,10 @@ interface RawServicePlan {
 type RawInternetPlan = RawServicePlan;
 type RawWaterPlan = RawServicePlan;
 
+// Debounce timer for usage updates - allows immediate client-side calc
+// then fetches accurate pricing from API after user stops adjusting
+let usageUpdateDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
 const initialState = {
   currentStep: 1 as FlowStep,
 
@@ -1053,7 +1057,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       };
     });
 
-    // Update available services with recalculated plans
+    // Update available services with recalculated plans (immediate feedback)
     const updatedServices: AvailableServices = {
       ...availableServices!,
       electricity: {
@@ -1063,7 +1067,24 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     };
 
     set({ availableServices: updatedServices, isLoadingElectricity: false });
-    console.log('[updateMonthlyUsage] Recalculation complete');
+    console.log('[updateMonthlyUsage] Client-side recalculation complete (approximate)');
+
+    // Cancel any pending debounced API call
+    if (usageUpdateDebounceTimer) {
+      clearTimeout(usageUpdateDebounceTimer);
+    }
+
+    // Schedule debounced API call for accurate non-linear pricing
+    // Texas electricity plans have bill credits and tiered pricing that
+    // only the API can calculate correctly
+    usageUpdateDebounceTimer = setTimeout(async () => {
+      console.log('[updateMonthlyUsage] Fetching accurate pricing from API...');
+      const currentAddress = get().address;
+      if (currentAddress?.zip) {
+        await get().fetchElectricityPlans(currentAddress.zip);
+        console.log('[updateMonthlyUsage] Accurate API pricing received');
+      }
+    }, 600); // Wait 600ms after slider stops moving
   },
 
   // 2TIO User actions
