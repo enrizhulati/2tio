@@ -53,6 +53,28 @@ export interface UserProfile {
   smsOptIn: boolean;
 }
 
+// Water plan option choice (e.g., a specific fee or service)
+export interface WaterPlanOptionChoice {
+  id: string;
+  name: string;
+  description?: string;
+  price?: number;
+}
+
+// Water plan option (e.g., "Residential Sewer", "Application Fee")
+export interface WaterPlanOption {
+  id: string;
+  name: string;
+  type: 'single' | 'multi';
+  required?: boolean;
+  choices?: WaterPlanOptionChoice[];
+  selectedInt?: number;
+  selectedValues?: string[];
+  // Computed for display
+  displayPrice?: string;  // e.g., "$25.41/month", "Included", "$80-$320"
+  isIncluded?: boolean;   // true if price is 0 or "Included"
+}
+
 export interface ServicePlan {
   id: string;
   provider: string;
@@ -268,6 +290,8 @@ export interface FlowState {
   selectedServices: SelectedServices;
   selectedPlans: SelectedPlans;
   expandedService: ServiceType | null;
+  waterPlanOptions: WaterPlanOption[] | null;  // Options from water plan details API
+  waterPlanInfo: string | null;  // Info text about water pricing (from API)
 
   // 2TIO Cart
   cart: TwotionCart | null;

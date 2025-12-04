@@ -20,6 +20,7 @@ import type {
   OwnershipAnswer,
   DwellingType,
   WaterEligibility,
+  WaterPlanOption,
 } from '@/types/flow';
 import { DWELLING_ENERGY_DEFAULTS } from '@/types/flow';
 import {
@@ -27,6 +28,7 @@ import {
   setUserId,
   generateUserId,
   getPlans,
+  getPlanDetails,
   enrichPlansWithCosts,
   addPlanToCart as apiAddToCart,
   removePlanFromCart as apiRemoveFromCart,
@@ -35,6 +37,7 @@ import {
   type TwotionPlan,
   type CheckoutData,
   type CheckoutFiles,
+  type PlanOption,
 } from '@/lib/api/twotion';
 
 // Default usage profile for cost estimates (when Zillow data unavailable)
@@ -196,6 +199,8 @@ const initialState = {
   },
   selectedPlans: {},
   expandedService: 'water' as ServiceType | null, // Auto-expand water since it's pre-selected
+  waterPlanOptions: null as WaterPlanOption[] | null,
+  waterPlanInfo: null as string | null,
 
   // 2TIO Cart
   cart: null as TwotionCart | null,
@@ -470,11 +475,75 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       // Auto-select first water plan if water should be included
       const waterPlan = (shouldIncludeWater && waterPlans.length > 0) ? waterPlans[0] : undefined;
 
+      // Fetch water plan details to get options (sewer, garbage, fees, etc.)
+      let waterPlanOptions: WaterPlanOption[] | null = null;
+      let waterPlanInfo: string | null = null;
+      if (waterPlan) {
+        try {
+          const planDetails = await getPlanDetails('water', waterPlan.id);
+          if (planDetails.options && planDetails.options.length > 0) {
+            // Convert API PlanOption to WaterPlanOption with display-friendly pricing
+            waterPlanOptions = planDetails.options.map((opt: PlanOption) => {
+              // Determine display price from choices
+              let displayPrice = 'Included';
+              let isIncluded = true;
+
+              if (opt.choices && opt.choices.length > 0) {
+                // Check if it's a range (multiple price points) like deposits
+                const prices = opt.choices
+                  .map(c => c.price)
+                  .filter((p): p is number => p !== undefined && p !== null);
+
+                if (prices.length > 1) {
+                  const minPrice = Math.min(...prices);
+                  const maxPrice = Math.max(...prices);
+                  if (minPrice === 0 && maxPrice === 0) {
+                    displayPrice = 'Included';
+                  } else if (minPrice !== maxPrice) {
+                    displayPrice = `$${minPrice}-$${maxPrice}`;
+                    isIncluded = false;
+                  } else if (minPrice > 0) {
+                    displayPrice = `$${minPrice.toFixed(2)}/month`;
+                    isIncluded = false;
+                  }
+                } else if (prices.length === 1 && prices[0] > 0) {
+                  // Single price - check if monthly or one-time
+                  const price = prices[0];
+                  // Fees like "Application Fee" are one-time, others are monthly
+                  const isOneTime = opt.name.toLowerCase().includes('fee') ||
+                                   opt.name.toLowerCase().includes('deposit');
+                  displayPrice = isOneTime ? `$${price.toFixed(2)}` : `$${price.toFixed(2)}/month`;
+                  isIncluded = false;
+                }
+              }
+
+              return {
+                id: opt.id,
+                name: opt.name,
+                type: opt.type,
+                required: opt.required,
+                choices: opt.choices,
+                selectedInt: opt.selectedInt,
+                selectedValues: opt.selectedValues,
+                displayPrice,
+                isIncluded,
+              } as WaterPlanOption;
+            });
+          }
+          // Extract info text from plan description
+          waterPlanInfo = planDetails.longDescription || planDetails.shortDescription || null;
+        } catch (detailsError) {
+          console.error('Error fetching water plan details:', detailsError);
+        }
+      }
+
       set({
         availableServices,
         isCheckingAvailability: false,
         availabilityChecked: true,
         selectedPlans: waterPlan ? { water: waterPlan } : {},
+        waterPlanOptions,
+        waterPlanInfo,
         // Update selectedServices.water based on whether water should be included
         selectedServices: {
           water: !!waterPlan,

@@ -265,12 +265,12 @@ export function ServiceCard({
                         {option.name}
                       </span>
                       {option.required && (
-                        <span className="text-[12px] font-bold uppercase tracking-wider text-[var(--color-coral)] bg-[var(--color-coral)]/10 px-1.5 py-0.5 rounded">
+                        <span className="text-[14px] font-bold uppercase tracking-wider text-[var(--color-coral)] bg-[var(--color-coral)]/10 px-2 py-0.5 rounded">
                           Required
                         </span>
                       )}
                     </div>
-                    <span className={`text-[14px] ${option.isIncluded ? 'text-[var(--color-teal)]' : 'text-[var(--color-coral)]'}`}>
+                    <span className={`text-[16px] ${option.isIncluded ? 'text-[var(--color-teal)]' : 'text-[var(--color-coral)]'}`}>
                       {option.displayPrice}
                     </span>
                   </div>
@@ -283,7 +283,7 @@ export function ServiceCard({
               <div className="mt-4 p-4 rounded-lg bg-white border border-[var(--color-light)]">
                 <div className="flex items-start gap-3">
                   <Info className="w-5 h-5 text-[var(--color-medium)] flex-shrink-0 mt-0.5" aria-hidden="true" />
-                  <p className="text-[14px] text-[var(--color-dark)] leading-relaxed">
+                  <p className="text-[16px] text-[var(--color-dark)] leading-relaxed">
                     {waterPlanInfo}
                   </p>
                 </div>
