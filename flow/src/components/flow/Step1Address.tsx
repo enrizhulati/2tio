@@ -4,189 +4,21 @@ import { useState, useCallback } from 'react';
 import { useFlowStore } from '@/store/flowStore';
 import { Button, Input } from '@/components/ui';
 import { AddressAutocomplete, type AddressResult } from '@/components/ui/AddressAutocomplete';
-import { ChevronRight, Building2, AlertCircle, Check, Home, Droplets, Lightbulb, MapPin } from 'lucide-react';
-import type { ESIID, WaterAnswer, OwnershipAnswer } from '@/types/flow';
-
-// Format date for display
-const formatDate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
-};
-
-// Format number with commas
-const formatNumber = (num: number): string => num.toLocaleString();
-
-// Compact map preview for address confirmation
-function CompactMapPreview() {
-  return (
-    <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-[var(--color-lightest)] flex-shrink-0">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#E8F4F8] to-[#D4E8ED]">
-        {/* Grid pattern */}
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `
-              linear-gradient(var(--color-medium) 1px, transparent 1px),
-              linear-gradient(90deg, var(--color-medium) 1px, transparent 1px)
-            `,
-            backgroundSize: '20px 20px'
-          }}
-        />
-        {/* Roads */}
-        <div className="absolute top-1/2 left-0 right-0 h-1.5 bg-white opacity-60" />
-        <div className="absolute top-0 bottom-0 left-1/3 w-1 bg-white opacity-40" />
-        {/* Location marker */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
-          <div className="relative">
-            <div className="w-6 h-6 bg-[var(--color-coral)] rounded-full flex items-center justify-center shadow-md">
-              <MapPin className="w-3.5 h-3.5 text-white" aria-hidden="true" />
-            </div>
-            <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-2 h-2 bg-[var(--color-coral)] rotate-45" />
-          </div>
-        </div>
-        {/* Pulse animation */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="w-8 h-8 rounded-full bg-[var(--color-coral)] opacity-20 animate-ping" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Inline water question component for apartments
-function WaterQuestion({
-  waterAnswer,
-  ownershipAnswer,
-  onWaterAnswerChange,
-  onOwnershipAnswerChange,
-}: {
-  waterAnswer: WaterAnswer;
-  ownershipAnswer: OwnershipAnswer;
-  onWaterAnswerChange: (answer: WaterAnswer) => void;
-  onOwnershipAnswerChange: (answer: OwnershipAnswer) => void;
-}) {
-  return (
-    <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-[#F0F9FF]">
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-3">
-        <Droplets className="w-5 h-5 text-[#0EA5E9]" aria-hidden="true" />
-        <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
-          One quick question about water
-        </span>
-      </div>
-
-      {/* Question */}
-      <p className="text-[15px] text-[var(--color-dark)] mb-4">
-        Do you pay for water separately at this address?
-      </p>
-
-      {/* Options */}
-      <div className="space-y-2">
-        {([
-          { value: 'yes_separate', label: 'Yes, I have my own meter' },
-          { value: 'no_included', label: "No, it's included in my rent" },
-          { value: 'not_sure', label: "I'm not sure" },
-        ] as const).map((option) => (
-          <label
-            key={option.value}
-            className="flex items-center gap-3 p-3 rounded-lg border-2 border-[var(--color-light)] bg-white cursor-pointer hover:border-[var(--color-medium)] transition-colors has-[:checked]:border-[var(--color-teal)] has-[:checked]:bg-[var(--color-teal)]/5"
-          >
-            <input
-              type="radio"
-              name="water-answer"
-              value={option.value}
-              checked={waterAnswer === option.value}
-              onChange={() => onWaterAnswerChange(option.value)}
-              className="w-5 h-5 accent-[var(--color-teal)]"
-            />
-            <span className="text-[16px] text-[var(--color-darkest)]">{option.label}</span>
-          </label>
-        ))}
-      </div>
-
-      {/* Follow-up for "I'm not sure" */}
-      {waterAnswer === 'not_sure' && (
-        <div className="mt-4 pt-4 border-t border-[var(--color-light)] animate-fade-in">
-          <p className="text-[15px] text-[var(--color-dark)] mb-3">
-            Are you renting or do you own?
-          </p>
-          <div className="space-y-2">
-            {([
-              { value: 'renting', label: "I'm renting" },
-              { value: 'own', label: 'I own this home' },
-            ] as const).map((option) => (
-              <label
-                key={option.value}
-                className="flex items-center gap-3 p-3 rounded-lg border-2 border-[var(--color-light)] bg-white cursor-pointer hover:border-[var(--color-medium)] transition-colors has-[:checked]:border-[var(--color-teal)] has-[:checked]:bg-[var(--color-teal)]/5"
-              >
-                <input
-                  type="radio"
-                  name="ownership-answer"
-                  value={option.value}
-                  checked={ownershipAnswer === option.value}
-                  onChange={() => onOwnershipAnswerChange(option.value)}
-                  className="w-5 h-5 accent-[var(--color-teal)]"
-                />
-                <span className="text-[16px] text-[var(--color-darkest)]">{option.label}</span>
-              </label>
-            ))}
-          </div>
-
-          {/* Guidance message based on selection */}
-          {ownershipAnswer === 'renting' && (
-            <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200 animate-fade-in">
-              <div className="flex gap-2">
-                <Lightbulb className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
-                <div className="text-[14px] text-amber-900">
-                  <p className="font-medium mb-1">Check with your landlord or leasing office</p>
-                  <p>They&apos;ll know if water is included in your rent. We won&apos;t include water setup for now — you can always add it later if needed.</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {ownershipAnswer === 'own' && (
-            <div className="mt-4 p-3 rounded-lg bg-teal-50 border border-teal-200 animate-fade-in">
-              <div className="flex gap-2">
-                <Lightbulb className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
-                <div className="text-[14px] text-teal-900">
-                  <p className="font-medium mb-1">You&apos;ll most likely need water service</p>
-                  <p>As a homeowner, you&apos;ll need water in your name. We&apos;ll include water setup to make sure you&apos;re covered.</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+import { ChevronRight, Building2, AlertCircle, Check } from 'lucide-react';
+import type { ESIID } from '@/types/flow';
 
 function Step1Address() {
   const {
     address,
     moveInDate,
-    availableServices,
-    availabilityChecked,
-    homeDetails,
     esiidMatches,
     selectedEsiid,
     esiidSearchComplete,
     esiidConfirmed,
     isLoadingElectricity,
-    isApartment,
-    waterAnswer,
-    ownershipAnswer,
     isCheckingAvailability,
     setAddress,
     setMoveInDate,
-    setWaterAnswer,
-    setOwnershipAnswer,
     checkAvailability,
     fetchESIIDs,
     selectESIID,
@@ -306,6 +138,8 @@ function Step1Address() {
 
           await useFlowStore.getState().fetchUsageProfile();
           await checkAvailability();
+          // Go directly to services after successful availability check
+          nextStep();
         } else {
           const searchAddress = detectedUnit
             ? `${selectedAddress.street} APT ${detectedUnit.replace(/\D/g, '')}`
@@ -314,6 +148,11 @@ function Step1Address() {
             checkAvailability(),
             fetchESIIDs(searchAddress, selectedAddress.zip, detectedUnit),
           ]);
+          // If only one ESIID match (or none), go to services
+          const state = useFlowStore.getState();
+          if (state.esiidMatches.length <= 1 && state.esiidSearchComplete) {
+            nextStep();
+          }
         }
       } catch (error) {
         console.error('Error checking availability:', error);
@@ -321,7 +160,7 @@ function Step1Address() {
         setIsLoading(false);
       }
     }
-  }, [selectedAddress, date, setAddress, setMoveInDate, checkAvailability, fetchESIIDs]);
+  }, [selectedAddress, date, setAddress, setMoveInDate, checkAvailability, fetchESIIDs, nextStep]);
 
   const handleEdit = () => {
     setSelectedAddress(null);
@@ -344,14 +183,12 @@ function Step1Address() {
     });
   };
 
-  const handleConfirm = async () => {
-    nextStep();
-  };
-
   const handleEsiidConfirm = async () => {
     setIsLoading(true);
     try {
       await confirmEsiid();
+      // Go directly to services after ESIID confirmation
+      nextStep();
     } finally {
       setIsLoading(false);
     }
@@ -510,90 +347,6 @@ function Step1Address() {
               Need help? <a href="tel:1-800-555-0123" className="text-[var(--color-teal)] underline font-medium">Call us</a> or <a href="#" className="text-[var(--color-teal)] underline font-medium">start a chat</a>
             </p>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show confirmation screen after availability is checked
-  if (availabilityChecked && availableServices && address && moveInDate && (esiidConfirmed || esiidMatches.length === 1)) {
-    return (
-      <div className="space-y-8">
-        {/* Success header */}
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--color-coral-light)] flex items-center justify-center">
-            <Home className="w-8 h-8 text-[var(--color-coral)]" aria-hidden="true" />
-          </div>
-          <h1 className="text-[32px] sm:text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
-            We found your home!
-          </h1>
-          <p className="text-[18px] text-[var(--color-dark)]">
-            Confirm this is the right address and we&apos;ll show you available services.
-          </p>
-        </div>
-
-        {/* Address card */}
-        <div className="p-4 rounded-xl border-2 border-[var(--color-light)] bg-[var(--color-lightest)]">
-          <div className="flex items-start gap-4">
-            {/* Address info */}
-            <div className="flex-1 min-w-0">
-              <p className="text-[18px] font-semibold text-[var(--color-darkest)] leading-snug">
-                {address.street}
-                {address.unit && `, ${address.unit}`}
-              </p>
-              <p className="text-[16px] text-[var(--color-dark)]">
-                {address.city}, {address.state} {address.zip}
-              </p>
-              <p className="text-[16px] text-[var(--color-dark)] mt-2">
-                Move-in: {formatDate(moveInDate)}
-              </p>
-
-              {/* Home details if available */}
-              {homeDetails?.foundDetails && (
-                <div className="flex items-center gap-1.5 mt-3 text-[16px] text-[var(--color-teal)]">
-                  <Home className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                  <span className="font-medium">
-                    {formatNumber(homeDetails.squareFootage || 0)} sq ft
-                    {homeDetails.yearBuilt ? ` • Built ${homeDetails.yearBuilt}` : ''}
-                    {homeDetails.annualKwh ? ` • ~${formatNumber(homeDetails.annualKwh)} kWh/yr` : ''}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Compact map */}
-            <CompactMapPreview />
-          </div>
-        </div>
-
-        {/* Water question for apartments */}
-        {isApartment && (
-          <WaterQuestion
-            waterAnswer={waterAnswer}
-            ownershipAnswer={ownershipAnswer}
-            onWaterAnswerChange={setWaterAnswer}
-            onOwnershipAnswerChange={setOwnershipAnswer}
-          />
-        )}
-
-        {/* Actions */}
-        <div className="space-y-4">
-          <Button
-            onClick={handleConfirm}
-            fullWidth
-            size="large"
-            colorScheme="coral"
-            rightIcon={<ChevronRight className="w-5 h-5" />}
-          >
-            Yes, this is my home
-          </Button>
-
-          <button
-            onClick={handleEdit}
-            className="w-full text-center text-[var(--color-teal)] text-[16px] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors py-2"
-          >
-            No, change address
-          </button>
         </div>
       </div>
     );
