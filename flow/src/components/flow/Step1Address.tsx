@@ -161,45 +161,44 @@ function Step1Address() {
       // Otherwise, fall back to searching by address
       if (selectedAddress.esiid) {
         // ESIID already known from ERCOT search - skip ESIID lookup
-        // Just fetch usage profile and check availability
-        await Promise.all([
-          checkAvailability(),
-          // Set the ESIID directly in the store
-          useFlowStore.setState({
-            selectedEsiid: {
-              _id: selectedAddress.esiid,
-              esiid: selectedAddress.esiid,
-              address: `${selectedAddress.street}${detectedUnit ? ` APT ${detectedUnit}` : ''}`.toUpperCase(),
-              address_overflow: '',
-              city: selectedAddress.city.toUpperCase(),
-              state: selectedAddress.state,
-              zip_code: selectedAddress.zip,
-              premise_type: 'Residential',
-              status: 'Active',
-              power_region: 'ERCOT',
-              station_name: '',
-              duns: '',
-            },
-            esiidMatches: [{
-              _id: selectedAddress.esiid,
-              esiid: selectedAddress.esiid,
-              address: `${selectedAddress.street}${detectedUnit ? ` APT ${detectedUnit}` : ''}`.toUpperCase(),
-              address_overflow: '',
-              city: selectedAddress.city.toUpperCase(),
-              state: selectedAddress.state,
-              zip_code: selectedAddress.zip,
-              premise_type: 'Residential',
-              status: 'Active',
-              power_region: 'ERCOT',
-              station_name: '',
-              duns: '',
-            }],
-            esiidSearchComplete: true,
-            esiidConfirmed: true,
-          }),
-        ]);
-        // Fetch usage profile for the ESIID
-        useFlowStore.getState().fetchUsageProfile();
+        // Set the ESIID directly in the store FIRST
+        useFlowStore.setState({
+          selectedEsiid: {
+            _id: selectedAddress.esiid,
+            esiid: selectedAddress.esiid,
+            address: `${selectedAddress.street}${detectedUnit ? ` APT ${detectedUnit}` : ''}`.toUpperCase(),
+            address_overflow: '',
+            city: selectedAddress.city.toUpperCase(),
+            state: selectedAddress.state,
+            zip_code: selectedAddress.zip,
+            premise_type: 'Residential',
+            status: 'Active',
+            power_region: 'ERCOT',
+            station_name: '',
+            duns: '',
+          },
+          esiidMatches: [{
+            _id: selectedAddress.esiid,
+            esiid: selectedAddress.esiid,
+            address: `${selectedAddress.street}${detectedUnit ? ` APT ${detectedUnit}` : ''}`.toUpperCase(),
+            address_overflow: '',
+            city: selectedAddress.city.toUpperCase(),
+            state: selectedAddress.state,
+            zip_code: selectedAddress.zip,
+            premise_type: 'Residential',
+            status: 'Active',
+            power_region: 'ERCOT',
+            station_name: '',
+            duns: '',
+          }],
+          esiidSearchComplete: true,
+          esiidConfirmed: true,
+        });
+
+        // Fetch usage profile FIRST (needs ESIID to be set), THEN check availability
+        // This ensures electricity plans are calculated with actual home usage data
+        await useFlowStore.getState().fetchUsageProfile();
+        await checkAvailability();
       } else {
         // No ESIID from search - fall back to searching by address
         const searchAddress = detectedUnit

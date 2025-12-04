@@ -778,9 +778,11 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         esiidConfirmed: shouldAutoConfirm,
       });
 
-      // Auto-fetch usage profile if auto-confirmed
+      // Auto-fetch usage profile if auto-confirmed, then recalculate plans with real data
       if (shouldAutoConfirm && autoSelected) {
-        get().fetchUsageProfile();
+        // Fetch usage profile first, then recalculate availability with real usage data
+        await get().fetchUsageProfile();
+        await get().checkAvailability();
       }
     } catch (error) {
       console.error('Error fetching ESIIDs:', error);
