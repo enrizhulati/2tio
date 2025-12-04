@@ -554,12 +554,6 @@ function Step5Review() {
                 <p className="text-[16px] text-[var(--color-dark)] ml-7">
                   {selectedPlans.water.name} • Setup: ${selectedPlans.water.setupFee}
                 </p>
-                {/* Show vendor contact from API */}
-                {selectedPlans.water.vendorPhone && (
-                  <p className="text-[16px] text-[var(--color-dark)] ml-7 mt-1">
-                    Support: <a href={`tel:${selectedPlans.water.vendorPhone}`} className="text-[var(--color-teal)] underline">{selectedPlans.water.vendorPhone}</a>
-                  </p>
-                )}
               </div>
             )}
 
@@ -589,12 +583,6 @@ function Step5Review() {
                     Service starts in {selectedPlans.electricity.leadTime} {selectedPlans.electricity.leadTime === 1 ? 'day' : 'days'}
                   </p>
                 )}
-                {/* Show vendor contact from API */}
-                {selectedPlans.electricity.vendorPhone && (
-                  <p className="text-[16px] text-[var(--color-dark)] ml-7 mt-1">
-                    Support: <a href={`tel:${selectedPlans.electricity.vendorPhone}`} className="text-[var(--color-teal)] underline">{selectedPlans.electricity.vendorPhone}</a>
-                  </p>
-                )}
               </div>
             )}
 
@@ -616,12 +604,6 @@ function Step5Review() {
                 {selectedPlans.internet.leadTime !== undefined && selectedPlans.internet.leadTime > 0 && (
                   <p className="text-[16px] text-[var(--color-teal)] ml-7 mt-1">
                     Service starts in {selectedPlans.internet.leadTime} {selectedPlans.internet.leadTime === 1 ? 'day' : 'days'}
-                  </p>
-                )}
-                {/* Show vendor contact from API */}
-                {selectedPlans.internet.vendorPhone && (
-                  <p className="text-[16px] text-[var(--color-dark)] ml-7 mt-1">
-                    Support: <a href={`tel:${selectedPlans.internet.vendorPhone}`} className="text-[var(--color-teal)] underline">{selectedPlans.internet.vendorPhone}</a>
                   </p>
                 )}
               </div>
