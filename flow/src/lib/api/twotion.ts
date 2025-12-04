@@ -116,7 +116,8 @@ export interface PlanDetails {
   vendorName: string;
   serviceName: string;
   options?: PlanOption[];
-  // ... other plan fields
+  shortDescription?: string;
+  longDescription?: string;
 }
 
 export interface CartItem {

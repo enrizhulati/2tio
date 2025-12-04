@@ -13,6 +13,8 @@ import {
   X,
   Star,
   Loader2,
+  Check,
+  Info,
 } from 'lucide-react';
 import { SERVICE_INFO, type ServiceType } from '@/types/flow';
 
@@ -31,7 +33,7 @@ export function ServiceCard({
   onExpand: () => void;
   isLoading?: boolean;
 }) {
-  const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile, updateMonthlyUsage, isLoadingElectricity, dwellingType, isApartment, originalMonthlyUsage } = useFlowStore();
+  const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile, updateMonthlyUsage, isLoadingElectricity, dwellingType, isApartment, originalMonthlyUsage, waterPlanOptions, waterPlanInfo } = useFlowStore();
   const [showAllPlans, setShowAllPlans] = useState(false);
 
   // Capture initial estimate once on first render (stable even if usageProfile changes)
@@ -243,6 +245,54 @@ export function ServiceCard({
         </div>
       </div>
 
+      {/* Water plan options (sewer, garbage, fees, etc.) */}
+      {isWater && waterPlanOptions && waterPlanOptions.length > 0 && (
+        <div className="border-t border-[var(--color-light)]">
+          <div className="px-5 sm:px-6 py-4 space-y-3">
+            {waterPlanOptions.map((option) => (
+              <div
+                key={option.id}
+                className="flex items-center justify-between p-3 rounded-lg bg-[var(--color-lightest)] border border-[var(--color-light)]"
+              >
+                <div className="flex items-center gap-3">
+                  {/* Checked checkbox indicator */}
+                  <div className="w-6 h-6 rounded border-2 border-[var(--color-teal)] bg-[var(--color-teal)]/10 flex items-center justify-center">
+                    <Check className="w-4 h-4 text-[var(--color-teal)]" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[16px] font-medium text-[var(--color-darkest)]">
+                        {option.name}
+                      </span>
+                      {option.required && (
+                        <span className="text-[12px] font-bold uppercase tracking-wider text-[var(--color-coral)] bg-[var(--color-coral)]/10 px-1.5 py-0.5 rounded">
+                          Required
+                        </span>
+                      )}
+                    </div>
+                    <span className={`text-[14px] ${option.isIncluded ? 'text-[var(--color-teal)]' : 'text-[var(--color-coral)]'}`}>
+                      {option.displayPrice}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Water info box */}
+            {waterPlanInfo && (
+              <div className="mt-4 p-4 rounded-lg bg-white border border-[var(--color-light)]">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-[var(--color-medium)] flex-shrink-0 mt-0.5" aria-hidden="true" />
+                  <p className="text-[14px] text-[var(--color-dark)] leading-relaxed">
+                    {waterPlanInfo}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Expandable plan selection - Practical UI: Accessible disclosure, 48px touch target */}
       {isSelected && !isWater && (
         <div className="border-t border-[var(--color-light)]">
@@ -295,7 +345,7 @@ export function ServiceCard({
             </div>
             <button
               onClick={onExpand}
-              className="flex-shrink-0 ml-3 p-2 -mr-2 rounded-full hover:bg-[var(--color-lightest)] transition-colors"
+              className="flex-shrink-0 ml-3 p-3 -mr-3 rounded-full hover:bg-[var(--color-lightest)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
               aria-expanded={isExpanded}
               aria-controls={`${type}-plan-section`}
               aria-label={isExpanded ? 'Collapse plan options' : 'Expand plan options'}

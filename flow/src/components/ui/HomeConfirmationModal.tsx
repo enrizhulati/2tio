@@ -300,7 +300,7 @@ export function HomeConfirmationModal({
           <button
             onClick={() => !isConfirming && onChangeAddress()}
             disabled={isConfirming}
-            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[var(--color-lightest)] transition-colors z-10 disabled:opacity-50"
+            className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-lg hover:bg-[var(--color-lightest)] transition-colors z-10 disabled:opacity-50"
             aria-label="Close and change address"
           >
             <X className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />

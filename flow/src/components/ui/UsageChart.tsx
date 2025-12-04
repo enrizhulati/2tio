@@ -73,13 +73,13 @@ function UsageChart({ usage, homeDetails, className = '' }: UsageChartProps) {
         <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
           Estimated Usage Profile
         </span>
-        {/* Info tooltip - click/tap to show on mobile */}
+        {/* Info tooltip - click/tap to show on mobile - Practical UI: 44px minimum touch target */}
         <button
           type="button"
           onClick={() => setShowInfoTooltip(!showInfoTooltip)}
           onMouseEnter={() => setShowInfoTooltip(true)}
           onMouseLeave={() => setShowInfoTooltip(false)}
-          className="p-1 -m-1"
+          className="p-3 -m-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
           aria-label="How we estimate your usage"
         >
           <Info className="w-4 h-4 text-[var(--color-dark)]" aria-hidden="true" />
