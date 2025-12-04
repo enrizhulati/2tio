@@ -118,7 +118,7 @@ function RadioOption({
         <div
           className={`
             relative w-full px-4 py-2 text-center rounded-t-lg
-            text-[14px] font-bold tracking-wide
+            text-[16px] font-bold tracking-wide
             ${bannerStyles[badgeVariant]}
           `}
         >

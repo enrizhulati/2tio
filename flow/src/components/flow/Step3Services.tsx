@@ -83,13 +83,13 @@ function WaterAnswerSummary({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <Droplets className="w-5 h-5 text-[#0EA5E9] flex-shrink-0" aria-hidden="true" />
-          <span className="text-[15px] text-[var(--color-darkest)] truncate">
+          <span className="text-[16px] text-[var(--color-darkest)] truncate">
             {getAnswerText()}
           </span>
         </div>
         <button
           onClick={onChangeAnswer}
-          className="text-[14px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors flex-shrink-0"
+          className="text-[16px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors flex-shrink-0"
         >
           Change
         </button>
@@ -115,13 +115,13 @@ function WaterQuestion({
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <Droplets className="w-5 h-5 text-[#0EA5E9]" aria-hidden="true" />
-        <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
+        <span className="text-[18px] font-semibold text-[var(--color-darkest)]">
           One quick question about water
         </span>
       </div>
 
       {/* Question */}
-      <p className="text-[15px] text-[var(--color-dark)] mb-4">
+      <p className="text-[16px] text-[var(--color-dark)] mb-4">
         Do you pay for water separately at this address?
       </p>
 
@@ -152,7 +152,7 @@ function WaterQuestion({
       {/* Follow-up for "I'm not sure" */}
       {waterAnswer === 'not_sure' && (
         <div className="mt-4 pt-4 border-t border-[var(--color-light)] animate-fade-in">
-          <p className="text-[15px] text-[var(--color-dark)] mb-3">
+          <p className="text-[16px] text-[var(--color-dark)] mb-3">
             Are you renting or do you own?
           </p>
           <div className="space-y-2">
@@ -179,24 +179,24 @@ function WaterQuestion({
 
           {/* Guidance message based on selection */}
           {ownershipAnswer === 'renting' && (
-            <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200 animate-fade-in">
-              <div className="flex gap-2">
+            <div className="mt-4 p-4 rounded-lg bg-amber-50 border border-amber-200 animate-fade-in">
+              <div className="flex gap-3">
                 <Lightbulb className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
-                <div className="text-[14px] text-amber-900">
+                <div className="text-[16px] text-amber-900">
                   <p className="font-medium mb-1">Check with your landlord or leasing office</p>
-                  <p>They&apos;ll know if water is included in your rent. We won&apos;t include water setup for now — you can always add it later if needed.</p>
+                  <p className="leading-relaxed">They&apos;ll know if water is included in your rent. We won&apos;t include water setup for now — you can always add it later if needed.</p>
                 </div>
               </div>
             </div>
           )}
 
           {ownershipAnswer === 'own' && (
-            <div className="mt-4 p-3 rounded-lg bg-teal-50 border border-teal-200 animate-fade-in">
-              <div className="flex gap-2">
+            <div className="mt-4 p-4 rounded-lg bg-teal-50 border border-teal-200 animate-fade-in">
+              <div className="flex gap-3">
                 <Lightbulb className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
-                <div className="text-[14px] text-teal-900">
+                <div className="text-[16px] text-teal-900">
                   <p className="font-medium mb-1">You&apos;ll most likely need water service</p>
-                  <p>As a homeowner, you&apos;ll need water in your name. We&apos;ll include water setup to make sure you&apos;re covered.</p>
+                  <p className="leading-relaxed">As a homeowner, you&apos;ll need water in your name. We&apos;ll include water setup to make sure you&apos;re covered.</p>
                 </div>
               </div>
             </div>
@@ -284,18 +284,18 @@ function Step3Services() {
                 {address.street}
                 {address.unit && `, ${address.unit}`}
               </p>
-              <p className="text-[14px] text-[var(--color-dark)]">
+              <p className="text-[16px] text-[var(--color-dark)]">
                 {address.city}, {address.state} {address.zip}
               </p>
               {moveInDate && (
-                <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                <p className="text-[16px] text-[var(--color-dark)] mt-1">
                   Move-in: {formatDate(moveInDate)}
                 </p>
               )}
 
-              {/* Home details if available - Practical UI: 14px minimum */}
+              {/* Home details if available */}
               {homeDetails?.foundDetails && (
-                <div className="flex items-center gap-2 mt-2 text-[14px] text-[var(--color-teal)]">
+                <div className="flex items-center gap-2 mt-2 text-[16px] text-[var(--color-teal)]">
                   <Home className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
                   <span className="font-medium">
                     {formatNumber(homeDetails.squareFootage || 0)} sq ft
@@ -308,7 +308,7 @@ function Step3Services() {
             {/* Change link */}
             <button
               onClick={prevStep}
-              className="text-[14px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors"
+              className="text-[16px] text-[var(--color-teal)] font-medium underline hover:text-[var(--color-teal-hover)] transition-colors"
             >
               Change
             </button>

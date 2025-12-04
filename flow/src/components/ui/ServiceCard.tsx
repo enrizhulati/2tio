@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useFlowStore } from '@/store/flowStore';
 import { UsageChart, UsageSlider, ServiceIcon } from '@/components/ui';
 import { RadioGroup, RadioOption } from '@/components/ui/RadioGroup';
@@ -34,10 +34,14 @@ export function ServiceCard({
   const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile, updateMonthlyUsage, isLoadingElectricity, dwellingType, isApartment, originalMonthlyUsage } = useFlowStore();
   const [showAllPlans, setShowAllPlans] = useState(false);
 
-  // Original estimate from store (stable across slider adjustments)
-  const originalEstimate = originalMonthlyUsage ?? Math.round(
-    (usageProfile?.usage || [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900]).reduce((a, b) => a + b, 0) / 12
-  );
+  // Capture initial estimate once on first render (stable even if usageProfile changes)
+  const capturedEstimateRef = useRef<number | null>(null);
+  if (capturedEstimateRef.current === null && usageProfile?.usage) {
+    capturedEstimateRef.current = Math.round(usageProfile.usage.reduce((a, b) => a + b, 0) / 12);
+  }
+
+  // Original estimate: prefer store value, then captured value, then default
+  const originalEstimate = originalMonthlyUsage ?? capturedEstimateRef.current ?? 1100;
 
   const service = availableServices?.[type];
   const selectedPlan = selectedPlans[type];
@@ -125,7 +129,7 @@ export function ServiceCard({
                   {SERVICE_INFO[type].label}
                 </h3>
                 {isWater && (
-                  <span className="text-[12px] font-bold uppercase tracking-wider text-[var(--color-dark)] bg-[var(--color-lightest)] px-2 py-0.5 rounded">
+                  <span className="text-[14px] font-bold uppercase tracking-wider text-[var(--color-dark)] bg-[var(--color-lightest)] px-2 py-0.5 rounded">
                     Required
                   </span>
                 )}
@@ -140,7 +144,7 @@ export function ServiceCard({
                       {selectedPlan?.name || 'City Water Service'}
                     </p>
                     {selectedPlan?.shortDescription && (
-                      <p className="text-[14px] text-[var(--color-dark)] mt-1">
+                      <p className="text-[16px] text-[var(--color-dark)] mt-1">
                         {selectedPlan.shortDescription}
                       </p>
                     )}
@@ -409,7 +413,7 @@ export function ServiceCard({
                               {plan.contractMonths > 0 ? `${plan.contractMonths} Mo` : 'No Contract'}
                             </span>
                             {isElectricity && renewablePct > 0 && (
-                              <span className="text-[14px] font-medium text-[var(--color-success)]">
+                              <span className="text-[16px] font-medium text-[var(--color-success)]">
                                 {renewablePct}% Green
                               </span>
                             )}
@@ -486,7 +490,7 @@ export function ServiceCard({
                             <span className="text-[28px] font-bold text-[var(--color-coral)] tracking-tight">
                               {ratePerKwh}
                             </span>
-                            <span className="text-[14px] text-[var(--color-dark)]">
+                            <span className="text-[16px] text-[var(--color-dark)]">
                               per kWh
                             </span>
                           </div>
