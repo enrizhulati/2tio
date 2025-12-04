@@ -333,22 +333,21 @@ function Step5Review() {
 
           {/* Apartment renter CTA - email account number to leasing office */}
           {isApartmentRenter && selectedServices.electricity && (
-            <div className="p-5 rounded-xl bg-gradient-to-br from-[var(--color-coral-light)] to-[#FFF5F4] border-2 border-[var(--color-coral)]">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--color-coral)] flex items-center justify-center flex-shrink-0">
-                  <Key className="w-5 h-5 text-white" aria-hidden="true" />
+            <div className="p-6 rounded-xl bg-[var(--color-coral-light)] border border-[var(--color-light)] text-left">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-[var(--color-coral)] flex items-center justify-center flex-shrink-0">
+                  <Key className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-[18px] font-semibold text-[var(--color-darkest)]">
+                <div>
+                  <h3 className="text-[18px] font-semibold text-[var(--color-darkest)]">
                     Get your keys faster
-                  </p>
-                  <p className="text-[16px] text-[var(--color-dark)] mt-1">
-                    In Texas, your leasing office needs your electricity account number before you can pick up your keys.
-                    We can email it to them for you.
+                  </h3>
+                  <p className="text-[16px] text-[var(--color-dark)] mt-2 leading-relaxed">
+                    In Texas, your leasing office needs your electricity account number before you can pick up your keys. We can email it to them for you.
                   </p>
                   <button
                     onClick={() => setIsLandlordEmailModalOpen(true)}
-                    className="inline-flex items-center gap-2 mt-3 px-5 py-3 bg-[var(--color-coral)] text-white text-[16px] font-semibold rounded-lg hover:bg-[var(--color-coral-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-coral)] focus-visible:ring-offset-2"
+                    className="inline-flex items-center gap-2 mt-4 px-4 py-2.5 bg-[var(--color-coral)] text-white text-[16px] font-medium rounded-lg hover:bg-[var(--color-coral-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-coral)] focus-visible:ring-offset-2"
                   >
                     <Mail className="w-4 h-4" aria-hidden="true" />
                     Email to my leasing office
