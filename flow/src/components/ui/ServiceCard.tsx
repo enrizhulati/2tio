@@ -239,36 +239,49 @@ export function ServiceCard({
       {/* Expandable plan selection - Practical UI: Accessible disclosure, 48px touch target */}
       {isSelected && !isWater && (
         <div className="border-t border-[var(--color-light)]">
-          <button
-            onClick={onExpand}
-            className="w-full px-5 sm:px-6 py-4 flex items-center justify-between text-left hover:bg-[var(--color-lightest)] transition-colors min-h-[56px]"
-            aria-expanded={isExpanded}
-            aria-controls={`${type}-plan-section`}
-          >
+          <div className="w-full px-5 sm:px-6 py-4 flex items-center justify-between min-h-[56px]">
             <div className="flex-1 min-w-0">
               {selectedPlan ? (
                 <>
                   <span className="text-[16px] font-semibold text-[var(--color-darkest)]">
                     {selectedPlan.provider}
                   </span>
-                  <span className="text-[16px] text-[var(--color-teal)] ml-2">
+                  <button
+                    onClick={() => {
+                      const heading = document.getElementById(`${type}-plan-heading`);
+                      heading?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className="text-[16px] text-[var(--color-teal)] ml-2 hover:underline"
+                  >
                     {isExpanded ? 'Change plan' : `Choose your ${type} plan`}
-                  </span>
+                  </button>
                 </>
               ) : (
-                <span className="text-[16px] font-semibold text-[var(--color-teal)]">
+                <button
+                  onClick={() => {
+                    const heading = document.getElementById(`${type}-plan-heading`);
+                    heading?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className="text-[16px] font-semibold text-[var(--color-teal)] hover:underline"
+                >
                   Choose your {type} plan
-                </span>
+                </button>
               )}
             </div>
-            <div className="flex-shrink-0 ml-3">
+            <button
+              onClick={onExpand}
+              className="flex-shrink-0 ml-3 p-2 -mr-2 rounded-full hover:bg-[var(--color-lightest)] transition-colors"
+              aria-expanded={isExpanded}
+              aria-controls={`${type}-plan-section`}
+              aria-label={isExpanded ? 'Collapse plan options' : 'Expand plan options'}
+            >
               {isExpanded ? (
                 <ChevronUp className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
               ) : (
                 <ChevronDown className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
               )}
-            </div>
-          </button>
+            </button>
+          </div>
 
           {isExpanded && (
             <div id={`${type}-plan-section`} className="px-5 sm:px-6 pb-5 sm:pb-6 animate-slide-up overflow-hidden">

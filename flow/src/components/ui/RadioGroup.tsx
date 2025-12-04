@@ -17,6 +17,7 @@ interface RadioGroupProps {
   onChange: (value: string) => void;
   children: ReactNode;
   label?: string;
+  labelId?: string;
   className?: string;
 }
 
@@ -26,13 +27,14 @@ function RadioGroup({
   onChange,
   children,
   label,
+  labelId,
   className = '',
 }: RadioGroupProps) {
   return (
     <RadioGroupContext.Provider value={{ name, value, onChange }}>
       <div role="radiogroup" aria-label={label} className={className}>
         {label && (
-          <h4 className="text-[22px] font-bold text-[var(--color-darkest)] mb-4">
+          <h4 id={labelId} className="text-[22px] font-bold text-[var(--color-darkest)] mb-4">
             {label}
           </h4>
         )}
