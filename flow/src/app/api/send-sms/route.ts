@@ -84,7 +84,7 @@ Your info is saved. Try again at 2turniton.com or reply for help.
 
 Your electricity account #: ${data.orderId}
 
-In Texas, your leasing office needs this before you can move in. Email it from your confirmation page or forward this text.
+Your leasing office needs this before you can move in. Just forward this text to them.
 
 – 2TurnItOn`;
 

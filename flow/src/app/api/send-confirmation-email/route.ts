@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
           Get your keys
         </p>
         <p style="margin: 0; font-size: 16px; line-height: 1.5; color: ${colors.dark};">
-          In Texas, your leasing office needs your electricity account number before you can pick up your keys. Your account number is <strong style="color: ${colors.darkest};">${orderId}</strong>. Email this to your leasing office from your confirmation page.
+          In Texas, your leasing office needs your electricity account number before you can pick up your keys. Your account number is <strong style="color: ${colors.darkest};">${orderId}</strong>. Forward this email to them and you're done.
         </p>
       </div>
     ` : '';
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
 GET YOUR KEYS
 In Texas, your leasing office needs your electricity account number before you can pick up your keys.
 Your account number: ${orderId}
-Email this to your leasing office from your confirmation page.
+Forward this email to them and you're done.
 ` : '';
 
     // Create the email HTML - Practical UI compliant
