@@ -1049,6 +1049,11 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       // Call 2TIO checkout API
       const apiResponse = await completeCheckout(checkoutData, checkoutFiles);
 
+      // Debug: Log API response to identify cpOrderUrl field name
+      console.log('[submitOrder] API response fields:', Object.keys(apiResponse));
+      console.log('[submitOrder] Looking for cpOrderUrl - found:',
+        apiResponse.cpOrderUrl || apiResponse.CPOrderUrl || apiResponse.CPOrderURL || apiResponse.orderUrl || 'none');
+
       // Build services list for confirmation display
       const services: OrderConfirmation['services'] = [];
 
@@ -1091,7 +1096,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         depositServiceName: apiResponse.depositServiceName,
         depositVendorName: apiResponse.depositVendorName,
         // CP order URL for completing electric enrollment (redirects to ComparePower.com)
-        cpOrderUrl: apiResponse.cpOrderUrl,
+        // Check multiple possible field names (API may use PascalCase or different casing)
+        cpOrderUrl: apiResponse.cpOrderUrl || apiResponse.CPOrderUrl || apiResponse.CPOrderURL || apiResponse.orderUrl,
       };
 
       set({
