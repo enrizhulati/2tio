@@ -5,6 +5,7 @@ import { useFlowStore } from '@/store/flowStore';
 import { Button, ServiceIcon } from '@/components/ui';
 import { Confetti } from '@/components/ui/Confetti';
 import { OrderDetailsModal } from './OrderDetailsModal';
+import { LandlordEmailModal } from './LandlordEmailModal';
 import { generateOrderPdf } from '@/lib/generatePdf';
 import {
   ChevronLeft,
@@ -17,6 +18,8 @@ import {
   ChevronUp,
   ExternalLink,
   AlertCircle,
+  Key,
+  Mail,
 } from 'lucide-react';
 import { SERVICE_INFO, type ServicePlan, type TwotionCheckoutStep } from '@/types/flow';
 
@@ -165,11 +168,20 @@ function Step5Review() {
     submitOrder,
     prevStep,
     goToStep,
+    dwellingType,
+    ownershipStatus,
   } = useFlowStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLandlordEmailModalOpen, setIsLandlordEmailModalOpen] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [termsExpanded, setTermsExpanded] = useState(false);
+
+  // Determine if user is an apartment renter (show landlord email feature)
+  const isApartmentRenter =
+    dwellingType === 'apartment' ||
+    ownershipStatus === 'renter' ||
+    (selectedServices.electricity && !selectedServices.water); // Apartment proxy: has electricity but no water
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -319,6 +331,33 @@ function Step5Review() {
             </div>
           )}
 
+          {/* Apartment renter CTA - email account number to leasing office */}
+          {isApartmentRenter && selectedServices.electricity && (
+            <div className="p-5 rounded-xl bg-gradient-to-br from-[var(--color-coral-light)] to-[#FFF5F4] border-2 border-[var(--color-coral)]">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-coral)] flex items-center justify-center flex-shrink-0">
+                  <Key className="w-5 h-5 text-white" aria-hidden="true" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[18px] font-semibold text-[var(--color-darkest)]">
+                    Get your keys faster
+                  </p>
+                  <p className="text-[16px] text-[var(--color-dark)] mt-1">
+                    In Texas, your leasing office needs your electricity account number before you can pick up your keys.
+                    We can email it to them for you.
+                  </p>
+                  <button
+                    onClick={() => setIsLandlordEmailModalOpen(true)}
+                    className="inline-flex items-center gap-2 mt-3 px-5 py-3 bg-[var(--color-coral)] text-white text-[16px] font-semibold rounded-lg hover:bg-[var(--color-coral-hover)] transition-colors"
+                  >
+                    <Mail className="w-4 h-4" aria-hidden="true" />
+                    Email to my leasing office
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* What happens next - Practical UI: Use proper numbered list semantics */}
           <div className="text-left">
             <h2 className="text-[22px] font-semibold text-[var(--color-darkest)] mb-4">
@@ -391,6 +430,17 @@ function Step5Review() {
           <OrderDetailsModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
+            orderConfirmation={orderConfirmation}
+            profile={profile}
+            selectedPlans={selectedPlans}
+          />
+        )}
+
+        {/* Landlord Email Modal - for apartment renters */}
+        {profile && (
+          <LandlordEmailModal
+            isOpen={isLandlordEmailModalOpen}
+            onClose={() => setIsLandlordEmailModalOpen(false)}
             orderConfirmation={orderConfirmation}
             profile={profile}
             selectedPlans={selectedPlans}
