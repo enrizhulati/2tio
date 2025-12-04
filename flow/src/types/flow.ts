@@ -314,7 +314,7 @@ export interface FlowState {
   // New dwelling type actions
   setDwellingType: (type: Exclude<DwellingType, null>) => void;
   setOwnershipStatus: (status: 'owner' | 'renter') => void;
-  setWaterOverride: (override: boolean) => void;
+  setWaterOverride: (override: boolean) => Promise<void>;
   checkAvailability: () => Promise<void>;
   setProfile: (profile: UserProfile) => void;
   toggleService: (service: ServiceType) => Promise<void>;

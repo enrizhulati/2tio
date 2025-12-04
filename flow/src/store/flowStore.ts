@@ -273,7 +273,76 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     });
   },
 
-  setWaterOverride: (override: boolean) => set({ waterOverride: override }),
+  setWaterOverride: async (override: boolean) => {
+    set({ waterOverride: override });
+
+    // If enabling override and we don't have water plan options yet, fetch them
+    if (override) {
+      const { availableServices, waterPlanOptions } = get();
+      const waterPlan = availableServices?.water?.plans?.[0];
+
+      if (waterPlan && !waterPlanOptions) {
+        try {
+          const planDetails = await getPlanDetails('water', waterPlan.id);
+          if (planDetails.options && planDetails.options.length > 0) {
+            // Convert API PlanOption to WaterPlanOption with display-friendly pricing
+            const options: WaterPlanOption[] = planDetails.options.map((opt: PlanOption) => {
+              let displayPrice = 'Included';
+              let isIncluded = true;
+
+              if (opt.choices && opt.choices.length > 0) {
+                const prices = opt.choices
+                  .map(c => c.price)
+                  .filter((p): p is number => p !== undefined && p !== null);
+
+                if (prices.length > 1) {
+                  const minPrice = Math.min(...prices);
+                  const maxPrice = Math.max(...prices);
+                  if (minPrice === 0 && maxPrice === 0) {
+                    displayPrice = 'Included';
+                  } else if (minPrice !== maxPrice) {
+                    displayPrice = `$${minPrice}-$${maxPrice}`;
+                    isIncluded = false;
+                  } else if (minPrice > 0) {
+                    displayPrice = `$${minPrice.toFixed(2)}/month`;
+                    isIncluded = false;
+                  }
+                } else if (prices.length === 1 && prices[0] > 0) {
+                  const price = prices[0];
+                  const isOneTime = opt.name.toLowerCase().includes('fee') ||
+                                   opt.name.toLowerCase().includes('deposit');
+                  displayPrice = isOneTime ? `$${price.toFixed(2)}` : `$${price.toFixed(2)}/month`;
+                  isIncluded = false;
+                }
+              }
+
+              return {
+                id: opt.id,
+                name: opt.name,
+                type: opt.type,
+                required: opt.required,
+                choices: opt.choices,
+                selectedInt: opt.selectedInt,
+                selectedValues: opt.selectedValues,
+                displayPrice,
+                isIncluded,
+              } as WaterPlanOption;
+            });
+
+            set({
+              waterPlanOptions: options,
+              waterPlanInfo: planDetails.longDescription || planDetails.shortDescription || null,
+              // Also select the water plan
+              selectedPlans: { ...get().selectedPlans, water: waterPlan },
+              selectedServices: { ...get().selectedServices, water: true },
+            });
+          }
+        } catch (err) {
+          console.error('Error fetching water plan details:', err);
+        }
+      }
+    }
+  },
 
   checkAvailability: async () => {
     const { address, usageProfile } = get();
@@ -806,7 +875,51 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   submitOrder: async () => {
     set({ isSubmitting: true });
 
-    const { address, moveInDate, selectedServices, selectedPlans, documents, checkoutAnswers } = get();
+    const { address, moveInDate, selectedServices, selectedPlans, documents, checkoutAnswers, profile, dwellingType, ownershipStatus } = get();
+
+    // Helper to send confirmation email (fire-and-forget, don't block UI)
+    const sendConfirmationEmail = async (orderConfirmation: OrderConfirmation) => {
+      if (!profile?.email) return;
+
+      const fullAddress = `${orderConfirmation.address.street}${
+        orderConfirmation.address.unit ? `, ${orderConfirmation.address.unit}` : ''
+      }, ${orderConfirmation.address.city}, ${orderConfirmation.address.state} ${orderConfirmation.address.zip}`;
+
+      // Determine if user is apartment renter
+      const isApartmentRenter =
+        dwellingType === 'apartment' ||
+        ownershipStatus === 'renter' ||
+        (selectedServices.electricity && !selectedServices.water);
+
+      // Build services array for email
+      const emailServices = orderConfirmation.services.map(service => ({
+        type: service.type,
+        provider: service.provider,
+        plan: service.plan,
+        rate: selectedPlans[service.type]?.rate,
+      }));
+
+      try {
+        await fetch('/api/send-confirmation-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerEmail: profile.email,
+            customerName: `${profile.firstName} ${profile.lastName}`,
+            customerPhone: profile.phone,
+            orderId: orderConfirmation.orderId,
+            serviceAddress: fullAddress,
+            moveInDate: orderConfirmation.moveInDate,
+            services: emailServices,
+            isApartmentRenter,
+          }),
+        });
+        console.log('Confirmation email sent');
+      } catch (emailError) {
+        // Don't fail the order if email fails
+        console.error('Failed to send confirmation email:', emailError);
+      }
+    };
 
     try {
       // Prepare checkout data for 2TIO API
@@ -879,6 +992,9 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         orderConfirmation,
         currentStep: 4,
       });
+
+      // Send confirmation email (fire-and-forget)
+      sendConfirmationEmail(orderConfirmation);
     } catch (error) {
       console.error('Checkout error:', error);
 
@@ -921,6 +1037,9 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         orderConfirmation,
         currentStep: 4,
       });
+
+      // Still send confirmation email even on API error
+      sendConfirmationEmail(orderConfirmation);
     }
   },
 
