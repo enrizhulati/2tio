@@ -983,10 +983,11 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     }
   },
 
-  // Update monthly usage estimate and recalculate plans
+  // Update monthly usage estimate and recalculate plan costs client-side
+  // This avoids API rate limiting by not fetching new plans - just recalculating costs
   updateMonthlyUsage: async (monthlyKwh: number) => {
     console.log('[updateMonthlyUsage] Called with monthlyKwh:', monthlyKwh);
-    const { address, usageProfile } = get();
+    const { address, usageProfile, availableServices } = get();
     if (!address?.zip) {
       console.log('[updateMonthlyUsage] No zip code, aborting');
       return;
@@ -1015,10 +1016,48 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       },
     });
 
-    // Refetch plans with new usage
-    console.log('[updateMonthlyUsage] State updated, now refetching plans with new usage:', usage.slice(0, 3), '...');
-    await get().fetchElectricityPlans(address.zip);
-    console.log('[updateMonthlyUsage] Refetch complete');
+    // Recalculate plan costs client-side using existing plans (avoids API rate limiting)
+    const existingPlans = availableServices?.electricity?.plans;
+    if (!existingPlans?.length) {
+      console.log('[updateMonthlyUsage] No existing plans to recalculate');
+      return;
+    }
+
+    console.log('[updateMonthlyUsage] Recalculating', existingPlans.length, 'plans with new usage:', usage.slice(0, 3), '...');
+
+    // Recalculate costs for each plan using the new usage profile
+    const recalculatedPlans: ServicePlan[] = existingPlans.map((plan) => {
+      // Parse the rate from the plan (stored as "$0.090/kWh")
+      const rateMatch = plan.rate?.match(/\$?([\d.]+)/);
+      const ratePerKwh = rateMatch ? parseFloat(rateMatch[1]) : 0;
+
+      // Calculate new annual cost based on usage and rate
+      const annualCost = annualKwh * ratePerKwh;
+      const monthlyEstimate = annualCost / 12;
+
+      // Calculate effective rate (cents per kWh)
+      const effectiveRate = annualKwh > 0 ? (annualCost / annualKwh) * 100 : ratePerKwh * 100;
+      const rateInDollars = effectiveRate / 100;
+
+      return {
+        ...plan,
+        rate: `$${rateInDollars.toFixed(3)}/kWh`,
+        annualCost,
+        monthlyEstimate: `$${Math.round(monthlyEstimate)}`,
+      };
+    });
+
+    // Update available services with recalculated plans
+    const updatedServices: AvailableServices = {
+      ...availableServices!,
+      electricity: {
+        ...availableServices!.electricity!,
+        plans: recalculatedPlans,
+      },
+    };
+
+    set({ availableServices: updatedServices });
+    console.log('[updateMonthlyUsage] Recalculation complete');
   },
 
   // 2TIO User actions

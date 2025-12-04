@@ -306,12 +306,14 @@ function ServiceCard({
                     {service.providerCount} providers available
                   </p>
                   <p className="text-[16px] text-[var(--color-dark)]">
-                    Starting at <span className="font-semibold text-[var(--color-darkest)]">{service.startingRate}</span>
+                    Starting at <span className="font-semibold text-[var(--color-darkest)]">
+                      {type === 'electricity' && sortedPlans.length > 0 ? sortedPlans[0].rate : service.startingRate}
+                    </span>
                   </p>
-                  {/* Show home-based estimate for electricity */}
-                  {type === 'electricity' && homeDetails?.foundDetails && plans.length > 0 && plans[0].monthlyEstimate && (
+                  {/* Show usage-based estimate for electricity (cheapest plan) */}
+                  {type === 'electricity' && sortedPlans.length > 0 && sortedPlans[0].monthlyEstimate && (
                     <p className="text-[16px] text-[var(--color-teal)] font-semibold">
-                      Est. {plans[0].monthlyEstimate}/mo based on your home
+                      Est. {sortedPlans[0].monthlyEstimate}/mo based on your home
                     </p>
                   )}
                   {/* Show speed info for internet */}
