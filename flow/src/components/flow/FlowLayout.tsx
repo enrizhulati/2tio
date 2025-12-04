@@ -2,7 +2,7 @@
 
 import { type ReactNode, useEffect } from 'react';
 import { useFlowStore } from '@/store/flowStore';
-import { Home, MapPin, User, Zap, Settings, CheckCircle } from 'lucide-react';
+import { Home, MapPin, User, Settings, CheckCircle, Zap } from 'lucide-react';
 
 interface FlowLayoutProps {
   children: ReactNode;
@@ -47,8 +47,7 @@ function Logo({ onClick }: { onClick?: () => void }) {
 }
 
 // Step configuration - user-centered microcopy
-// Order: Address → Services → Your details → Verify → Confirm
-// (Services before Profile so "Choose my services" CTA is fulfilled immediately)
+// Order: Address → Services → Your details → Verify → Confirm (5 steps)
 const STEPS = [
   { step: 1, label: 'Your home', icon: MapPin },
   { step: 2, label: 'Services', icon: Zap },

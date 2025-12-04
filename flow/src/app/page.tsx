@@ -13,19 +13,19 @@ import {
 export default function Home() {
   const currentStep = useFlowStore((state) => state.currentStep);
 
-  // Flow order: Address → Services → Profile → Verify → Review
+  // Flow order: Address → Services → Profile → Verify → Confirm (5 steps)
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1Address />;
+        return <Step1Address />; // Address entry + confirmation modal
       case 2:
-        return <Step3Services />; // Services now step 2
+        return <Step3Services />; // Service selection
       case 3:
-        return <Step2Profile />; // Profile now step 3
+        return <Step2Profile />; // Your details
       case 4:
-        return <Step4Verify />;
+        return <Step4Verify />; // Verification
       case 5:
-        return <Step5Review />;
+        return <Step5Review />; // Confirmation
       default:
         return <Step1Address />;
     }

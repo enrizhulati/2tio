@@ -680,7 +680,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       set({
         isSubmitting: false,
         orderConfirmation,
-        currentStep: 5,
+        currentStep: 4,
       });
     } catch (error) {
       console.error('Checkout error:', error);
@@ -722,14 +722,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       set({
         isSubmitting: false,
         orderConfirmation,
-        currentStep: 5,
+        currentStep: 4,
       });
     }
   },
 
   nextStep: () => {
     const { currentStep } = get();
-    if (currentStep < 5) {
+    if (currentStep < 4) {
       set({ currentStep: (currentStep + 1) as FlowStep });
     }
   },
