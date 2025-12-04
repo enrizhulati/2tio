@@ -89,7 +89,7 @@ export function DwellingTypeSelector({
               >
                 {option.label}
               </span>
-              <span className="text-[14px] text-[var(--color-dark)]">
+              <span className="text-[16px] text-[var(--color-dark)]">
                 {option.description}
               </span>
             </button>

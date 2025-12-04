@@ -146,7 +146,7 @@ export function UsageSlider({
             </p>
             <div className="relative group">
               <Info className="w-4 h-4 text-[var(--color-medium)] cursor-help" />
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-3 bg-[var(--color-darkest)] text-white text-[14px] rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 shadow-lg pointer-events-none leading-relaxed">
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-3 bg-[var(--color-darkest)] text-white text-[16px] rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 shadow-lg pointer-events-none leading-relaxed">
                 {hasHomeData
                   ? 'We estimated your usage based on your home\'s size, age, and similar properties in your area.'
                   : 'We\'ll use this estimate to find plans that best match your needs.'}
@@ -196,7 +196,7 @@ export function UsageSlider({
             >
               <Icon className={`w-5 h-5 mb-1 ${isActive ? 'text-white' : 'text-[var(--color-teal)]'}`} aria-hidden="true" />
               <span className="text-[16px] font-semibold">{preset.label}</span>
-              <span className={`text-[14px] ${isActive ? 'text-white/80' : 'text-[var(--color-dark)]'}`}>
+              <span className={`text-[16px] ${isActive ? 'text-white/80' : 'text-[var(--color-dark)]'}`}>
                 {preset.description}
               </span>
             </button>
@@ -241,8 +241,8 @@ export function UsageSlider({
         />
       </div>
 
-      {/* Min/Max labels - Practical UI: 14px minimum for legibility */}
-      <div className="flex justify-between mt-2 text-[14px] text-[var(--color-medium)]">
+      {/* Min/Max labels - Practical UI: 16px minimum for legibility */}
+      <div className="flex justify-between mt-2 text-[16px] text-[var(--color-medium)]">
         <span>{minUsage.toLocaleString()} kWh</span>
         <span>{maxUsage.toLocaleString()} kWh</span>
       </div>
