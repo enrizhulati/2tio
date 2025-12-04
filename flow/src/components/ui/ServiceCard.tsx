@@ -333,6 +333,7 @@ export function ServiceCard({
                   if (plan) selectPlan(type, plan);
                 }}
                 label="Choose your plan"
+                labelId={`${type}-plan-heading`}
               >
                 {displayedPlans.map((plan, index) => {
                   // For electricity: first plan is cheapest, show GREEN badge only if 100% renewable
