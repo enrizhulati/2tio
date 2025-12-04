@@ -877,6 +877,58 @@ export const useFlowStore = create<FlowState>((set, get) => ({
 
     const { address, moveInDate, selectedServices, selectedPlans, documents, checkoutAnswers, profile, dwellingType, ownershipStatus } = get();
 
+    // Helper to send failure email (fire-and-forget)
+    const sendFailureEmail = async (errorMsg?: string) => {
+      if (!profile?.email || !address) return;
+
+      const fullAddress = `${address.street}${
+        address.unit ? `, ${address.unit}` : ''
+      }, ${address.city}, ${address.state} ${address.zip}`;
+
+      // Build services array for email
+      const emailServices: { type: string; provider: string; plan: string }[] = [];
+      if (selectedServices.water && selectedPlans.water) {
+        emailServices.push({
+          type: 'water',
+          provider: selectedPlans.water.provider,
+          plan: selectedPlans.water.name,
+        });
+      }
+      if (selectedServices.electricity && selectedPlans.electricity) {
+        emailServices.push({
+          type: 'electricity',
+          provider: selectedPlans.electricity.provider,
+          plan: selectedPlans.electricity.name,
+        });
+      }
+      if (selectedServices.internet && selectedPlans.internet) {
+        emailServices.push({
+          type: 'internet',
+          provider: selectedPlans.internet.provider,
+          plan: selectedPlans.internet.name,
+        });
+      }
+
+      try {
+        await fetch('/api/send-failure-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerEmail: profile.email,
+            customerName: `${profile.firstName} ${profile.lastName}`,
+            customerPhone: profile.phone,
+            serviceAddress: fullAddress,
+            moveInDate: moveInDate || new Date().toISOString(),
+            services: emailServices,
+            errorMessage: errorMsg,
+          }),
+        });
+        console.log('Failure email sent');
+      } catch (emailError) {
+        console.error('Failed to send failure email:', emailError);
+      }
+    };
+
     // Helper to send confirmation email (fire-and-forget, don't block UI)
     const sendConfirmationEmail = async (orderConfirmation: OrderConfirmation) => {
       if (!profile?.email) return;
@@ -998,6 +1050,10 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     } catch (error) {
       console.error('Checkout error:', error);
 
+      // Send failure notification email
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      sendFailureEmail(errorMsg);
+
       // Fallback: create local confirmation on error (so user doesn't lose progress)
       const services: OrderConfirmation['services'] = [];
       if (selectedServices.water && selectedPlans.water) {
@@ -1038,8 +1094,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         currentStep: 4,
       });
 
-      // Still send confirmation email even on API error
-      sendConfirmationEmail(orderConfirmation);
+      // Note: Failure email already sent above, don't send confirmation email on error
     }
   },
 

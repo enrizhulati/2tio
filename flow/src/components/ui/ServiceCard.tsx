@@ -35,6 +35,7 @@ export function ServiceCard({
 }) {
   const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile, updateMonthlyUsage, isLoadingElectricity, dwellingType, isApartment, originalMonthlyUsage, waterPlanOptions, waterPlanInfo } = useFlowStore();
   const [showAllPlans, setShowAllPlans] = useState(false);
+  const [showWaterOptions, setShowWaterOptions] = useState(false);
 
   // Capture initial estimate once on first render (stable even if usageProfile changes)
   const capturedEstimateRef = useRef<number | null>(null);
@@ -245,51 +246,76 @@ export function ServiceCard({
         </div>
       </div>
 
-      {/* Water plan options (sewer, garbage, fees, etc.) */}
+      {/* Water plan options accordion (sewer, garbage, fees, etc.) */}
       {isWater && waterPlanOptions && waterPlanOptions.length > 0 && (
         <div className="border-t border-[var(--color-light)]">
-          <div className="px-5 sm:px-6 py-4 space-y-3">
-            {waterPlanOptions.map((option) => (
-              <div
-                key={option.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-[var(--color-lightest)] border border-[var(--color-light)]"
-              >
-                <div className="flex items-center gap-3">
-                  {/* Checked checkbox indicator */}
-                  <div className="w-6 h-6 rounded border-2 border-[var(--color-teal)] bg-[var(--color-teal)]/10 flex items-center justify-center">
-                    <Check className="w-4 h-4 text-[var(--color-teal)]" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[16px] font-medium text-[var(--color-darkest)]">
-                        {option.name}
-                      </span>
-                      {option.required && (
-                        <span className="text-[14px] font-bold uppercase tracking-wider text-[var(--color-coral)] bg-[var(--color-coral)]/10 px-2 py-0.5 rounded">
-                          Required
-                        </span>
-                      )}
-                    </div>
-                    <span className={`text-[16px] ${option.isIncluded ? 'text-[var(--color-teal)]' : 'text-[var(--color-coral)]'}`}>
-                      {option.displayPrice}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Water info box */}
-            {waterPlanInfo && (
-              <div className="mt-4 p-4 rounded-lg bg-white border border-[var(--color-light)]">
-                <div className="flex items-start gap-3">
-                  <Info className="w-5 h-5 text-[var(--color-medium)] flex-shrink-0 mt-0.5" aria-hidden="true" />
-                  <p className="text-[16px] text-[var(--color-dark)] leading-relaxed">
-                    {waterPlanInfo}
-                  </p>
-                </div>
-              </div>
+          {/* Accordion header */}
+          <button
+            onClick={() => setShowWaterOptions(!showWaterOptions)}
+            className="w-full px-5 sm:px-6 py-4 flex items-center justify-between hover:bg-[var(--color-lightest)]/50 transition-colors"
+            aria-expanded={showWaterOptions}
+            aria-controls="water-options-panel"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-[16px] font-medium text-[var(--color-darkest)]">
+                Included services & fees
+              </span>
+              <span className="text-[14px] text-[var(--color-dark)] bg-[var(--color-lightest)] px-2 py-0.5 rounded">
+                {waterPlanOptions.length} items
+              </span>
+            </div>
+            {showWaterOptions ? (
+              <ChevronUp className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-[var(--color-dark)]" aria-hidden="true" />
             )}
-          </div>
+          </button>
+
+          {/* Accordion content */}
+          {showWaterOptions && (
+            <div id="water-options-panel" className="px-5 sm:px-6 pb-4 space-y-3 animate-slide-up">
+              {waterPlanOptions.map((option) => (
+                <div
+                  key={option.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-[var(--color-lightest)] border border-[var(--color-light)]"
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Checked checkbox indicator */}
+                    <div className="w-6 h-6 rounded border-2 border-[var(--color-teal)] bg-[var(--color-teal)]/10 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 text-[var(--color-teal)]" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[16px] font-medium text-[var(--color-darkest)]">
+                          {option.name}
+                        </span>
+                        {option.required && (
+                          <span className="text-[14px] font-bold uppercase tracking-wider text-[var(--color-coral)] bg-[var(--color-coral)]/10 px-1.5 py-0.5 rounded">
+                            Required
+                          </span>
+                        )}
+                      </div>
+                      <span className={`text-[16px] ${option.isIncluded ? 'text-[var(--color-teal)]' : 'text-[var(--color-coral)]'}`}>
+                        {option.displayPrice}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Water info box */}
+              {waterPlanInfo && (
+                <div className="mt-2 p-4 rounded-lg bg-white border border-[var(--color-light)]">
+                  <div className="flex items-start gap-3">
+                    <Info className="w-5 h-5 text-[var(--color-medium)] flex-shrink-0 mt-0.5" aria-hidden="true" />
+                    <p className="text-[16px] text-[var(--color-dark)] leading-relaxed">
+                      {waterPlanInfo}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
