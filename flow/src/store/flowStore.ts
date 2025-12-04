@@ -950,6 +950,9 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           // Enriched fields from usage calculation
           annualCost,
           renewable: plan.renewable,
+          // Raw pricing for recalculation when usage changes
+          kWh1000: plan.kWh1000,
+          mPrice: plan.mPrice,
           // New fields from 2TIO API
           logo: rawPlan?.logo,
           leadTime: rawPlan?.leadTime,
@@ -987,18 +990,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     }
   },
 
-  // Update monthly usage estimate and recalculate plan costs client-side
-  // This avoids API rate limiting by not fetching new plans - just recalculating costs
+  // Update monthly usage estimate and re-fetch plans from API
+  // API calculates accurate pricing with tiered rates, bill credits, etc.
   updateMonthlyUsage: async (monthlyKwh: number) => {
     console.log('[updateMonthlyUsage] Called with monthlyKwh:', monthlyKwh);
 
-    // Set loading state immediately for UI feedback
-    set({ isLoadingElectricity: true });
-
-    const { address, usageProfile, availableServices } = get();
+    const { address, usageProfile } = get();
     if (!address?.zip) {
       console.warn('[updateMonthlyUsage] No zip code available');
-      set({ isLoadingElectricity: false });
       return;
     }
 
@@ -1025,66 +1024,21 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       },
     });
 
-    // Recalculate plan costs client-side using existing plans (avoids API rate limiting)
-    const existingPlans = availableServices?.electricity?.plans;
-    if (!existingPlans?.length) {
-      console.warn('[updateMonthlyUsage] No existing plans to recalculate');
-      set({ isLoadingElectricity: false });
-      return;
-    }
-
-    console.log('[updateMonthlyUsage] Recalculating', existingPlans.length, 'plans with new usage:', usage.slice(0, 3), '...');
-
-    // Recalculate costs for each plan using the new usage profile
-    const recalculatedPlans: ServicePlan[] = existingPlans.map((plan) => {
-      // Parse the rate from the plan (stored as "$0.090/kWh")
-      const rateMatch = plan.rate?.match(/\$?([\d.]+)/);
-      const ratePerKwh = rateMatch ? parseFloat(rateMatch[1]) : 0;
-
-      // Calculate new annual cost based on usage and rate
-      const annualCost = annualKwh * ratePerKwh;
-      const monthlyEstimate = annualCost / 12;
-
-      // Calculate effective rate (cents per kWh)
-      const effectiveRate = annualKwh > 0 ? (annualCost / annualKwh) * 100 : ratePerKwh * 100;
-      const rateInDollars = effectiveRate / 100;
-
-      return {
-        ...plan,
-        rate: `$${rateInDollars.toFixed(3)}/kWh`,
-        annualCost,
-        monthlyEstimate: `$${Math.round(monthlyEstimate)}`,
-      };
-    });
-
-    // Update available services with recalculated plans (immediate feedback)
-    const updatedServices: AvailableServices = {
-      ...availableServices!,
-      electricity: {
-        ...availableServices!.electricity!,
-        plans: recalculatedPlans,
-      },
-    };
-
-    set({ availableServices: updatedServices, isLoadingElectricity: false });
-    console.log('[updateMonthlyUsage] Client-side recalculation complete (approximate)');
-
     // Cancel any pending debounced API call
     if (usageUpdateDebounceTimer) {
       clearTimeout(usageUpdateDebounceTimer);
     }
 
-    // Schedule debounced API call for accurate non-linear pricing
-    // Texas electricity plans have bill credits and tiered pricing that
-    // only the API can calculate correctly
+    // Debounce API call to avoid rate limiting during rapid slider movement
+    // API calculates accurate pricing including tiered rates, bill credits, etc.
     usageUpdateDebounceTimer = setTimeout(async () => {
-      console.log('[updateMonthlyUsage] Fetching accurate pricing from API...');
+      console.log('[updateMonthlyUsage] Fetching plans from API with new usage...');
       const currentAddress = get().address;
       if (currentAddress?.zip) {
         await get().fetchElectricityPlans(currentAddress.zip);
-        console.log('[updateMonthlyUsage] Accurate API pricing received');
+        console.log('[updateMonthlyUsage] API fetch complete - plans updated with accurate pricing');
       }
-    }, 600); // Wait 600ms after slider stops moving
+    }, 500); // Wait 500ms after slider stops moving
   },
 
   // 2TIO User actions
