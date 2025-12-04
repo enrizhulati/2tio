@@ -184,6 +184,23 @@ export async function GET(request: NextRequest) {
       }
 
       const data = await response.json();
+
+      // Debug: Log first plan's pricing fields to see what API returns
+      if (serviceName === 'electricity' && Array.isArray(data) && data.length > 0) {
+        const p = data[0];
+        console.log('[Plans API] First plan pricing fields:', {
+          name: p.name,
+          kWh1000: p.kWh1000,
+          mPrice: p.mPrice,
+          totalCost: p.totalCost,
+          averageCostPerMonth: p.averageCostPerMonth,
+          averageCentsPerKwh: p.averageCentsPerKwh,
+          low: p.low,
+          high: p.high,
+          electricityUsageProvided: !!electricityUsage,
+        });
+      }
+
       return NextResponse.json(data);
     }
 
