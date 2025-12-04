@@ -258,6 +258,12 @@ export async function getPlans(
   const maxRetries = 3;
   let lastError: Error | null = null;
 
+  // Debug: Log usage being passed to API
+  if (serviceName === 'electricity' && electricityUsage) {
+    const total = electricityUsage.reduce((a, b) => a + b, 0);
+    console.log(`[getPlans] Calling API with usage: ${total} kWh/year (avg ${Math.round(total/12)} kWh/mo)`);
+  }
+
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     if (attempt > 0) {
       // Exponential backoff: 1s, 2s, 4s

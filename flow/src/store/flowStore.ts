@@ -895,9 +895,11 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       const rawPlans: TwotionPlan[] = await getPlans('electricity', zipCode, usage);
 
       // Debug: Log first 3 plans' API pricing fields
-      console.log('[fetchElectricityPlans] API returned', rawPlans.length, 'plans. Usage:', monthlyAvg, 'kWh/mo');
+      const annualUsageTotal = usage.reduce((a, b) => a + b, 0);
+      console.log('[fetchElectricityPlans] API returned', rawPlans.length, 'plans. Usage:', monthlyAvg, 'kWh/mo (', annualUsageTotal, 'kWh/yr)');
       rawPlans.slice(0, 3).forEach((p, i) => {
-        console.log(`  [${i}] ${p.vendorName} - kWh1000: ${p.kWh1000}, mPrice: ${p.mPrice}, totalCost: ${p.totalCost}`);
+        const apiRate = p.totalCost ? (p.totalCost / annualUsageTotal * 100).toFixed(1) : 'N/A';
+        console.log(`  [${i}] ${p.vendorName} - kWh1000: ${p.kWh1000}, totalCost: ${p.totalCost ? `$${p.totalCost.toFixed(0)}` : 'undefined'}, API rate: ${apiRate}¢`);
       });
 
       // Convert to ServicePlan format for the store with all API fields
