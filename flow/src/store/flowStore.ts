@@ -1288,21 +1288,34 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       };
 
       // Calculate monthly average for reset functionality (only set once)
+      // If no real home data, use dwelling type default so reset matches what user sees
       const monthlyAvg = Math.round(profile.usage.reduce((a, b) => a + b, 0) / 12);
       const currentOriginal = get().originalMonthlyUsage;
+      const { dwellingType } = get();
+
+      // Use dwelling default if no real home data and we have a dwelling type
+      const effectiveOriginal = (!profile.found_home_details && dwellingType)
+        ? DWELLING_ENERGY_DEFAULTS[dwellingType]
+        : monthlyAvg;
 
       set({
         usageProfile: profile,
         homeDetails,
-        originalMonthlyUsage: currentOriginal ?? monthlyAvg, // Only set if not already set
+        originalMonthlyUsage: currentOriginal ?? effectiveOriginal, // Only set if not already set
         isLoadingElectricity: false,
       });
     } catch (error) {
       console.error('Error fetching usage profile:', error);
-      // Set default profile on error
+      // Set default profile on error - use dwelling default if available
+      const { dwellingType } = get();
       const defaultUsage = [900, 850, 900, 1000, 1200, 1400, 1500, 1500, 1300, 1100, 950, 900];
       const defaultMonthlyAvg = Math.round(defaultUsage.reduce((a, b) => a + b, 0) / 12);
       const currentOriginal = get().originalMonthlyUsage;
+
+      // Use dwelling default if available, otherwise use generic default
+      const effectiveDefault = dwellingType
+        ? DWELLING_ENERGY_DEFAULTS[dwellingType]
+        : defaultMonthlyAvg;
 
       set({
         usageProfile: {
@@ -1318,7 +1331,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
           annualKwh: calculateAnnualKwh(defaultUsage),
           foundDetails: false,
         },
-        originalMonthlyUsage: currentOriginal ?? defaultMonthlyAvg, // Only set if not already set
+        originalMonthlyUsage: currentOriginal ?? effectiveDefault, // Only set if not already set
         isLoadingElectricity: false,
       });
     }
