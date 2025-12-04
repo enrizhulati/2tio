@@ -452,12 +452,12 @@ function ServiceCard({
                 label="Choose your plan"
               >
                 {displayedPlans.map((plan, index) => {
-                  // For electricity: first plan is cheapest, show GREEN badge if renewable
+                  // For electricity: first plan is cheapest, show GREEN badge only if 100% renewable
                   const isElectricity = type === 'electricity';
                   const isInternet = type === 'internet';
                   const isCheapest = isElectricity && index === 0;
-                  const isGreen = plan.renewable || plan.badge === 'GREEN';
-                  const renewablePct = plan.renewablePercent || (isGreen ? 100 : 0);
+                  const renewablePct = plan.renewablePercent || 0;
+                  const is100Green = renewablePct >= 100;
 
                   let badge: 'BEST FIT' | 'GREEN' | 'RECOMMENDED' | 'POPULAR' | undefined;
                   let badgeVariant: 'default' | 'success' | 'cheapest' = 'default';
@@ -468,10 +468,10 @@ function ServiceCard({
                     badgeVariant = 'cheapest';
                     // Show value proposition - use "similar homes" framing
                     badgeReason = 'Best value for homes with this usage pattern';
-                  } else if (isGreen) {
+                  } else if (is100Green) {
                     badge = 'GREEN';
                     badgeVariant = 'success';
-                    badgeReason = renewablePct >= 100 ? '100% renewable energy' : `${renewablePct}% renewable energy`;
+                    badgeReason = '100% renewable energy from Texas wind and solar';
                   } else if (plan.badge === 'POPULAR') {
                     badge = 'POPULAR';
                   }

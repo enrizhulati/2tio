@@ -210,8 +210,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
             rawPlan?.bulletPoint4,
             rawPlan?.bulletPoint5,
           ].filter(Boolean) as string[],
-          badge: plan.renewable ? 'GREEN' as const : index === 0 ? 'RECOMMENDED' as const : undefined,
-          badgeReason: plan.renewable
+          badge: (rawPlan?.renewablePercent >= 100) ? 'GREEN' as const : index === 0 ? 'RECOMMENDED' as const : undefined,
+          badgeReason: (rawPlan?.renewablePercent >= 100)
             ? '100% renewable energy from Texas wind and solar'
             : index === 0
             ? 'Best value based on estimated usage'
@@ -939,8 +939,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
             rawPlan?.bulletPoint5,
           ].filter(Boolean) as string[],
           // Badge assigned dynamically in component after sorting by cost
-          badge: plan.renewable ? 'GREEN' : undefined,
-          badgeReason: plan.renewable
+          badge: (rawPlan?.renewablePercent >= 100) ? 'GREEN' : undefined,
+          badgeReason: (rawPlan?.renewablePercent >= 100)
             ? '100% renewable energy from Texas wind and solar'
             : undefined,
           // Enriched fields from usage calculation
