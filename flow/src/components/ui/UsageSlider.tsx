@@ -12,6 +12,8 @@ interface UsageSliderProps {
   originalEstimate?: number;
   /** Whether we have real home data (vs default) */
   hasHomeData?: boolean;
+  /** Whether this is an apartment (for smart defaults) */
+  isApartment?: boolean;
   /** Loading state while recalculating */
   isLoading?: boolean;
   /** Additional CSS classes */
@@ -37,6 +39,7 @@ export function UsageSlider({
   onChange,
   originalEstimate,
   hasHomeData = false,
+  isApartment = false,
   isLoading = false,
   className = '',
 }: UsageSliderProps) {
@@ -54,6 +57,17 @@ export function UsageSlider({
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
+
+  // Auto-select Small preset for apartments on first render (when no real home data)
+  const [hasAutoSelected, setHasAutoSelected] = useState(false);
+  useEffect(() => {
+    if (isApartment && !hasAutoSelected && !hasHomeData) {
+      const apartmentPreset = 750; // Small preset value
+      setLocalValue(apartmentPreset);
+      onChange(apartmentPreset);
+      setHasAutoSelected(true);
+    }
+  }, [isApartment, hasAutoSelected, hasHomeData, onChange]);
 
   // Handle preset button click
   const handlePresetClick = useCallback((presetValue: number) => {
@@ -122,9 +136,11 @@ export function UsageSlider({
             </div>
           </div>
           <p className="text-[14px] text-[var(--color-dark)] mt-0.5">
-            {hasHomeData
-              ? 'We estimated this for you. Only adjust if it seems off.'
-              : 'Select your typical monthly usage to rank plans.'}
+            {isApartment && !hasHomeData
+              ? 'Apartments typically use less electricity. Adjust if needed.'
+              : hasHomeData
+                ? 'We estimated this for you. Only adjust if it seems off.'
+                : 'Select your typical monthly usage to rank plans.'}
           </p>
         </div>
         <div className="text-right">

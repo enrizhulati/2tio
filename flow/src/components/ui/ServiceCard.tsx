@@ -31,7 +31,7 @@ export function ServiceCard({
   onExpand: () => void;
   isLoading?: boolean;
 }) {
-  const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile, updateMonthlyUsage, isLoadingElectricity } = useFlowStore();
+  const { availableServices, selectedPlans, selectPlan, homeDetails, usageProfile, updateMonthlyUsage, isLoadingElectricity, isApartment } = useFlowStore();
   const [showAllPlans, setShowAllPlans] = useState(false);
 
   // Track original estimate for reset functionality (captured on first render)
@@ -323,6 +323,7 @@ export function ServiceCard({
                   onChange={(monthlyKwh) => updateMonthlyUsage(monthlyKwh)}
                   originalEstimate={originalEstimate}
                   hasHomeData={homeDetails?.foundDetails || false}
+                  isApartment={isApartment}
                   isLoading={isLoadingElectricity}
                   className="mb-4"
                 />
