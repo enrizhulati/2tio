@@ -205,9 +205,11 @@ function Step5Review() {
 
   // Show confirmation page after order is placed
   if (orderConfirmation) {
-    // Check if electricity enrollment is pending (cpOrderUrl comes from checkout API response)
-    const hasElectricityPending = selectedServices.electricity &&
-      orderConfirmation.cpOrderUrl;
+    // cpOrderUrl can come from either:
+    // 1. Checkout API response (stored in orderConfirmation.cpOrderUrl)
+    // 2. Plans API (stored in selectedPlans.electricity.cpOrderUrl)
+    const cpOrderUrl = orderConfirmation.cpOrderUrl || selectedPlans.electricity?.cpOrderUrl;
+    const hasElectricityPending = selectedServices.electricity && cpOrderUrl;
 
     return (
       <>
@@ -242,7 +244,7 @@ function Step5Review() {
           </div>
 
           {/* Electricity CTA - shown prominently at top when pending */}
-          {hasElectricityPending && orderConfirmation.cpOrderUrl && selectedPlans.electricity && (
+          {hasElectricityPending && cpOrderUrl && selectedPlans.electricity && (
             <div className="p-6 rounded-xl bg-gradient-to-br from-[var(--color-coral-light)] to-[#FFF5F4] border-2 border-[var(--color-coral)] text-left">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-[var(--color-coral)] flex items-center justify-center flex-shrink-0">
@@ -261,7 +263,7 @@ function Step5Review() {
                     to activate electricity on {formatDate(orderConfirmation.moveInDate)}.
                   </p>
                   <a
-                    href={orderConfirmation.cpOrderUrl}
+                    href={cpOrderUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-[var(--color-coral)] text-white text-[16px] font-semibold rounded-lg hover:bg-[var(--color-coral-hover)] transition-colors shadow-md"
@@ -303,7 +305,7 @@ function Step5Review() {
             <div className="space-y-4">
               {orderConfirmation.services.map((service) => {
                 const plan = selectedPlans[service.type];
-                const isElectricityPending = service.type === 'electricity' && orderConfirmation.cpOrderUrl;
+                const isElectricityPending = service.type === 'electricity' && cpOrderUrl;
 
                 return (
                   <div key={service.type} className="flex items-start justify-between">

@@ -440,6 +440,13 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         };
       });
 
+      // Debug: Log if any electricity plans have cpOrderUrl
+      const plansWithCpUrl = electricityPlans.filter(p => p.cpOrderUrl);
+      console.log(`[fetchElectricityPlans] ${electricityPlans.length} plans fetched, ${plansWithCpUrl.length} have cpOrderUrl`);
+      if (plansWithCpUrl.length > 0) {
+        console.log('[fetchElectricityPlans] Plans with cpOrderUrl:', plansWithCpUrl.map(p => ({ name: p.name, cpOrderUrl: p.cpOrderUrl })));
+      }
+
       // Convert internet plans to ServicePlan format with all API fields
       const internetPlans: ServicePlan[] = rawInternetPlans.map((plan, index) => {
         const rawPlan = plan as RawServicePlan;
