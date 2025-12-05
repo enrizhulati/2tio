@@ -1028,7 +1028,8 @@ export const useFlowStore = create<FlowState>((set, get) => ({
             services: emailServices,
             isApartmentRenter,
             // Electricity enrollment fields (for ComparePower redirect CTA in email)
-            cpOrderUrl: selectedPlans.electricity?.cpOrderUrl,
+            // cpOrderUrl comes from checkout API response, stored in orderConfirmation
+            cpOrderUrl: orderConfirmation.cpOrderUrl,
             electricityProvider: selectedPlans.electricity?.provider,
             electricityPlan: selectedPlans.electricity?.name,
           }),
