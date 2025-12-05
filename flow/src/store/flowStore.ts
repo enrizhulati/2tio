@@ -1118,11 +1118,12 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       console.log('[submitOrder] Nested URL search result:', nestedUrl || 'NONE');
 
       // Try multiple field names for cpOrderUrl (including nested paths)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawAny = rawResponse as any;
       const foundCpOrderUrl = rawResponse.cpOrderUrl || rawResponse.CPOrderUrl || rawResponse.CPOrderURL ||
         rawResponse.orderUrl || rawResponse.OrderUrl || rawResponse.cpUrl || rawResponse.CPUrl ||
         rawResponse.comparePowerUrl || rawResponse.enrollmentUrl || rawResponse.electricityUrl ||
-        (rawResponse as Record<string, Record<string, unknown>>).electricity?.cpOrderUrl ||
-        (rawResponse as Record<string, Record<string, unknown>>).services?.[0]?.cpOrderUrl ||
+        rawAny.electricity?.cpOrderUrl || rawAny.services?.[0]?.cpOrderUrl ||
         nestedUrl;
       console.log('[submitOrder] cpOrderUrl found:', foundCpOrderUrl || 'NONE - API did not return any matching field');
 

@@ -21,7 +21,7 @@ import {
   Key,
   Mail,
 } from 'lucide-react';
-import { SERVICE_INFO, type ServicePlan, type TwotionCheckoutStep } from '@/types/flow';
+import { SERVICE_INFO, type ServicePlan, type TwotionCheckoutStep, type OrderConfirmation } from '@/types/flow';
 
 // Generate terms text for a vendor - uses API terms if available, otherwise generic
 function generateVendorTerms(
@@ -193,39 +193,101 @@ function Step5Review() {
     });
   };
 
+  // DEBUG: Check URL for ?mock_confirmation=1 to test confirmation UI with mock data
+  const isMockConfirmation = typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('mock_confirmation') === '1';
+
+  // Default mock address if none exists
+  const mockAddress = {
+    street: '3031 Oliver St',
+    city: 'Dallas',
+    state: 'TX',
+    zip: '75205',
+    formatted: '3031 Oliver St, Dallas, TX 75205',
+  };
+
+  // Create mock orderConfirmation for testing when ?mock_confirmation=1
+  // Type assertion to satisfy OrderConfirmation interface
+  // In mock mode, ALWAYS include electricity to test the "Almost there!" UI
+  const mockOrderConfirmation: OrderConfirmation | null = isMockConfirmation ? {
+    orderId: 'MOCK-2TIO-12345',
+    address: address || mockAddress,
+    moveInDate: moveInDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    services: [
+      // Always include electricity in mock mode to test the "Almost there!" UI
+      {
+        type: 'electricity' as const,
+        provider: selectedPlans.electricity?.provider || 'TXU Energy',
+        plan: selectedPlans.electricity?.name || 'Free Nights 12',
+        status: 'pending' as const,
+      },
+      // Also include water to show the mixed state (electricity pending, water confirmed)
+      {
+        type: 'water' as const,
+        provider: selectedPlans.water?.provider || 'City of Dallas',
+        plan: selectedPlans.water?.name || 'Standard Residential',
+        status: 'confirmed' as const,
+      },
+    ],
+    cpOrderUrl: 'https://comparepower.com/enroll?mock=true&demo=1',
+  } : null;
+
+  // Use real orderConfirmation or mock for testing
+  const effectiveOrderConfirmation: OrderConfirmation | null = orderConfirmation || mockOrderConfirmation;
+
+  // Mock electricity plan for display when in mock mode
+  const mockElectricityPlan = isMockConfirmation ? {
+    id: 'mock-electricity-plan',
+    name: 'Free Nights 12',
+    provider: 'TXU Energy',
+    rate: '11.5¢/kWh',
+    contractLabel: '12 month contract',
+    setupFee: 0,
+    cpOrderUrl: 'https://comparepower.com/enroll?mock=true&demo=1',
+  } : null;
+
+  // Use real plan or mock plan for display
+  const effectiveElectricityPlan = selectedPlans.electricity || mockElectricityPlan;
+
   const handleDownloadPdf = () => {
-    if (orderConfirmation && profile) {
+    if (effectiveOrderConfirmation && profile) {
       generateOrderPdf({
-        orderConfirmation,
+        orderConfirmation: effectiveOrderConfirmation,
         profile,
         selectedPlans,
       });
     }
   };
 
-  // Show confirmation page after order is placed
-  if (orderConfirmation) {
+  // Show confirmation page after order is placed (or in mock mode)
+  if (effectiveOrderConfirmation) {
     // cpOrderUrl can come from either:
     // 1. Checkout API response (stored in orderConfirmation.cpOrderUrl)
     // 2. Plans API (stored in selectedPlans.electricity.cpOrderUrl)
     // 3. DEBUG: Check URL for ?debug_cp=1 to test with mock URL
+    // 4. MOCK: ?mock_confirmation=1 injects a full mock confirmation with cpOrderUrl
     const debugCpUrl = typeof window !== 'undefined' &&
       new URLSearchParams(window.location.search).get('debug_cp') === '1'
         ? 'https://comparepower.com/enroll?demo=true'
         : null;
 
-    const cpOrderUrl = debugCpUrl || orderConfirmation.cpOrderUrl || selectedPlans.electricity?.cpOrderUrl;
-    const hasElectricityPending = selectedServices.electricity && cpOrderUrl;
+    const cpOrderUrl = debugCpUrl || effectiveOrderConfirmation.cpOrderUrl || selectedPlans.electricity?.cpOrderUrl;
+    // In mock mode, check if mock services include electricity instead of store state
+    const hasElectricityInServices = isMockConfirmation
+      ? effectiveOrderConfirmation.services.some(s => s.type === 'electricity')
+      : selectedServices.electricity;
+    const hasElectricityPending = hasElectricityInServices && cpOrderUrl;
 
     // DEBUG: Log cpOrderUrl sources to help diagnose the issue
     console.log('[Step5Review] DEBUG cpOrderUrl check:', {
       'debugCpUrl (from ?debug_cp=1)': debugCpUrl,
-      'orderConfirmation.cpOrderUrl': orderConfirmation.cpOrderUrl,
+      'effectiveOrderConfirmation.cpOrderUrl': effectiveOrderConfirmation.cpOrderUrl,
       'selectedPlans.electricity?.cpOrderUrl': selectedPlans.electricity?.cpOrderUrl,
       'resolved cpOrderUrl': cpOrderUrl,
       'selectedServices.electricity': selectedServices.electricity,
       'hasElectricityPending': hasElectricityPending,
-      'full orderConfirmation': orderConfirmation,
+      'isMockConfirmation': isMockConfirmation,
+      'full effectiveOrderConfirmation': effectiveOrderConfirmation,
     });
 
     return (
@@ -261,7 +323,7 @@ function Step5Review() {
           </div>
 
           {/* Electricity CTA - shown prominently at top when pending */}
-          {hasElectricityPending && cpOrderUrl && selectedPlans.electricity && (
+          {hasElectricityPending && cpOrderUrl && effectiveElectricityPlan && (
             <div className="p-6 rounded-xl bg-gradient-to-br from-[var(--color-coral-light)] to-[#FFF5F4] border-2 border-[var(--color-coral)] text-left">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-[var(--color-coral)] flex items-center justify-center flex-shrink-0">
@@ -275,9 +337,9 @@ function Step5Review() {
                     Complete your electricity enrollment
                   </h3>
                   <p className="text-[16px] text-[var(--color-dark)] mt-2 leading-relaxed">
-                    You selected <strong>{selectedPlans.electricity.name}</strong> from{' '}
-                    <strong>{selectedPlans.electricity.provider}</strong>. Complete enrollment
-                    to activate electricity on {formatDate(orderConfirmation.moveInDate)}.
+                    You selected <strong>{effectiveElectricityPlan.name}</strong> from{' '}
+                    <strong>{effectiveElectricityPlan.provider}</strong>. Complete enrollment
+                    to activate electricity on {formatDate(effectiveOrderConfirmation.moveInDate)}.
                   </p>
                   <a
                     href={cpOrderUrl}
@@ -292,7 +354,7 @@ function Step5Review() {
                     Opens in new tab • Takes 2-3 minutes
                   </p>
                   <p className="text-[14px] text-[var(--color-medium)] mt-1">
-                    After completing, you'll receive your account number and confirmation from {selectedPlans.electricity.provider} via email.
+                    After completing, you'll receive your account number and confirmation from {effectiveElectricityPlan.provider} via email.
                   </p>
                 </div>
               </div>
@@ -302,25 +364,25 @@ function Step5Review() {
           {/* Order card */}
           <div className="p-6 rounded-xl border-2 border-[var(--color-light)] bg-white text-left">
             <p className="text-[16px] text-[var(--color-dark)] mb-2">
-              Order #{orderConfirmation.orderId}
+              Order #{effectiveOrderConfirmation.orderId}
             </p>
             <p className="text-[18px] font-semibold text-[var(--color-darkest)]">
-              {orderConfirmation.address.street}
-              {orderConfirmation.address.unit && `, ${orderConfirmation.address.unit}`}
+              {effectiveOrderConfirmation.address.street}
+              {effectiveOrderConfirmation.address.unit && `, ${effectiveOrderConfirmation.address.unit}`}
             </p>
             <p className="text-[16px] text-[var(--color-dark)]">
-              {orderConfirmation.address.city}, {orderConfirmation.address.state}{' '}
-              {orderConfirmation.address.zip}
+              {effectiveOrderConfirmation.address.city}, {effectiveOrderConfirmation.address.state}{' '}
+              {effectiveOrderConfirmation.address.zip}
             </p>
             <p className="text-[16px] text-[var(--color-dark)] mt-2">
-              Services starting {formatDate(orderConfirmation.moveInDate)}
+              Services starting {formatDate(effectiveOrderConfirmation.moveInDate)}
             </p>
 
             <div className="border-t border-[var(--color-light)] my-4" />
 
             {/* Services status */}
             <div className="space-y-4">
-              {orderConfirmation.services.map((service) => {
+              {effectiveOrderConfirmation.services.map((service) => {
                 const plan = selectedPlans[service.type];
                 const isElectricityPending = service.type === 'electricity' && cpOrderUrl;
 
@@ -368,19 +430,19 @@ function Step5Review() {
           </div>
 
           {/* Deposit Notice - shown if credit check requires deposit */}
-          {orderConfirmation.depositRequired && orderConfirmation.depositAmount && (
+          {effectiveOrderConfirmation.depositRequired && effectiveOrderConfirmation.depositAmount && (
             <div className="p-4 rounded-xl bg-[var(--color-warning-light)] border border-[var(--color-warning)]">
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-[var(--color-warning)] flex-shrink-0 mt-0.5" aria-hidden="true" />
                 <div>
                   <p className="text-[16px] font-medium text-[var(--color-darkest)]">
-                    Deposit Required: ${orderConfirmation.depositAmount.toLocaleString()}
+                    Deposit Required: ${effectiveOrderConfirmation.depositAmount.toLocaleString()}
                   </p>
                   <p className="text-[16px] text-[var(--color-dark)] mt-1">
-                    {orderConfirmation.depositVendorName && (
-                      <span>{orderConfirmation.depositVendorName} requires a deposit </span>
+                    {effectiveOrderConfirmation.depositVendorName && (
+                      <span>{effectiveOrderConfirmation.depositVendorName} requires a deposit </span>
                     )}
-                    {orderConfirmation.depositReason || 'based on the credit check for your account.'}
+                    {effectiveOrderConfirmation.depositReason || 'based on the credit check for your account.'}
                     {' '}You'll receive payment instructions via email.
                   </p>
                 </div>
@@ -535,7 +597,7 @@ function Step5Review() {
           <OrderDetailsModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            orderConfirmation={orderConfirmation}
+            orderConfirmation={effectiveOrderConfirmation}
             profile={profile}
             selectedPlans={selectedPlans}
           />
@@ -546,7 +608,7 @@ function Step5Review() {
           <LandlordEmailModal
             isOpen={isLandlordEmailModalOpen}
             onClose={() => setIsLandlordEmailModalOpen(false)}
-            orderConfirmation={orderConfirmation}
+            orderConfirmation={effectiveOrderConfirmation}
             profile={profile}
             selectedPlans={selectedPlans}
           />
