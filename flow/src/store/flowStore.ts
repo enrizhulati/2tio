@@ -1062,12 +1062,24 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       // Call 2TIO checkout API
       const apiResponse = await completeCheckout(checkoutData, checkoutFiles);
 
-      // Debug: Log API response to identify cpOrderUrl field name
+      // Debug: Log FULL API response to identify cpOrderUrl field name
       // Cast to Record to check for alternative field names the API might use
       const rawResponse = apiResponse as unknown as Record<string, unknown>;
+      console.log('[submitOrder] FULL API response:', JSON.stringify(rawResponse, null, 2));
       console.log('[submitOrder] API response fields:', Object.keys(rawResponse));
-      console.log('[submitOrder] Looking for cpOrderUrl - found:',
-        rawResponse.cpOrderUrl || rawResponse.CPOrderUrl || rawResponse.CPOrderURL || rawResponse.orderUrl || 'none');
+
+      // Search for ANY field containing 'url', 'Url', 'URL', 'order', 'Order', 'cp', 'CP'
+      const urlFields = Object.entries(rawResponse).filter(([key, value]) =>
+        (key.toLowerCase().includes('url') || key.toLowerCase().includes('order') || key.toLowerCase().includes('cp'))
+        && typeof value === 'string'
+      );
+      console.log('[submitOrder] Fields containing url/order/cp:', urlFields);
+
+      // Try multiple field names for cpOrderUrl
+      const foundCpOrderUrl = rawResponse.cpOrderUrl || rawResponse.CPOrderUrl || rawResponse.CPOrderURL ||
+        rawResponse.orderUrl || rawResponse.OrderUrl || rawResponse.cpUrl || rawResponse.CPUrl ||
+        rawResponse.comparePowerUrl || rawResponse.enrollmentUrl || rawResponse.electricityUrl;
+      console.log('[submitOrder] cpOrderUrl found:', foundCpOrderUrl || 'NONE - API did not return any matching field');
 
       // Build services list for confirmation display
       const services: OrderConfirmation['services'] = [];
@@ -1112,7 +1124,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
         depositVendorName: apiResponse.depositVendorName,
         // CP order URL for completing electric enrollment (redirects to ComparePower.com)
         // Check multiple possible field names (API may use PascalCase or different casing)
-        cpOrderUrl: (rawResponse.cpOrderUrl || rawResponse.CPOrderUrl || rawResponse.CPOrderURL || rawResponse.orderUrl) as string | undefined,
+        cpOrderUrl: (foundCpOrderUrl) as string | undefined,
       };
 
       set({
