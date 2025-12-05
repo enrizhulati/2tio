@@ -211,6 +211,16 @@ function Step5Review() {
     const cpOrderUrl = orderConfirmation.cpOrderUrl || selectedPlans.electricity?.cpOrderUrl;
     const hasElectricityPending = selectedServices.electricity && cpOrderUrl;
 
+    // DEBUG: Log cpOrderUrl sources to help diagnose the issue
+    console.log('[Step5Review] DEBUG cpOrderUrl check:', {
+      'orderConfirmation.cpOrderUrl': orderConfirmation.cpOrderUrl,
+      'selectedPlans.electricity?.cpOrderUrl': selectedPlans.electricity?.cpOrderUrl,
+      'resolved cpOrderUrl': cpOrderUrl,
+      'selectedServices.electricity': selectedServices.electricity,
+      'hasElectricityPending': hasElectricityPending,
+      'full orderConfirmation': orderConfirmation,
+    });
+
     return (
       <>
         {/* Only show confetti when all services are complete */}
