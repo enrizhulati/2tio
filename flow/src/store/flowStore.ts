@@ -1075,17 +1075,55 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       console.log('[submitOrder] FULL API response:', JSON.stringify(rawResponse, null, 2));
       console.log('[submitOrder] API response fields:', Object.keys(rawResponse));
 
-      // Search for ANY field containing 'url', 'Url', 'URL', 'order', 'Order', 'cp', 'CP'
+      // Recursive function to find any URL field in nested objects
+      function findUrlInObject(obj: unknown, path = ''): string | null {
+        if (!obj || typeof obj !== 'object') return null;
+
+        const record = obj as Record<string, unknown>;
+        for (const [key, value] of Object.entries(record)) {
+          const currentPath = path ? `${path}.${key}` : key;
+
+          // Check if this key contains url-related terms
+          const keyLower = key.toLowerCase();
+          if ((keyLower.includes('url') || keyLower.includes('order') || keyLower.includes('cp') ||
+               keyLower.includes('link') || keyLower.includes('enroll') || keyLower.includes('redirect'))
+              && typeof value === 'string' && value.startsWith('http')) {
+            console.log(`[submitOrder] Found URL at ${currentPath}:`, value);
+            return value;
+          }
+
+          // Recursively search arrays and objects
+          if (Array.isArray(value)) {
+            for (let i = 0; i < value.length; i++) {
+              const found = findUrlInObject(value[i], `${currentPath}[${i}]`);
+              if (found) return found;
+            }
+          } else if (typeof value === 'object' && value !== null) {
+            const found = findUrlInObject(value, currentPath);
+            if (found) return found;
+          }
+        }
+        return null;
+      }
+
+      // Search for ANY field containing 'url', 'Url', 'URL', 'order', 'Order', 'cp', 'CP' at top level
       const urlFields = Object.entries(rawResponse).filter(([key, value]) =>
         (key.toLowerCase().includes('url') || key.toLowerCase().includes('order') || key.toLowerCase().includes('cp'))
         && typeof value === 'string'
       );
-      console.log('[submitOrder] Fields containing url/order/cp:', urlFields);
+      console.log('[submitOrder] Top-level fields containing url/order/cp:', urlFields);
 
-      // Try multiple field names for cpOrderUrl
+      // Search nested objects for URLs
+      const nestedUrl = findUrlInObject(rawResponse);
+      console.log('[submitOrder] Nested URL search result:', nestedUrl || 'NONE');
+
+      // Try multiple field names for cpOrderUrl (including nested paths)
       const foundCpOrderUrl = rawResponse.cpOrderUrl || rawResponse.CPOrderUrl || rawResponse.CPOrderURL ||
         rawResponse.orderUrl || rawResponse.OrderUrl || rawResponse.cpUrl || rawResponse.CPUrl ||
-        rawResponse.comparePowerUrl || rawResponse.enrollmentUrl || rawResponse.electricityUrl;
+        rawResponse.comparePowerUrl || rawResponse.enrollmentUrl || rawResponse.electricityUrl ||
+        (rawResponse as Record<string, Record<string, unknown>>).electricity?.cpOrderUrl ||
+        (rawResponse as Record<string, Record<string, unknown>>).services?.[0]?.cpOrderUrl ||
+        nestedUrl;
       console.log('[submitOrder] cpOrderUrl found:', foundCpOrderUrl || 'NONE - API did not return any matching field');
 
       // Build services list for confirmation display
