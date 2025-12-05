@@ -1117,7 +1117,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       set({
         isSubmitting: false,
         orderConfirmation,
-        currentStep: 4,
+        // Stay on step 5 to show confirmation (step 5 = Review/Confirmation)
       });
 
       // Send confirmation email and SMS (fire-and-forget)
@@ -1178,7 +1178,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       set({
         isSubmitting: false,
         orderConfirmation,
-        currentStep: 4,
+        // Stay on step 5 to show confirmation (step 5 = Review/Confirmation)
       });
 
       // Note: Failure email already sent above, don't send confirmation email on error
