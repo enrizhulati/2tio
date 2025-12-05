@@ -26,6 +26,10 @@ interface ConfirmationEmailRequest {
   moveInDate: string;
   services: ServiceInfo[];
   isApartmentRenter?: boolean;
+  // Electricity enrollment fields (for ComparePower redirect)
+  cpOrderUrl?: string;
+  electricityProvider?: string;
+  electricityPlan?: string;
 }
 
 // Practical UI Design Tokens
@@ -57,7 +61,13 @@ export async function POST(request: NextRequest) {
       moveInDate,
       services,
       isApartmentRenter,
+      cpOrderUrl,
+      electricityProvider,
+      electricityPlan,
     } = body;
+
+    // Check if electricity enrollment is pending
+    const hasElectricityPending = !!cpOrderUrl;
 
     // Validate required fields
     if (!customerEmail || !customerName || !orderId || !serviceAddress || !services?.length) {
@@ -121,6 +131,40 @@ Your account number: ${orderId}
 Forward this email to them and you're done.
 ` : '';
 
+    // Electricity enrollment CTA - prominent section when cpOrderUrl exists
+    const electricityCtaHtml = hasElectricityPending ? `
+      <div style="background: linear-gradient(135deg, ${colors.coralLight} 0%, #FFF5F4 100%); border: 2px solid ${colors.coral}; border-radius: 12px; padding: 28px; margin: 32px 0;">
+        <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: ${colors.coral}; text-transform: uppercase; letter-spacing: 0.1em;">
+          ⚡ Action Required
+        </p>
+        <h2 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 700; color: ${colors.darkest};">
+          Complete Your Electricity Enrollment
+        </h2>
+        <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.5; color: ${colors.dark};">
+          You selected <strong style="color: ${colors.darkest};">${electricityPlan}</strong> from <strong style="color: ${colors.darkest};">${electricityProvider}</strong>. Complete enrollment to activate electricity at your new address.
+        </p>
+        <a href="${cpOrderUrl}" style="display: inline-block; padding: 14px 28px; background: ${colors.coral}; color: ${colors.white}; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 8px; text-align: center;">
+          Complete Electricity Enrollment →
+        </a>
+        <p style="margin: 16px 0 0 0; font-size: 14px; color: ${colors.dark};">
+          This takes 2-3 minutes. After completing, you'll receive your account number and confirmation from ${electricityProvider}.
+        </p>
+      </div>
+    ` : '';
+
+    const electricityCtaText = hasElectricityPending ? `
+⚡ ACTION REQUIRED: COMPLETE YOUR ELECTRICITY ENROLLMENT
+
+You selected ${electricityPlan} from ${electricityProvider}.
+Complete enrollment to activate electricity at your new address.
+
+Complete enrollment here: ${cpOrderUrl}
+
+This takes 2-3 minutes. After completing, you'll receive your account number from ${electricityProvider}.
+
+────────────────────────────────────────────────
+` : '';
+
     // Create the email HTML - Practical UI compliant
     const emailHtml = `
 <!DOCTYPE html>
@@ -141,15 +185,15 @@ Forward this email to them and you're done.
 
           <!-- Header -->
           <tr>
-            <td style="background: ${colors.teal}; padding: 48px 32px; text-align: center;">
+            <td style="background: ${hasElectricityPending ? colors.coral : colors.teal}; padding: 48px 32px; text-align: center;">
               <div style="width: 64px; height: 64px; background: ${colors.white}; border-radius: 50%; margin: 0 auto 24px; line-height: 64px; text-align: center;">
-                <span style="font-size: 32px; color: ${colors.teal};">✓</span>
+                <span style="font-size: 32px; color: ${hasElectricityPending ? colors.coral : colors.teal};">${hasElectricityPending ? '⏳' : '✓'}</span>
               </div>
               <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: ${colors.white}; letter-spacing: -0.02em;">
-                You're all set
+                ${hasElectricityPending ? 'Almost done!' : "You're all set"}
               </h1>
               <p style="margin: 8px 0 0 0; font-size: 18px; color: rgba(255,255,255,0.9);">
-                Your utilities are being set up
+                ${hasElectricityPending ? 'One more step to complete your electricity' : 'Your utilities are being set up'}
               </p>
             </td>
           </tr>
@@ -162,8 +206,12 @@ Forward this email to them and you're done.
                 Hi ${customerName.split(' ')[0]},
               </p>
 
+              ${electricityCtaHtml}
+
               <p style="margin: 0 0 32px 0; font-size: 18px; line-height: 1.5; color: ${colors.dark};">
-                We've submitted your utility setup requests. Here's your order summary.
+                ${hasElectricityPending
+                  ? "We've submitted your other utility requests. Here's your order summary."
+                  : "We've submitted your utility setup requests. Here's your order summary."}
               </p>
 
               <!-- Order Details Card -->
@@ -264,11 +312,13 @@ Forward this email to them and you're done.
 `;
 
     // Plain text version - Practical UI: front-load important info, be concise
-    const emailText = `You're all set
+    const emailText = `${hasElectricityPending ? 'Almost done!' : "You're all set"}
 
 Hi ${customerName.split(' ')[0]},
 
-We've submitted your utility setup requests.
+${electricityCtaText}${hasElectricityPending
+  ? "We've submitted your other utility requests."
+  : "We've submitted your utility setup requests."}
 
 ORDER DETAILS
 Order number: ${orderId}
@@ -290,10 +340,14 @@ Questions? Contact support@2tion.com
 `;
 
     // Send the email using Resend
+    const subject = hasElectricityPending
+      ? `Almost done! Complete your electricity enrollment – ${orderId}`
+      : `Order confirmed – ${orderId}`;
+
     const { data, error } = await getResend().emails.send({
       from: '2TurnItOn <onboarding@resend.dev>',
       to: customerEmail,
-      subject: `Order confirmed – ${orderId}`,
+      subject,
       html: emailHtml,
       text: emailText,
     });

@@ -205,26 +205,80 @@ function Step5Review() {
 
   // Show confirmation page after order is placed
   if (orderConfirmation) {
+    // Check if electricity enrollment is pending (has cpOrderUrl that needs completion)
+    const hasElectricityPending = selectedServices.electricity &&
+      selectedPlans.electricity?.cpOrderUrl;
+
     return (
       <>
-        <Confetti />
+        {/* Only show confetti when all services are complete */}
+        {!hasElectricityPending && <Confetti />}
         <div className="space-y-8 text-center">
-          {/* Success icon */}
+          {/* Success/Pending icon */}
           <div className="flex justify-center">
-            <div className="w-20 h-20 rounded-full bg-[var(--color-success-light)] flex items-center justify-center">
-              <CheckCircle className="w-10 h-10 text-[var(--color-success)]" aria-hidden="true" />
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center ${
+              hasElectricityPending
+                ? 'bg-[var(--color-coral-light)]'
+                : 'bg-[var(--color-success-light)]'
+            }`}>
+              {hasElectricityPending ? (
+                <Clock className="w-10 h-10 text-[var(--color-coral)]" aria-hidden="true" />
+              ) : (
+                <CheckCircle className="w-10 h-10 text-[var(--color-success)]" aria-hidden="true" />
+              )}
             </div>
           </div>
 
-          {/* Heading */}
+          {/* Heading - phased messaging based on electricity status */}
           <div>
             <h1 className="text-[32px] sm:text-[44px] font-bold text-[var(--color-darkest)] leading-[1.15] tracking-tight mb-3">
-              You're all set!
+              {hasElectricityPending ? 'Almost there!' : "You're all set!"}
             </h1>
             <p className="text-[18px] text-[var(--color-dark)]">
-              Your utilities are being set up — one less thing to worry about.
+              {hasElectricityPending
+                ? 'Complete one more step to finish setting up your electricity.'
+                : 'Your utilities are being set up — one less thing to worry about.'}
             </p>
           </div>
+
+          {/* Electricity CTA - shown prominently at top when pending */}
+          {hasElectricityPending && selectedPlans.electricity?.cpOrderUrl && (
+            <div className="p-6 rounded-xl bg-gradient-to-br from-[var(--color-coral-light)] to-[#FFF5F4] border-2 border-[var(--color-coral)] text-left">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-[var(--color-coral)] flex items-center justify-center flex-shrink-0">
+                  <ServiceIcon type="electricity" size="md" className="text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[14px] font-bold text-[var(--color-coral)] uppercase tracking-wide mb-1">
+                    Action Required
+                  </p>
+                  <h3 className="text-[20px] font-semibold text-[var(--color-darkest)]">
+                    Complete your electricity enrollment
+                  </h3>
+                  <p className="text-[16px] text-[var(--color-dark)] mt-2 leading-relaxed">
+                    You selected <strong>{selectedPlans.electricity.name}</strong> from{' '}
+                    <strong>{selectedPlans.electricity.provider}</strong>. Complete enrollment
+                    to activate electricity on {formatDate(orderConfirmation.moveInDate)}.
+                  </p>
+                  <a
+                    href={selectedPlans.electricity.cpOrderUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-[var(--color-coral)] text-white text-[16px] font-semibold rounded-lg hover:bg-[var(--color-coral-hover)] transition-colors shadow-md"
+                  >
+                    Complete Electricity Enrollment
+                    <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                  </a>
+                  <p className="text-[14px] text-[var(--color-dark)] mt-3">
+                    Opens in new tab • Takes 2-3 minutes
+                  </p>
+                  <p className="text-[14px] text-[var(--color-medium)] mt-1">
+                    After completing, you'll receive your account number and confirmation from {selectedPlans.electricity.provider} via email.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Order card */}
           <div className="p-6 rounded-xl border-2 border-[var(--color-light)] bg-white text-left">
@@ -249,6 +303,8 @@ function Step5Review() {
             <div className="space-y-4">
               {orderConfirmation.services.map((service) => {
                 const plan = selectedPlans[service.type];
+                const isElectricityPending = service.type === 'electricity' && plan?.cpOrderUrl;
+
                 return (
                   <div key={service.type} className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
@@ -260,8 +316,8 @@ function Step5Review() {
                         <p className="text-[16px] text-[var(--color-dark)]">
                           {service.provider}
                         </p>
-                        {/* Show lead time from API */}
-                        {plan?.leadTime !== undefined && plan.leadTime > 0 && (
+                        {/* Show lead time from API (only for confirmed services) */}
+                        {!isElectricityPending && plan?.leadTime !== undefined && plan.leadTime > 0 && (
                           <p className="text-[16px] text-[var(--color-teal)]">
                             Ready in {plan.leadTime} {plan.leadTime === 1 ? 'day' : 'days'}
                           </p>
@@ -274,10 +330,18 @@ function Step5Review() {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 text-[16px] text-[var(--color-warning)]">
-                      <Clock className="w-4 h-4" aria-hidden="true" />
-                      <span>Setting up...</span>
-                    </div>
+                    {/* Status badge - different for electricity pending vs confirmed services */}
+                    {isElectricityPending ? (
+                      <div className="flex items-center gap-1 text-[14px] text-[var(--color-coral)] font-medium">
+                        <Clock className="w-4 h-4" aria-hidden="true" />
+                        <span>Action required</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-[14px] text-[var(--color-success)] font-medium">
+                        <Check className="w-4 h-4" aria-hidden="true" />
+                        <span>Confirmed</span>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -305,53 +369,41 @@ function Step5Review() {
             </div>
           )}
 
-          {/* CP Order Link - for completing electric enrollment */}
-          {selectedPlans.electricity?.cpOrderUrl && (
-            <div className="p-5 rounded-xl bg-[var(--color-teal-light)] border-2 border-[var(--color-teal)]">
-              <div className="flex items-start gap-3">
-                <ServiceIcon type="electricity" size="md" />
-                <div className="flex-1">
-                  <p className="text-[18px] font-semibold text-[var(--color-darkest)]">
-                    Complete your electricity enrollment
-                  </p>
-                  <p className="text-[16px] text-[var(--color-dark)] mt-1">
-                    Click below to finalize your electricity service with your selected provider.
-                  </p>
-                  <a
-                    href={selectedPlans.electricity.cpOrderUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 mt-3 px-5 py-3 bg-[var(--color-teal)] text-white text-[16px] font-semibold rounded-lg hover:bg-[var(--color-teal-dark)] transition-colors"
-                  >
-                    Complete enrollment
-                    <ExternalLink className="w-4 h-4" aria-hidden="true" />
-                  </a>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* CP Order Link moved to top when pending - this is now handled above */}
 
           {/* Apartment renter CTA - email account number to leasing office */}
           {isApartmentRenter && selectedServices.electricity && (
-            <div className="p-6 rounded-xl bg-[var(--color-coral-light)] border border-[var(--color-light)] text-left">
+            <div className="p-6 rounded-xl bg-[var(--color-lightest)] border border-[var(--color-light)] text-left">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-[var(--color-coral)] flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-[var(--color-teal)] flex items-center justify-center flex-shrink-0">
                   <Key className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
                 <div>
                   <h3 className="text-[18px] font-semibold text-[var(--color-darkest)]">
                     Get your keys faster
                   </h3>
-                  <p className="text-[16px] text-[var(--color-dark)] mt-2 leading-relaxed">
-                    In Texas, your leasing office needs your electricity account number before you can pick up your keys. We can email it to them for you.
-                  </p>
-                  <button
-                    onClick={() => setIsLandlordEmailModalOpen(true)}
-                    className="inline-flex items-center gap-2 mt-4 px-4 py-2.5 bg-[var(--color-coral)] text-white text-[16px] font-medium rounded-lg hover:bg-[var(--color-coral-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-coral)] focus-visible:ring-offset-2"
-                  >
-                    <Mail className="w-4 h-4" aria-hidden="true" />
-                    Email to my leasing office
-                  </button>
+                  {hasElectricityPending ? (
+                    // When electricity enrollment is pending
+                    <p className="text-[16px] text-[var(--color-dark)] mt-2 leading-relaxed">
+                      In Texas, your leasing office needs your electricity account number before you can pick up your keys.{' '}
+                      <strong>After completing electricity enrollment above</strong>, forward your confirmation email
+                      from {selectedPlans.electricity?.provider} to your leasing office — it will include your account number.
+                    </p>
+                  ) : (
+                    // When electricity is already confirmed
+                    <>
+                      <p className="text-[16px] text-[var(--color-dark)] mt-2 leading-relaxed">
+                        In Texas, your leasing office needs your electricity account number before you can pick up your keys. We can email it to them for you.
+                      </p>
+                      <button
+                        onClick={() => setIsLandlordEmailModalOpen(true)}
+                        className="inline-flex items-center gap-2 mt-4 px-4 py-2.5 bg-[var(--color-teal)] text-white text-[16px] font-medium rounded-lg hover:bg-[var(--color-teal-dark)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-teal)] focus-visible:ring-offset-2"
+                      >
+                        <Mail className="w-4 h-4" aria-hidden="true" />
+                        Email to my leasing office
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -363,30 +415,65 @@ function Step5Review() {
               What happens next
             </h2>
             <ol className="space-y-3">
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
-                  1
-                </span>
-                <span className="text-[16px] text-[var(--color-darkest)]">
-                  We submit your information to each provider
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
-                  2
-                </span>
-                <span className="text-[16px] text-[var(--color-darkest)]">
-                  You&apos;ll receive confirmation emails within 24 hours
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
-                  3
-                </span>
-                <span className="text-[16px] text-[var(--color-darkest)]">
-                  Utilities will be active on your move-in date
-                </span>
-              </li>
+              {hasElectricityPending ? (
+                // Steps when electricity enrollment is pending
+                <>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-coral)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
+                      1
+                    </span>
+                    <span className="text-[16px] text-[var(--color-darkest)]">
+                      <strong>Complete electricity enrollment above</strong> — takes 2-3 minutes
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
+                      2
+                    </span>
+                    <span className="text-[16px] text-[var(--color-darkest)]">
+                      {selectedServices.water || selectedServices.internet
+                        ? "We've submitted your other services — confirmation within 24 hours"
+                        : "You'll receive confirmation from your electricity provider"}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
+                      3
+                    </span>
+                    <span className="text-[16px] text-[var(--color-darkest)]">
+                      All utilities active on your move-in date
+                    </span>
+                  </li>
+                </>
+              ) : (
+                // Steps when all services are confirmed
+                <>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
+                      1
+                    </span>
+                    <span className="text-[16px] text-[var(--color-darkest)]">
+                      We submit your information to each provider
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
+                      2
+                    </span>
+                    <span className="text-[16px] text-[var(--color-darkest)]">
+                      You&apos;ll receive confirmation emails within 24 hours
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--color-teal)] text-white text-[16px] font-bold flex items-center justify-center" aria-hidden="true">
+                      3
+                    </span>
+                    <span className="text-[16px] text-[var(--color-darkest)]">
+                      Utilities will be active on your move-in date
+                    </span>
+                  </li>
+                </>
+              )}
             </ol>
           </div>
 

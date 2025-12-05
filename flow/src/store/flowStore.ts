@@ -1027,6 +1027,10 @@ export const useFlowStore = create<FlowState>((set, get) => ({
             moveInDate: orderConfirmation.moveInDate,
             services: emailServices,
             isApartmentRenter,
+            // Electricity enrollment fields (for ComparePower redirect CTA in email)
+            cpOrderUrl: selectedPlans.electricity?.cpOrderUrl,
+            electricityProvider: selectedPlans.electricity?.provider,
+            electricityPlan: selectedPlans.electricity?.name,
           }),
         });
         console.log('Confirmation email sent');
