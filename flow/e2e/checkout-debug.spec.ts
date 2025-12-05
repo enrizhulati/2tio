@@ -1,108 +1,177 @@
 import { test, expect } from '@playwright/test';
 
 test('capture checkout API response', async ({ page }) => {
-  // Capture console logs
+  test.setTimeout(180000); // 3 minutes
+
+  // Capture ALL console logs
   const consoleLogs: string[] = [];
   page.on('console', msg => {
     const text = msg.text();
-    if (text.includes('[submitOrder]') || text.includes('cpOrderUrl') || text.includes('API response')) {
-      consoleLogs.push(text);
+    consoleLogs.push(`[${msg.type()}] ${text}`);
+    // Print important logs immediately
+    if (text.includes('[submitOrder]') || text.includes('cpOrderUrl') || text.includes('[Step5Review]')) {
       console.log('CAPTURED:', text);
     }
   });
 
+  // Run against deployed site
   await page.goto('https://2tion-flow.netlify.app');
+  await page.waitForLoadState('networkidle');
 
   // Step 1: Enter address
-  const addressInput = page.locator('input').first();
-  await addressInput.fill('3031 Oliver St');
+  console.log('=== Step 1: Entering address ===');
+  const addressInput = page.getByPlaceholder('Start typing your address');
+  await addressInput.fill('3031 Oliver');
   await page.waitForTimeout(2000);
 
-  // Select first address suggestion from dropdown
-  const dropdownOption = page.locator('li').filter({ hasText: '3031 Oliver St' }).first();
-  await dropdownOption.click();
-  await page.waitForTimeout(1500);
-
-  // Select tomorrow's date
-  const dateInput = page.locator('input[type="date"]');
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 14);
-  const dateStr = tomorrow.toISOString().split('T')[0];
-  await dateInput.fill(dateStr);
-
-  // Click Continue
-  await page.getByRole('button', { name: /continue/i }).click();
-  await page.waitForTimeout(2000);
-
-  // If ESIID selection appears, select first one
-  const esiidOption = page.locator('[data-testid="esiid-option"]').first();
-  if (await esiidOption.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await esiidOption.click();
-    await page.getByRole('button', { name: /confirm/i }).click();
+  // Select first address suggestion - click directly on the li option
+  const dropdownOptions = page.locator('ul li').filter({ hasText: /3031 Oliver St.*Dallas/ });
+  const firstOption = dropdownOptions.first();
+  if (await firstOption.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await firstOption.click({ force: true });
+    console.log('Selected address from dropdown');
   }
   await page.waitForTimeout(2000);
 
-  // Step 2: Enter profile
-  await page.locator('input[name="firstName"]').fill('Test');
-  await page.locator('input[name="lastName"]').fill('User');
-  await page.locator('input[name="email"]').fill('test@example.com');
-  await page.locator('input[name="phone"]').fill('5551234567');
+  // Set move-in date (14 days from now)
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + 14);
+  const dateStr = futureDate.toISOString().split('T')[0];
+  await page.locator('input[type="date"]').fill(dateStr);
+  console.log(`Set move-in date to: ${dateStr}`);
+  await page.waitForTimeout(500);
 
-  await page.getByRole('button', { name: /continue/i }).click();
+  // Dismiss dropdown by clicking outside if still visible
+  await page.locator('body').click({ position: { x: 100, y: 100 } });
+  await page.waitForTimeout(500);
+
+  // Click Check availability
+  const checkBtn = page.getByRole('button', { name: /check availability/i });
+  if (await checkBtn.isVisible({ timeout: 3000 })) {
+    await checkBtn.click({ force: true });
+    console.log('Clicked Check availability');
+    await page.waitForTimeout(5000);
+  }
+
+  // Handle ESIID selection if needed
+  const confirmBtn = page.getByRole('button', { name: /confirm this address/i });
+  if (await confirmBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+    console.log('ESIID selection visible');
+    const firstOption = page.locator('button[role="radio"]').first();
+    if (await firstOption.isVisible({ timeout: 2000 })) {
+      await firstOption.click();
+      console.log('Selected first ESIID');
+    }
+    await confirmBtn.click();
+    console.log('Confirmed address');
+    await page.waitForTimeout(3000);
+  }
+
+  await page.screenshot({ path: 'e2e/debug-screenshots/step1-complete.png', fullPage: true });
+
+  // Step 2: Services - should auto-navigate here
+  console.log('=== Step 2: Services ===');
+  await page.waitForTimeout(2000);
+  await page.screenshot({ path: 'e2e/debug-screenshots/step2-services.png', fullPage: true });
+
+  // Water should be required, electricity should be visible
+  // Click Continue/Next button
+  const servicesNextBtn = page.getByRole('button', { name: /next|continue/i });
+  if (await servicesNextBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await servicesNextBtn.click();
+    console.log('Clicked next on Services page');
+    await page.waitForTimeout(3000);
+  }
+
+  await page.screenshot({ path: 'e2e/debug-screenshots/step2-complete.png', fullPage: true });
+
+  // Step 3: Profile
+  console.log('=== Step 3: Profile ===');
   await page.waitForTimeout(2000);
 
-  // Step 3: Select services - electricity should be auto-selected
-  // Look for electricity plan and select first one
-  const electricitySection = page.locator('text=Electricity').first();
-  if (await electricitySection.isVisible()) {
-    await electricitySection.click();
+  // Fill profile form
+  const firstName = page.getByLabel(/first name/i);
+  if (await firstName.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await firstName.fill('Test');
+    await page.getByLabel(/last name/i).fill('User');
+    await page.getByLabel(/email/i).fill('test@example.com');
+    await page.getByLabel(/phone/i).fill('5551234567');
+    console.log('Filled profile form');
   }
+
+  await page.screenshot({ path: 'e2e/debug-screenshots/step3-profile.png', fullPage: true });
+
+  // Click Continue/Save
+  const profileNextBtn = page.getByRole('button', { name: /save|continue|next/i }).first();
+  if (await profileNextBtn.isVisible({ timeout: 3000 })) {
+    await profileNextBtn.click();
+    console.log('Clicked next on Profile page');
+    await page.waitForTimeout(5000);
+  }
+
+  // Step 4: Verify
+  console.log('=== Step 4: Verify ===');
+  await page.screenshot({ path: 'e2e/debug-screenshots/step4-verify.png', fullPage: true });
+
+  // Fill SSN if visible
+  const ssnInput = page.locator('input').filter({ hasText: /ssn/i }).first();
+  const ssnField = page.locator('[placeholder*="SSN"], input[name="ssn"]');
+  if (await ssnField.first().isVisible({ timeout: 3000 }).catch(() => false)) {
+    await ssnField.first().fill('123456789');
+    console.log('Filled SSN');
+  }
+
+  // Fill DOB if visible
+  const dobField = page.locator('input[name="dob"], input[type="date"]').last();
+  if (await dobField.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await dobField.fill('1990-01-15');
+    console.log('Filled DOB');
+  }
+
   await page.waitForTimeout(1000);
+  await page.screenshot({ path: 'e2e/debug-screenshots/step4-filled.png', fullPage: true });
 
-  // Select first electricity plan
-  const planCard = page.locator('[data-testid="plan-card"]').first();
-  if (await planCard.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await planCard.click();
+  // Click Continue/Next
+  const verifyNextBtn = page.getByRole('button', { name: /continue|next|submit/i }).first();
+  if (await verifyNextBtn.isVisible({ timeout: 3000 })) {
+    await verifyNextBtn.click();
+    console.log('Clicked next on Verify page');
+    await page.waitForTimeout(3000);
   }
 
-  await page.getByRole('button', { name: /continue/i }).click();
-  await page.waitForTimeout(2000);
+  // Step 5: Review
+  console.log('=== Step 5: Review ===');
+  await page.screenshot({ path: 'e2e/debug-screenshots/step5-review.png', fullPage: true });
 
-  // Step 4: Verification - enter SSN and DOB
-  const ssnInput = page.locator('input[name="ssn"], input[placeholder*="SSN"]').first();
-  if (await ssnInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await ssnInput.fill('123456789');
-  }
-
-  const dobInput = page.locator('input[name="dob"], input[type="date"]').last();
-  if (await dobInput.isVisible({ timeout: 2000 }).catch(() => false)) {
-    await dobInput.fill('1990-01-15');
-  }
-
-  await page.getByRole('button', { name: /continue/i }).click();
-  await page.waitForTimeout(2000);
-
-  // Step 5: Review and submit
   // Check terms checkbox
   const termsCheckbox = page.locator('input[type="checkbox"]').first();
   if (await termsCheckbox.isVisible({ timeout: 3000 }).catch(() => false)) {
     await termsCheckbox.check();
+    console.log('Checked terms checkbox');
   }
 
   // Click submit
-  const submitButton = page.getByRole('button', { name: /set up my utilities/i });
-  if (await submitButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await submitButton.click();
+  const submitBtn = page.getByRole('button', { name: /set up|submit|place order/i });
+  if (await submitBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+    console.log('Clicking submit button...');
+    await submitBtn.click();
 
     // Wait for API response
-    await page.waitForTimeout(10000);
+    console.log('Waiting for API response...');
+    await page.waitForTimeout(15000);
+
+    await page.screenshot({ path: 'e2e/debug-screenshots/step5-after-submit.png', fullPage: true });
   }
 
   // Print all captured logs
-  console.log('\n=== CAPTURED CONSOLE LOGS ===');
+  console.log('\n========================================');
+  console.log('=== ALL CAPTURED CONSOLE LOGS ===');
+  console.log('========================================');
   consoleLogs.forEach(log => console.log(log));
-  console.log('=== END LOGS ===\n');
+  console.log('========================================');
+  console.log('=== END LOGS ===');
+  console.log('========================================\n');
 
-  // Take screenshot of final state
-  await page.screenshot({ path: 'checkout-result.png', fullPage: true });
+  // Take final screenshot
+  await page.screenshot({ path: 'e2e/debug-screenshots/final-state.png', fullPage: true });
 });

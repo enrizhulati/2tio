@@ -208,11 +208,18 @@ function Step5Review() {
     // cpOrderUrl can come from either:
     // 1. Checkout API response (stored in orderConfirmation.cpOrderUrl)
     // 2. Plans API (stored in selectedPlans.electricity.cpOrderUrl)
-    const cpOrderUrl = orderConfirmation.cpOrderUrl || selectedPlans.electricity?.cpOrderUrl;
+    // 3. DEBUG: Check URL for ?debug_cp=1 to test with mock URL
+    const debugCpUrl = typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('debug_cp') === '1'
+        ? 'https://comparepower.com/enroll?demo=true'
+        : null;
+
+    const cpOrderUrl = debugCpUrl || orderConfirmation.cpOrderUrl || selectedPlans.electricity?.cpOrderUrl;
     const hasElectricityPending = selectedServices.electricity && cpOrderUrl;
 
     // DEBUG: Log cpOrderUrl sources to help diagnose the issue
     console.log('[Step5Review] DEBUG cpOrderUrl check:', {
+      'debugCpUrl (from ?debug_cp=1)': debugCpUrl,
       'orderConfirmation.cpOrderUrl': orderConfirmation.cpOrderUrl,
       'selectedPlans.electricity?.cpOrderUrl': selectedPlans.electricity?.cpOrderUrl,
       'resolved cpOrderUrl': cpOrderUrl,
