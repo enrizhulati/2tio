@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { useFlowStore } from '@/store/flowStore';
 import { Home, MapPin, User, Settings, CheckCircle, Zap } from 'lucide-react';
 
@@ -59,13 +59,26 @@ const STEPS = [
 function SidebarNav() {
   const currentStep = useFlowStore((state) => state.currentStep);
   const orderConfirmation = useFlowStore((state) => state.orderConfirmation);
+  const [isMockConfirmation, setIsMockConfirmation] = useState(false);
+
+  // Check for mock confirmation mode after hydration
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('mock_confirmation') === '1') {
+      setIsMockConfirmation(true);
+    }
+  }, []);
+
+  // In mock mode, treat as if we're on step 5 with order confirmed
+  const effectiveStep = isMockConfirmation ? 5 : currentStep;
+  const effectiveOrderConfirmation = isMockConfirmation || orderConfirmation;
 
   return (
     <nav className="space-y-1">
       {STEPS.map(({ step, label, icon: Icon }) => {
-        const isActive = step === currentStep;
-        const isCompleted = step < currentStep || orderConfirmation;
-        const isUpcoming = step > currentStep && !orderConfirmation;
+        const isActive = step === effectiveStep;
+        const isCompleted = step < effectiveStep || effectiveOrderConfirmation;
+        const isUpcoming = step > effectiveStep && !effectiveOrderConfirmation;
 
         return (
           <div
@@ -105,7 +118,18 @@ function SidebarNav() {
 
 function ProgressBar() {
   const currentStep = useFlowStore((state) => state.currentStep);
-  const progress = (currentStep / 5) * 100;
+  const [isMockConfirmation, setIsMockConfirmation] = useState(false);
+
+  // Check for mock confirmation mode after hydration
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('mock_confirmation') === '1') {
+      setIsMockConfirmation(true);
+    }
+  }, []);
+
+  const effectiveStep = isMockConfirmation ? 5 : currentStep;
+  const progress = (effectiveStep / 5) * 100;
 
   return (
     <div className="h-1.5 bg-[var(--color-light)] rounded-full overflow-hidden">
